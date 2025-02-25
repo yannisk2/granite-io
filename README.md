@@ -38,6 +38,8 @@ pip install -e .
 
 ### Quick Start
 
+Some sample code showing how to use the framework:
+
 **Run using `granite3.2` in Ollama**
 ```py
 from granite_io import make_backend, make_io_processor
@@ -65,6 +67,9 @@ print(outputs.next_message.content)
 ### Try It Out!
 
 To help you get up and running as quickly as possible with the Granite IO Processing framework, check out the following resources which demonstrate how to use the framework:
+
+> [!TIP]
+> To get started with the examples, make sure you have followed the [Installation](#installation) steps first.
 
 - Python script examples (**require Ollama server running with Granite 3.2 pulled/cached**):
   - [Granite 3.2 chat request](./examples/inference.py)
