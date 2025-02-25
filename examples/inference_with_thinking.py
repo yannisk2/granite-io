@@ -16,7 +16,7 @@ io_processor = make_io_processor(
     model_name, backend=make_backend("openai", {"model_name": model_name})
 )
 
-# Without Thinking
+# With Thinking
 inputs = ChatCompletionInputs(
     messages=[
         UserMessage(
