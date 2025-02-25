@@ -5,6 +5,7 @@ import datetime
 import json
 
 # Third Party
+import aconfig
 import pydantic
 
 # Local
@@ -294,7 +295,7 @@ class Granite3Point2InputOutputProcessor(ModelDirectInputOutputProcessor):
     ```
     """
 
-    def __init__(self, backend: Backend | None = None):
+    def __init__(self, config: aconfig.Config = None, backend: Backend | None = None):
         """
         :param backend: Handle on inference engine, required if this io processor's
             :func:`create_chat_completion()` method is going to be used
