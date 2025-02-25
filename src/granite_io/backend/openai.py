@@ -5,9 +5,9 @@ from openai import OpenAI
 import aconfig
 
 # Local
-from granite_io.backend.base import ChatCompletionBackend
+from granite_io.backend.base import Backend, ChatCompletionBackend
 from granite_io.backend.registry import backend
-from granite_io.types import ChatCompletionInputs
+from granite_io.types import ChatCompletionInputs, GenerateResult
 
 
 @backend(
@@ -18,7 +18,7 @@ from granite_io.types import ChatCompletionInputs
         }
     },
 )
-class OpenAIBackend(ChatCompletionBackend):
+class OpenAIBackend(Backend, ChatCompletionBackend):
     _model_str: str
     _openai_client: OpenAI
 
@@ -63,3 +63,16 @@ class OpenAIBackend(ChatCompletionBackend):
         # )
 
         return raw_message.content
+
+    def generate(self, input_str: str) -> GenerateResult:
+        """Run a direct /completions call"""
+
+        result = self.openai_client.completions.create(
+            model=self._model_str,
+            prompt=input_str,
+        )
+        return GenerateResult(
+            completion_string=result.choices[0].text,
+            completion_tokens=[],  # Not part of the OpenAI spec
+            stop_reason=result.choices[0].finish_reason,
+        )
