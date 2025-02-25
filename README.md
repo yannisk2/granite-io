@@ -6,11 +6,6 @@ Granite IO Processing is a framework which enables you to transform how a user c
 
 ## Quick Start
 
-**Install with pip**
-```sh
-pip install granite-io
-```
-
 **Run using `granite3.2` in Ollama**
 ```py
 from granite_io import make_backend, make_io_processor
@@ -54,16 +49,6 @@ source granite_io_venv/bin/activate
 > If you use [pyenv](https://github.com/pyenv/pyenv), [Conda Miniforge](https://github.com/conda-forge/miniforge) or other such tools for Python version management, create the virtual environment with that tool instead of venv. Otherwise, you may have issues with installed packages not being found as they are linked to your Python version management tool and not `venv`.
 
 You can install the Granite IO Processor as follows:
-
-#### From PyPI
-
-```sh
-pip install granite-io
-# With transformers backend
-pip install "granite-io[transformers]"
-# With dev tools
-pip install "granite-io[dev]"
-```
 
 #### From Source
 
