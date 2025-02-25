@@ -12,7 +12,7 @@ authors = [
   { name="Mark Sturdevant", email="mark.sturdevant@ibm.com" },
   { name="Martin Hickey", email="martin.hickey@ie.ibm.com" },
 ]
-description = "Input and output processing for IBM granite models"
+description = "Input and output processing for IBM Granite models"
 readme = "README.md"
 requires-python = ">=3.10,<3.12"
 classifiers = [
