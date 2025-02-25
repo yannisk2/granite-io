@@ -7,6 +7,7 @@
 import json
 
 # Third Party
+from openai import APIConnectionError
 import aconfig
 import pytest
 import torch
@@ -207,6 +208,10 @@ def test_run_transformers(
     # temperature controls, verify outputs
 
 
+@pytest.mark.xfail(
+    reason="APIConnectionError, but OpenAI tests are optional.",
+    raises=APIConnectionError,
+)
 def test_run_openai(
     io_processor_openai: Granite3Point2InputOutputProcessor, input_json_str: str
 ):

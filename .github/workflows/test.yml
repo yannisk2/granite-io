@@ -75,4 +75,4 @@ jobs:
 
       - name: Run unit test with tox (disable openai tests for now)
         run: |
-          tox -- -k "not openai"
+          tox
