@@ -88,8 +88,8 @@ def io_processor_transformers(pytestconfig) -> Granite3Point2InputOutputProcesso
             ),
         )
     except Exception as e:
-        pytest.skip(f"No transformers backend for {model_path}: {e}")
-    return Granite3Point2InputOutputProcessor(backend)
+        pytest.skip(f"No transformers backend for '{model_path}': {e}")
+    return Granite3Point2InputOutputProcessor(backend=backend)
 
 
 @pytest.fixture
