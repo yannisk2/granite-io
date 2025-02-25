@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
+# Standard
+import os
+
 # Third Party
 from openai import OpenAI
 import aconfig
@@ -15,8 +18,10 @@ from granite_io.types import ChatCompletionInputs, GenerateResult
     config_schema={
         "properties": {
             "model_name": {"type": "string"},
+            "openai_base_url": {"type": "string"},
+            "openai_api_key": {"type": "string"},
         }
-    },
+    }
 )
 class OpenAIBackend(Backend, ChatCompletionBackend):
     _model_str: str
@@ -24,16 +29,17 @@ class OpenAIBackend(Backend, ChatCompletionBackend):
 
     def __init__(self, config: aconfig.Config):
         self._model_str = config.model_name
+        api_key = config.openai_api_key or os.environ.get("OPENAI_API_KEY", "ollama")
+        base_url = config.openai_base_url or os.environ.get("OPENAI_BASE_URL", "http://localhost:11434/v1")
 
-        # TODO: cleanup this W-I-P
-        # Use openai env vars, but use local ollama defaults instead of openai
-        # Standard
-        import os
-
-        api_key = os.environ.get("OPENAI_API_KEY", "ollama")
-        base_url = os.environ.get("OPENAI_BASE_URL", "http://localhost:11434/v1")
-        self.openai_client = OpenAI(base_url=base_url, api_key=api_key)
-        # TODO: cleanup this W-I-P
+        self.openai_client = OpenAI(
+            base_url=base_url,
+            api_key=api_key,
+            default_headers={
+                "RITS_API_KEY": api_key,  # Does this extra header break anything?
+                "OPEN_API_KEY": api_key,
+            },
+        )
 
     def create_chat_completion(self, input_chat: ChatCompletionInputs) -> str:
         messages = [{"role": x.role, "content": x.content} for x in input_chat.messages]

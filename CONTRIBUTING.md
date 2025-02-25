@@ -96,6 +96,16 @@ For example, to skip the openAI tests and run using only the local transformers 
 tox -e unit -- --openai_model= --hf_model=ibm-granite/granite-3.2-8b-instruct-preview
 ```
 
+#### OpenAI env
+
+The OpenAI tests will by default find a typical local ollama installation, but you can use environment variables
+to refer to another server by specifying the URL and API_KEY (if required).  The environment variables are as follows:
+
+| Env var name    | Default value             | Description                 |
+|-----------------|---------------------------|-----------------------------|
+| OPENAI_BASE_URL | http://localhost:11434/v1 | Base URL for OpenAI endpoints |
+| OPENAI_API_KEY  | ollama                    | API Key (depends on provider) |
+
 ### Coding style
 
 Granite IO Processing follows the Python [pep8](https://peps.python.org/pep-0008/) coding style.

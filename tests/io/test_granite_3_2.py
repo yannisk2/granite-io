@@ -98,7 +98,7 @@ def io_processor_openai(pytestconfig) -> Granite3Point2InputOutputProcessor:
     backend = OpenAIBackend(
         aconfig.Config(
             {"model_name": model_name},
-            override_env_vars=False,
+            override_env_vars=True,
         ),
     )
     return Granite3Point2InputOutputProcessor(backend=backend)
