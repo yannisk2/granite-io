@@ -4,32 +4,6 @@
 
 Granite IO Processing is a framework which enables you to transform how a user calls or infers an IBM Granite model and how the output from the model is returned to the user. In other words, the framework allows you to extend the functionality of calling the model.
 
-## Quick Start
-
-**Run using `granite3.2` in Ollama**
-```py
-from granite_io import make_backend, make_io_processor
-from granite_io.types import ChatCompletionInputs, UserMessage
-
-model_name = "granite3.2"
-io_processor = make_io_processor(
-    model_name, backend=make_backend("openai", {"model_name": model_name})
-)
-
-# Without Thinking
-inputs = ChatCompletionInputs(
-    messages=[
-        UserMessage(
-            content="What's the fastest way for a seller to visit all the cities in their region?",
-        )
-    ],
-)
-outputs = io_processor.create_chat_completion(inputs)
-print(f"ROLE: {outputs.next_message.content}")
-print("--------")
-print(outputs.next_message.content)
-```
-
 ## Getting Started
 
 ### Requirements
@@ -62,11 +36,40 @@ cd granite-io
 pip install -e .
 ```
 
+### Quick Start
+
+**Run using `granite3.2` in Ollama**
+```py
+from granite_io import make_backend, make_io_processor
+from granite_io.types import ChatCompletionInputs, UserMessage
+
+model_name = "granite3.2"
+io_processor = make_io_processor(
+    model_name, backend=make_backend("openai", {"model_name": model_name})
+)
+
+# Without Thinking
+inputs = ChatCompletionInputs(
+    messages=[
+        UserMessage(
+            content="What's the fastest way for a seller to visit all the cities in their region?",
+        )
+    ],
+)
+outputs = io_processor.create_chat_completion(inputs)
+print(f"ROLE: {outputs.next_message.content}")
+print("--------")
+print(outputs.next_message.content)
+```
+
 ### Try It Out!
 
 To help you get up and running as quickly as possible with the Granite IO Processing framework, check out the following resources which demonstrate how to use the framework:
 
-- Jupyter notebook tutorials:
+- Python script examples (**require Ollama server running with Granite 3.2 pulled/cached**):
+  - [Granite 3.2 chat request](./examples/inference.py)
+  - [Granite 3.2 chat request with thinking](./examples/inference_with_thinking.py)
+- Jupyter notebook tutorial:
   - [IO](./notebooks/io.ipynb)
 
 ## Contributing
