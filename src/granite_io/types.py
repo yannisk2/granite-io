@@ -96,6 +96,13 @@ class ChatCompletionInputs(pydantic.BaseModel):
         extra="allow"
     )
 
+    def __getattr__(self, name: str) -> any:
+        """Allow attribute access for unknown attributes"""
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            return None
+
 
 class ChatCompletionResult(pydantic.BaseModel):
     """
@@ -105,6 +112,13 @@ class ChatCompletionResult(pydantic.BaseModel):
     """
 
     next_message: ChatMessage
+
+    def __getattr__(self, name: str) -> any:
+        """Allow attribute access for unknown attributes"""
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            return None
 
 
 class GenerateResult(pydantic.BaseModel):
