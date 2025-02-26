@@ -49,6 +49,10 @@ class AssistantMessage(_ChatMessageBase):
     # Raw response content without any parsing for re-serialization
     _raw: str | None = None
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._raw = kwargs.pop("raw", None)
+
     @property
     def raw(self) -> str:
         """Get the raw content of the response"""

@@ -571,10 +571,8 @@ class Granite3Point2InputOutputProcessor(ModelDirectInputOutputProcessor):
                     break
 
             if cot_start_span and cot_end_span and cot_end_span[0] > cot_start_span[1]:
-                cot = output[cot_start_span[1] : cot_end_span[0]].lstrip("\n")
-                output = output[: cot_start_span[0]] + output[cot_end_span[1] :].lstrip(
-                    "\n"
-                )
+                cot = output[cot_start_span[1] : cot_end_span[0]].strip()
+                output = output[: cot_start_span[0]] + output[cot_end_span[1] :].strip()
 
         # Parse out tool calls
         if output.startswith("<tool_call>"):
@@ -584,6 +582,6 @@ class Granite3Point2InputOutputProcessor(ModelDirectInputOutputProcessor):
             next_message=AssistantMessage(
                 content=output,
                 reasoning_content=cot,
-                _raw=original_output,
+                raw=original_output,
             )
         )
