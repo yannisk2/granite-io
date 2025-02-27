@@ -1,15 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Standard
+from typing import TYPE_CHECKING
 
 # Third Party
-from openai import OpenAI
 import aconfig
 
 # Local
 from granite_io.backend.base import Backend
 from granite_io.backend.registry import backend
+from granite_io.optional import import_optional
 from granite_io.types import GenerateResult
+
+if TYPE_CHECKING:
+    # Third Party
+    import openai
 
 
 @backend(
@@ -24,7 +29,7 @@ from granite_io.types import GenerateResult
 )
 class OpenAIBackend(Backend):
     _model_str: str
-    _openai_client: OpenAI
+    _openai_client: "openai.OpenAI"
 
     def __init__(self, config: aconfig.Config):
         self._model_str = config.model_name
@@ -33,7 +38,12 @@ class OpenAIBackend(Backend):
 
         default_headers = {"RITS_API_KEY": api_key} if api_key else None
 
-        self.openai_client = OpenAI(
+        # Import packages from extras "transformers"
+        with import_optional("openai"):
+            # Third Party
+            import openai
+
+        self.openai_client = openai.OpenAI(
             base_url=base_url,
             api_key=api_key,
             default_headers=default_headers,

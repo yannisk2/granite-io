@@ -31,7 +31,7 @@ To install from release ([PyPi package](https://pypi.org/project/granite-io/)):
 ```shell
 python3 -m venv granite_io_venv
 source granite_io_venv/bin/activate
-pip install granite-io
+pip install "granite-io[all]"
 ```
 
 #### From Source
@@ -43,7 +43,7 @@ python3 -m venv granite_io_venv
 source granite_io_venv/bin/activate
 git clone https://github.com/ibm-granite/granite-io
 cd granite-io
-pip install -e .
+pip install -e ".[all]"
 ```
 
 ### Framework Example
