@@ -15,7 +15,7 @@ from granite_io.types import GenerateResult
 
 if TYPE_CHECKING:
     # Third Party
-    pass
+    import litellm
 
 
 @backend(
@@ -37,12 +37,9 @@ class LiteLLMBackend(Backend):
     def generate(self, input_str: str) -> GenerateResult:
         """Run a direct /completions call"""
 
-        # Import packages from extras "transformers"
         with import_optional("litellm"):
             # Third Party
             import litellm
-
-        # litellm._turn_on_debug()
 
         result = litellm.text_completion(
             # model strings start with provider/
