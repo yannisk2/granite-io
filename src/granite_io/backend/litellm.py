@@ -15,7 +15,7 @@ from granite_io.types import GenerateResult
 
 if TYPE_CHECKING:
     # Third Party
-    import litellm
+    import litellm  # noqa: F401
 
 
 @backend(
