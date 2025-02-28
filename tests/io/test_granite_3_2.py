@@ -7,6 +7,7 @@
 import json
 
 # Third Party
+from litellm import APIConnectionError as ACE
 from openai import APIConnectionError
 import pytest
 import torch
@@ -98,6 +99,22 @@ def io_processor_openai() -> Granite3Point2InputOutputProcessor:
         "openai",
         {
             "model_name": "granite3.2:2b",
+            "openai_api_key": "ollama",
+            "openai_base_url": "http://localhost:11434/v1",
+        },
+    )
+    # The io factory requires a known model name
+    return make_io_processor(_MODEL_NAME, backend=backend)
+
+
+@pytest.fixture
+def io_processor_litellm() -> Granite3Point2InputOutputProcessor:
+    # The backend factory requires a known backend name
+    # You can override config with env vars, but only known config vars
+    backend = make_backend(
+        "litellm",
+        {
+            "model_name": "ollama/granite3.2:2b",
             "openai_api_key": "ollama",
             "openai_base_url": "http://localhost:11434/v1",
         },
@@ -211,7 +228,7 @@ def test_run_transformers(
 
 
 @pytest.mark.xfail(
-    reason="xfail if APIConnectionError because OpenAI tests are optional",
+    reason="will xfail if APIConnectionError because OpenAI tests are optional",
     raises=APIConnectionError,
 )
 def test_run_openai(
@@ -219,6 +236,20 @@ def test_run_openai(
 ):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
     _ = io_processor_openai.create_chat_completion(inputs)
+
+    # TODO: Once the prerelease model has settled down and we have implemented
+    # temperature controls, verify outputs
+
+
+@pytest.mark.xfail(
+    reason="will xfail if APIConnectionError because LiteLLM tests are optional",
+    raises=ACE,
+)
+def test_run_litellm(
+    io_processor_litellm: Granite3Point2InputOutputProcessor, input_json_str: str
+):
+    inputs = ChatCompletionInputs.model_validate_json(input_json_str)
+    _ = io_processor_litellm.create_chat_completion(inputs)
 
     # TODO: Once the prerelease model has settled down and we have implemented
     # temperature controls, verify outputs
