@@ -228,7 +228,7 @@ def test_run_transformers(
 
 
 @pytest.mark.xfail(
-    reason="will xfail if APIConnectionError because LiteLLM tests are optional",
+    reason="will xfail if APIConnectionError because OpenAI tests are optional",
     raises=APIConnectionError,
 )
 def test_run_openai(
@@ -242,7 +242,7 @@ def test_run_openai(
 
 
 @pytest.mark.xfail(
-    reason="will xfail if APIConnectionError because OpenAI tests are optional",
+    reason="will xfail if APIConnectionError because LiteLLM tests are optional",
     raises=ACE,
 )
 def test_run_litellm(
