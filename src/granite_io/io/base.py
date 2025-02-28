@@ -33,7 +33,7 @@ class InputOutputProcessor(FactoryConstructible):
         """By default an IO processor doesn't require config"""
 
     @abc.abstractmethod
-    def create_chat_completion(
+    async def create_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResult:
         """
@@ -68,7 +68,7 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
         super().__init__(config)
         self._backend = backend
 
-    def create_chat_completion(
+    async def create_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
         if self._backend is None:
@@ -77,8 +77,8 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
                 "configuring an inference backend."
             )
         input_string = self.inputs_to_string(inputs)
-        generation_results = self._backend.generate(input_string)
-        return self.output_to_result(generation_results, inputs)
+        generation_output = await self._backend.generate(input_string)
+        return self.output_to_result(generation_output.completion_string, inputs)
 
     @abc.abstractmethod
     def inputs_to_string(

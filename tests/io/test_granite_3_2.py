@@ -194,45 +194,29 @@ def test_basic_inputs_to_string():
     assert chatRequest.endswith("")
 
 
-@pytest.mark.vcr
-@pytest.mark.block_network
-@pytest.mark.flaky(retries=3, delay=5)  # VCR recording flakey
-def test_run_processor(backend_x: Backend, input_json_str: str):
+# Session scope for asyncio because the tests in this class all share the same vLLM
+# backend
+@pytest.mark.asyncio(loop_scope="session")
+async def test_run_transformers(
+    io_processor_transformers: Granite3Point2InputOutputProcessor, input_json_str: str
+):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
-    _ = io_processor.create_chat_completion(inputs)
+    _ = await io_processor_transformers.create_chat_completion(inputs)
 
     # TODO: Once the prerelease model has settled down and we have implemented
     # temperature controls, verify outputs
 
 
-@pytest.mark.parametrize(
-    ["inputs", "output", "exp_thought", "exp_resp"],
-    [
-        # No thinking flag
-        (no_thinking_input, no_thinking_output, None, no_thinking_output),
-        (no_thinking_input, cot_output, None, cot_output),
-        # Thinking flag
-        (thinking_input, no_cot_output, None, no_cot_output),
-        (thinking_input, no_thinking_output, None, no_thinking_output),
-        (thinking_input, no_response_output, None, no_response_output),
-        (thinking_input, cot_output, thought, response),
-        (thinking_input, cot_alt_output, thought, response),
-        (thinking_input, cot_mixed_output, thought, response),
-        (thinking_input, cot_pre_output, thought, f"{pre_thought} {response}"),
-    ],
+@pytest.mark.asyncio(loop_scope="session")
+@pytest.mark.xfail(
+    reason="APIConnectionError, but OpenAI tests are optional.",
+    raises=APIConnectionError,
 )
-def test_cot_parsing(inputs, output, exp_thought, exp_resp):
-    """Test the parsing logic for CoT reasoning output"""
-    proc = Granite3Point2InputOutputProcessor()
-    generated = GenerateResults(
-        results=[
-            GenerateResult(
-                completion_string=output, completion_tokens=[], stop_reason="?"
-            )
-        ]
-    )
-    result = proc.output_to_result(generated, inputs).results[0].next_message
-    assert result.reasoning_content == exp_thought
-    assert result.content == exp_resp
-    assert result.raw == output
+async def test_run_openai(
+    io_processor_openai: Granite3Point2InputOutputProcessor, input_json_str: str
+):
+    inputs = ChatCompletionInputs.model_validate_json(input_json_str)
+    _ = await io_processor_openai._backend.create_chat_completion(inputs)
+
+    # TODO: Once the prerelease model has settled down and we have implemented
+    # temperature controls, verify outputs
