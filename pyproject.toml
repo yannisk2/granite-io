@@ -43,9 +43,9 @@ openai = [
 ]
 litellm = [
     "litellm",
+    "python-dotenv==1.0.1",
 ]
 dev = [
-    "python-dotenv==1.0.1",
     "isort==6.0.1",
     "pre-commit>=3.0.4,<5.0",
     "pylint>=2.16.2,<4.0",
