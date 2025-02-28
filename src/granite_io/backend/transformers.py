@@ -237,13 +237,18 @@ class TransformersBackend(Backend):
             # Third Party
             import torch
 
-        # Make sure computations for this thread will happen in a separate CUDA context.
-        stream = torch.cuda.Stream()
+        if torch.cuda.is_available():
+            # Make sure computations for this thread will happen in a separate CUDA
+            # context.
+            stream = torch.cuda.Stream()
 
-        with torch.cuda.stream(stream):
+            with torch.cuda.stream(stream):
+                return self._model.generate(
+                    **(generation_inputs.model_input),
+                    generation_config=generation_inputs.generation_config,
+                )
+        else:
             return self._model.generate(
                 **(generation_inputs.model_input),
                 generation_config=generation_inputs.generation_config,
-                # Re-enable to use constrained decoding
-                # prefix_allowed_tokens_fn=generation_inputs.prefix_allowed_tokens_fn
             )
