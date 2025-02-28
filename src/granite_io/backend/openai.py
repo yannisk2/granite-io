@@ -38,7 +38,6 @@ class OpenAIBackend(Backend):
 
         default_headers = {"RITS_API_KEY": api_key} if api_key else None
 
-        # Import packages from extras "transformers"
         with import_optional("openai"):
             # Third Party
             import openai

@@ -31,7 +31,7 @@ To install from release ([PyPi package](https://pypi.org/project/granite-io/)):
 ```shell
 python3 -m venv granite_io_venv
 source granite_io_venv/bin/activate
-pip install "granite-io[all]"
+pip install granite-io
 ```
 
 #### From Source
@@ -43,10 +43,13 @@ python3 -m venv granite_io_venv
 source granite_io_venv/bin/activate
 git clone https://github.com/ibm-granite/granite-io
 cd granite-io
-pip install -e ".[all]"
+pip install -e ."
 ```
 
 ### Framework Example
+
+> [!IMPORTANT]  
+> To get started with the examples, make sure you have followed the [Installation](#installation) steps first. You will also need additional packages to be able to run the OpenAI example. They can be installed by running `pip install -e "granite-io[openai]"`. Replace package name `granite-io` with `.` if installing from source.
 
 Sample code snippet showing how to use the framework:
 
