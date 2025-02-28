@@ -8,15 +8,15 @@ import json
 
 # Third Party
 from openai import APIConnectionError
-import aconfig
 import pytest
 import torch
 import transformers
 
 # Local
-from granite_io.backend.openai import OpenAIBackend
-from granite_io.backend.transformers import TransformersBackend
+from granite_io import make_backend, make_io_processor
 from granite_io.io.granite_3_2 import (
+    _MODEL_NAME,
+    GRANITE_3_2_2B_HF,
     Granite3Point2InputOutputProcessor,
     _Granite3Point2Inputs,
 )
@@ -56,8 +56,8 @@ def input_json_str(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.fixture(scope="session")
-def tokenizer(pytestconfig) -> transformers.PreTrainedTokenizerBase:
-    model_path = pytestconfig.getoption("hf_model")
+def tokenizer() -> transformers.PreTrainedTokenizerBase:
+    model_path = GRANITE_3_2_2B_HF
     try:
         ret = transformers.AutoTokenizer.from_pretrained(
             model_path, local_files_only=True
@@ -68,8 +68,8 @@ def tokenizer(pytestconfig) -> transformers.PreTrainedTokenizerBase:
 
 
 @pytest.fixture(scope="session")
-def io_processor_transformers(pytestconfig) -> Granite3Point2InputOutputProcessor:
-    model_path = pytestconfig.getoption("hf_model")
+def io_processor_transformers() -> Granite3Point2InputOutputProcessor:
+    model_path = GRANITE_3_2_2B_HF
 
     if torch.cuda.is_available():
         device_name = "cuda"
@@ -81,27 +81,29 @@ def io_processor_transformers(pytestconfig) -> Granite3Point2InputOutputProcesso
         # CPU mode; prevent thrashing
         torch.set_num_threads(4)
     try:
-        backend = TransformersBackend(
-            aconfig.Config(
-                {"model_name": model_path, "device": device_name},
-                override_env_vars=False,
-            ),
+        backend = make_backend(
+            "transformers",
+            {"model_name": model_path, "device": device_name},
         )
     except Exception as e:
         pytest.skip(f"No transformers backend for '{model_path}': {e}")
-    return Granite3Point2InputOutputProcessor(backend=backend)
+    return make_io_processor(_MODEL_NAME, backend=backend)
 
 
 @pytest.fixture
-def io_processor_openai(pytestconfig) -> Granite3Point2InputOutputProcessor:
-    model_name = pytestconfig.getoption("openai_model")
-    backend = OpenAIBackend(
-        aconfig.Config(
-            {"model_name": model_name},
-            override_env_vars=False,
-        ),
+def io_processor_openai() -> Granite3Point2InputOutputProcessor:
+    # The backend factory requires a known backend name
+    # You can override config with env vars, but only known config vars
+    backend = make_backend(
+        "openai",
+        {
+            "model_name": "granite3.2:2b",
+            "openai_api_key": "ollama",
+            "openai_base_url": "http://localhost:11434/v1",
+        },
     )
-    return Granite3Point2InputOutputProcessor(backend=backend)
+    # The io factory requires a known model name
+    return make_io_processor(_MODEL_NAME, backend=backend)
 
 
 def test_read_inputs(input_json_str):
@@ -209,14 +211,14 @@ def test_run_transformers(
 
 
 @pytest.mark.xfail(
-    reason="APIConnectionError, but OpenAI tests are optional.",
+    reason="xfail if APIConnectionError because OpenAI tests are optional",
     raises=APIConnectionError,
 )
 def test_run_openai(
     io_processor_openai: Granite3Point2InputOutputProcessor, input_json_str: str
 ):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    _ = io_processor_openai._backend.create_chat_completion(inputs)
+    _ = io_processor_openai.create_chat_completion(inputs)
 
     # TODO: Once the prerelease model has settled down and we have implemented
     # temperature controls, verify outputs

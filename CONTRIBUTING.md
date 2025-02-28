@@ -81,20 +81,16 @@ By default, all tests found within the tests directory are run. However, specifi
 ```shell
 tox -e unit -- tests/io/test_granite_3_2.py::test_read_inputs
 ```
+#### OpenAI env
 
-By default, the tests attempt to run using transformers and the openAI API served by Ollama.
-The default model paths is:
+The OpenAI tests will by default find a typical local ollama installation, but you can use environment variables
+to refer to another server by specifying the URL and API_KEY (if required).  The environment variables are as follows:
 
-* --openai_model=granite3.1-dense:2b
-
-These model paths may refer to a local path or a model cached locally (using `huggingface-cli download` or equivalent).
-
-To skip any of these or to override the default model path, pass `--openai_model=`.
-For example, to skip the openAI tests and run using only the local transformers model, run:
-
-```shell
-tox -e unit -- --openai_model= --hf_model=ibm-granite/granite-3.2-8b-instruct-preview
-```
+| Env var name    | Default value             | Description                    |
+|-----------------|---------------------------|--------------------------------|
+| OPENAI_BASE_URL | http://localhost:11434/v1 | Base URL for OpenAI endpoints  |
+| OPENAI_API_KEY  | ollama                    | API Key (depends on provider)  |
+| MODEL_NAME      | granite3.2:2b             | Model name on backend provider |
 
 ### Coding style
 

@@ -128,7 +128,7 @@ class Factory:
                 copy.deepcopy(inst_cls.config_defaults),
                 cfg,
             ),
-            override_env_vars=False,
+            override_env_vars=True,
         )
         if validate:
             # NOTE: This explicitly allows additional properties

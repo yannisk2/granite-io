@@ -22,6 +22,8 @@ from granite_io.types import (
     UserMessage,
 )
 
+GRANITE_3_2_2B_OLLAMA = "granite3.2:2b"
+GRANITE_3_2_2B_HF = "ibm-granite/granite-3.2-2b-instruct"
 _MODEL_NAME = "Granite 3.2"
 
 
@@ -202,12 +204,14 @@ class _Granite3Point2ChatCompletionResult(ChatCompletionResult):
 @io_processor(
     _MODEL_NAME,
     # Huggingface
-    "ibm-granite/granite-3.2-8b-instruct",
+    GRANITE_3_2_2B_HF,
     "ibm-granite/granite-3.2-8b-instruct",
     # Ollama
     "granite3.2",
     "granite3.2:8b",
-    "granite3.2:2b",
+    GRANITE_3_2_2B_OLLAMA,
+    # RITS
+    "ibm-granite/granite-8b-instruct-preview-4k",
 )
 class Granite3Point2InputOutputProcessor(ModelDirectInputOutputProcessor):
     """
