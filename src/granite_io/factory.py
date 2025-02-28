@@ -75,9 +75,9 @@ class Factory:
         """Register the given constructible/callable"""
         base_name = getattr(constructible, "name", None) or constructible.__name__
         names = [base_name] + list(aliases)
-        assert not any(
-            name in self._registered_types for name in names
-        ), f"Conflicting registration of {base_name} (aliases: {aliases})"
+        assert not any(name in self._registered_types for name in names), (
+            f"Conflicting registration of {base_name} (aliases: {aliases})"
+        )
         for name in names:
             self._registered_types[name] = constructible
 
@@ -100,9 +100,9 @@ class Factory:
                 cls.CONFIG_KEY: cfg,
             }
         elif isinstance(arg_one, dict):
-            assert (
-                instance_config is None
-            ), "Cannot pass config as both first and second argument"
+            assert instance_config is None, (
+                "Cannot pass config as both first and second argument"
+            )
             instance_config = arg_one
         else:
             raise TypeError(f"Invalid argument type {type(arg_one)} for construct")
