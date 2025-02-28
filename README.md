@@ -81,6 +81,8 @@ print(outputs.next_message.content)
 ```
 
 > [!IMPORTANT]  
+> To get started with the examples, make sure you have followed the [Installation](#installation) steps first. You will also need additional packages to be able to run the OpenAI example. They can be installed by running `pip install -e "granite-io[openai]"`. Replace package name `granite-io` with `.` if installing from source.
+>
 > To be able to run the above code snippet, you will need an [Ollama](https://ollama.com/) server [running locally](https://github.com/ollama/ollama?tab=readme-ov-file#start-ollama) and [IBM Granite 3.2](https://www.ibm.com/granite) model cached (`ollama pull granite3.2:8b`).
 
 ### Try It Out!

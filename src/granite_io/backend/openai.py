@@ -1,13 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
+# Standard
+from typing import TYPE_CHECKING
+
 # Third Party
-from openai import AsyncOpenAI
 import aconfig
 
 # Local
-from granite_io.backend.base import Backend, ChatCompletionBackend
+from granite_io.backend.base import Backend
 from granite_io.backend.registry import backend
-from granite_io.types import ChatCompletionInputs, GenerateResult
+from granite_io.optional import import_optional
+from granite_io.types import GenerateResult
+
+if TYPE_CHECKING:
+    # Third Party
+    import openai
 
 
 @backend(
@@ -15,25 +22,28 @@ from granite_io.types import ChatCompletionInputs, GenerateResult
     config_schema={
         "properties": {
             "model_name": {"type": "string"},
+            "openai_base_url": {"type": "string"},
+            "openai_api_key": {"type": "string"},
         }
     },
 )
-class OpenAIBackend(Backend, ChatCompletionBackend):
+class OpenAIBackend(Backend):
     _model_str: str
-    _openai_client: AsyncOpenAI
+    _openai_client: "openai.AsyncOpenAI"
+
 
     def __init__(self, config: aconfig.Config):
+        with import_optional("openai"):
+            # Third Party
+            import openai
+        
         self._model_str = config.model_name
-
-        # TODO: cleanup this W-I-P
-        # Use openai env vars, but use local ollama defaults instead of openai
-        # Standard
-        import os
-
-        api_key = os.environ.get("OPENAI_API_KEY", "ollama")
-        base_url = os.environ.get("OPENAI_BASE_URL", "http://localhost:11434/v1")
-        self.openai_client = AsyncOpenAI(base_url=base_url, api_key=api_key)
-        # TODO: cleanup this W-I-P
+        api_key = config.get("openai_api_key", "ollama")
+        base_url = config.get("openai_base_url", "http://localhost:11434/v1")
+        default_headers = {"RITS_API_KEY": api_key} if api_key else None
+        
+        self._openai_client = openai.AsyncOpenAI(base_url=base_url, api_key=api_key,
+                                                 default_headers=default_headers)
 
     async def create_chat_completion(self, input_chat: ChatCompletionInputs) -> str:
         messages = [{"role": x.role, "content": x.content} for x in input_chat.messages]
@@ -65,8 +75,6 @@ class OpenAIBackend(Backend, ChatCompletionBackend):
         return raw_message.content
 
     async def generate(self, input_str: str) -> GenerateResult:
-        """Run a direct /completions call"""
-
         result = await self.openai_client.completions.create(
             model=self._model_str,
             prompt=input_str,
