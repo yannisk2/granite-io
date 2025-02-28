@@ -10,7 +10,7 @@ import aconfig
 from granite_io.backend.base import Backend
 from granite_io.backend.registry import backend
 from granite_io.optional import import_optional
-from granite_io.types import GenerateResult
+from granite_io.types import ChatCompletionInputs, GenerateResult
 
 if TYPE_CHECKING:
     # Third Party
@@ -31,24 +31,24 @@ class OpenAIBackend(Backend):
     _model_str: str
     _openai_client: "openai.AsyncOpenAI"
 
-
     def __init__(self, config: aconfig.Config):
         with import_optional("openai"):
             # Third Party
             import openai
-        
+
         self._model_str = config.model_name
         api_key = config.get("openai_api_key", "ollama")
         base_url = config.get("openai_base_url", "http://localhost:11434/v1")
         default_headers = {"RITS_API_KEY": api_key} if api_key else None
-        
-        self._openai_client = openai.AsyncOpenAI(base_url=base_url, api_key=api_key,
-                                                 default_headers=default_headers)
+
+        self._openai_client = openai.AsyncOpenAI(
+            base_url=base_url, api_key=api_key, default_headers=default_headers
+        )
 
     async def create_chat_completion(self, input_chat: ChatCompletionInputs) -> str:
         messages = [{"role": x.role, "content": x.content} for x in input_chat.messages]
 
-        result = await self.openai_client.chat.completions.create(
+        result = await self._openai_client.chat.completions.create(
             model=self._model_str,
             messages=messages,
             store=True,
@@ -75,7 +75,7 @@ class OpenAIBackend(Backend):
         return raw_message.content
 
     async def generate(self, input_str: str) -> GenerateResult:
-        result = await self.openai_client.completions.create(
+        result = await self._openai_client.completions.create(
             model=self._model_str,
             prompt=input_str,
         )
