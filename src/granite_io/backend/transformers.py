@@ -8,7 +8,6 @@ import dataclasses
 
 # Third Party
 import aconfig
-import torch
 
 # Local
 from granite_io.backend.base import Backend
@@ -225,6 +224,10 @@ class TransformersBackend(Backend):
             this day of the week, which changes without warning from one version to the
             next of the library.
         """
+        with import_optional("transformers"):
+            # Third Party
+            import torch
+
         # Make sure computations for this thread will happen in a separate CUDA context.
         stream = torch.cuda.Stream()
 
