@@ -34,9 +34,7 @@ class LiteLLMBackend(Backend):
     def __init__(self, config: aconfig.Config):
         self._model_str = config.model_name
 
-    def generate(
-        self, input_str: str, num_return_sequences: int = 1
-    ) -> GenerateResults:
+    async def generate(self, input_str: str) -> GenerateResult:
         """Run a direct /completions call"""
 
         if num_return_sequences < 1:  # Check like the others for invalid
@@ -48,7 +46,7 @@ class LiteLLMBackend(Backend):
             # Third Party
             import litellm
 
-        result = litellm.text_completion(
+        result = await litellm.atext_completion(
             # model strings start with provider/
             # model="watsonx/ibm/granite-3-2-8b-instruct",
             # model="ollama/llama3.1:latest",
