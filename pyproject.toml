@@ -41,6 +41,10 @@ transformers = [
 openai = [
     "openai",
 ]
+litellm = [
+    "litellm",
+    "python-dotenv==1.0.1",
+]
 dev = [
     "isort==6.0.1",
     "pre-commit>=3.0.4,<5.0",
@@ -50,10 +54,11 @@ dev = [
     "pytest-asyncio",
     "pytest-cov",
     "pytest-html",
-    "ruff==0.5.0",
+    "ruff==0.9.8",
     "tox",
     "granite-io[transformers]",
     "granite-io[openai]",
+    "granite-io[litellm]",
 ]
 notebook = [
     "ipywidgets",

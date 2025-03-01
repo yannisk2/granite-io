@@ -37,7 +37,7 @@ _MODEL_NAME = "Granite 3.2"
 # none of the supervised fine tuning data exercises knowledge cutoffs.
 _SYSTEM_MESSAGE_START = f"""\
 Knowledge Cutoff Date: April 2024.
-Today's Date: {datetime.datetime.now().strftime('%B %d, %Y')}.
+Today's Date: {datetime.datetime.now().strftime("%B %d, %Y")}.
 You are Granite, developed by IBM."""
 
 # String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START

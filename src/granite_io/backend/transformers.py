@@ -158,7 +158,7 @@ class TransformersBackend(Backend):
             # while others will raise a cryptic exception from deep within
             # their beam search code.
             raise ValueError(
-                f"Couldn't figure out padding token for tokenizer " f"{self._tokenizer}"
+                f"Couldn't figure out padding token for tokenizer {self._tokenizer}"
             )
 
         # The supported way to pass parameters to the generate() method is
