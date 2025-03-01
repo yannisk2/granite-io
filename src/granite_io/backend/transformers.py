@@ -237,18 +237,17 @@ class TransformersBackend(Backend):
             # Third Party
             import torch
 
-        if torch.cuda.is_available():
-            # Make sure computations for this thread will happen in a separate CUDA
-            # context.
-            stream = torch.cuda.Stream()
-
-            with torch.cuda.stream(stream):
-                return self._model.generate(
-                    **(generation_inputs.model_input),
-                    generation_config=generation_inputs.generation_config,
-                )
-        else:
+        def do_generate():
             return self._model.generate(
                 **(generation_inputs.model_input),
                 generation_config=generation_inputs.generation_config,
             )
+
+        if torch.cuda.is_available():
+            # Make sure computations for this thread will happen in a separate CUDA
+            # context.
+            stream = torch.cuda.Stream()
+            with torch.cuda.stream(stream):
+                return do_generate()
+        else:
+            return do_generate()
