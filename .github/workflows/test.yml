@@ -10,7 +10,6 @@ on:
       - '**.py'
       - 'pyproject.toml'
       - 'tox.ini'
-      - 'scripts/*.sh' # Used by this workflow
       - '.github/workflows/test.yml' # This workflow
   pull_request:
     branches:
@@ -20,7 +19,6 @@ on:
       - '**.py'
       - 'pyproject.toml'
       - 'tox.ini'
-      - 'scripts/*.sh' # Used by this workflow
       - '.github/workflows/test.yml' # This workflow
 
 env:
