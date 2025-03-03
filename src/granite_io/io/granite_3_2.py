@@ -76,6 +76,17 @@ available data."""
 _COT_START = "Here is my thought process:"
 _COT_END = "Here is my response:"
 
+# Some versions of the model are known to shorten "Here is" to "Here's", so we
+# provide alternate forms of these strings for those versions.
+_COT_START_ALTERNATIVES = [
+    _COT_START,
+    "Here's my thought process:",
+]
+_COT_END_ALTERNATIVES = [
+    _COT_END,
+    "Here's my response:",
+]
+
 # String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START
 # if there are no tools or documents in the current request and the "thinking" flag is
 # set to `True`.
@@ -191,14 +202,6 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
         # TODO: Validate this invariant.
 
         return messages
-
-
-class _Granite3Point2ChatCompletionResult(ChatCompletionResult):
-    """
-    Chat completion result type for granite 3.2 language models
-    """
-
-    reasoning_content: str | None
 
 
 @io_processor(
@@ -551,21 +554,34 @@ class Granite3Point2InputOutputProcessor(ModelDirectInputOutputProcessor):
         self,
         output: str,
         inputs: ChatCompletionInputs | None = None,
-    ) -> _Granite3Point2ChatCompletionResult:
-        cot = None
-
+    ) -> ChatCompletionResult:
         # Parse out CoT reasoning
+        cot = None
+        original_output = output
         if inputs.thinking:
-            cot_start = output.find(_COT_START)
-            cot_end = output.find(_COT_END)
-            if -1 not in [cot_start, cot_end]:
-                cot = output[cot_start + len(_COT_START) : cot_end]
-                output = output[:cot_start] + output[cot_end + len(_COT_END) :]
+            cot_start_span = None
+            cot_end_span = None
+            for cot_start_str in _COT_START_ALTERNATIVES:
+                if (cot_start_pos := output.find(cot_start_str)) != -1:
+                    cot_start_span = (cot_start_pos, cot_start_pos + len(cot_start_str))
+                    break
+            for cot_end_str in _COT_END_ALTERNATIVES:
+                if (cot_end_pos := output.find(cot_end_str)) != -1:
+                    cot_end_span = (cot_end_pos, cot_end_pos + len(cot_end_str))
+                    break
+
+            if cot_start_span and cot_end_span and cot_end_span[0] > cot_start_span[1]:
+                cot = output[cot_start_span[1] : cot_end_span[0]].strip()
+                output = output[: cot_start_span[0]] + output[cot_end_span[1] :].strip()
 
         # Parse out tool calls
         if output.startswith("<tool_call>"):
             raise NotImplementedError("TODO: Implement tool call parsing")
 
-        return _Granite3Point2ChatCompletionResult(
-            next_message=AssistantMessage(content=output), reasoning_content=cot
+        return ChatCompletionResult(
+            next_message=AssistantMessage(
+                content=output,
+                reasoning_content=cot,
+                raw=original_output,
+            )
         )

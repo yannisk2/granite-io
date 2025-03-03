@@ -45,6 +45,18 @@ class UserMessage(_ChatMessageBase):
 class AssistantMessage(_ChatMessageBase):
     role: Literal["assistant"] = "assistant"
     tool_calls: list[FunctionCall] = []
+    reasoning_content: str | None = None
+    # Raw response content without any parsing for re-serialization
+    _raw: str | None = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._raw = kwargs.pop("raw", None)
+
+    @property
+    def raw(self) -> str:
+        """Get the raw content of the response"""
+        return self._raw if self._raw is not None else self.content
 
 
 class ToolResultMessage(_ChatMessageBase):
