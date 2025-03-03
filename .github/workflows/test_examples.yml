@@ -52,9 +52,6 @@ jobs:
           # https://github.com/actions/checkout/issues/249
           fetch-depth: 0
 
-      - name: Setup Ollama server
-        uses: ./.github/actions/ollama-setup
-
       - name: Setup Python ${{ matrix.python }}
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
@@ -62,6 +59,9 @@ jobs:
           cache: pip
           cache-dependency-path: |
             **/pyproject.toml
+
+      - name: Setup Ollama server
+        uses: ./.github/actions/ollama-setup
 
       - name: Install dependencies
         run: |
