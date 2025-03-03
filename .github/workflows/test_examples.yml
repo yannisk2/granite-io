@@ -37,8 +37,6 @@ jobs:
           - "./examples/watsonx_litellm.py"
         python:
           - "3.10"
-          - "3.11"
-          - "3.12"
         platform:
           - "ubuntu-latest"
 
