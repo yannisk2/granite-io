@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Standard
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 # Third Party
 from openai import AsyncOpenAI
@@ -47,33 +47,46 @@ class OpenAIBackend(Backend):
             base_url=base_url, api_key=api_key, default_headers=default_headers
         )
 
-    async def create_chat_completion(self, input_chat: ChatCompletionInputs) -> str:
-        messages = [{"role": x.role, "content": x.content} for x in input_chat.messages]
+    def process_input(self, **kwargs: Any) -> Dict[str, Any]:
+        # From ChatCompletionInputs we have extra stuff that is not model input
+        kwargs.pop("messages", None)
+        kwargs.pop("tools", None)
+        kwargs.pop("thinking", None)
 
-        result = await self._openai_client.chat.completions.create(
-            model=self._model_str,
-            messages=messages,
-            store=True,
-        )
+        # model is required
+        if not kwargs.get("model"):
+            kwargs["model"] = self._model_str
 
-        raw_message = result.choices[0].message
+        # Migrate alias kwargs to this flavor of backend
+        self.kwarg_alias(kwargs, "stop", "stop_strings")
+        self.kwarg_alias(kwargs, "n", "num_return_sequences")
 
-        if raw_message.role != "assistant":
-            raise ValueError(f"Unexpected role '{raw_message.role}' in chat completion")
-        if raw_message.content is None:
-            raise NotImplementedError(
-                f"No text in chat completion, and decoding of other types is not "
-                f"implemented. Completion result: {raw_message}"
-            )
+        #
+        # Questionable validity checking -- this could be left up to the model
+        #
 
-        result = await self._openai_client.completions.create(
-            model=self._model_str,
-            prompt=input_str,
-            best_of=num_return_sequences,
-            n=num_return_sequences,
-        )
+        # n (a.k.a. num_return_sequences) validation
+        n = kwargs.get("n")
+
+        if n is not None:  # noqa SIM102
+            if not isinstance(n, int) or n < 1:
+                raise ValueError(f"Invalid value for n ({n})")
+            if n > 1:
+                # best_of must be >= n
+                best_of = kwargs.get("best_of")
+                if not isinstance(best_of, int) or best_of < n:
+                    kwargs["best_of"] = n
+
+        return kwargs
+
+    async def generate(self, **kwargs):
+        """Run a direct /completions call"""
+        # pylint: disable-next=missing-kwoa
+        return await self._openai_client.completions.create(**kwargs)
+
+    def process_output(self, output, **kwargs):
         results = []
-        for choice in result.choices:
+        for choice in output.choices:
             results.append(
                 GenerateResult(
                     completion_string=choice.text,
