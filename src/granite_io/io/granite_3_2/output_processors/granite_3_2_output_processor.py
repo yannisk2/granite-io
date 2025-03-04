@@ -100,6 +100,7 @@ class Granite3Point2OutputProcessor(OutputProcessor):
                         hallucinations=parsed_output["hallucinations"],
                         reasoning_content=cot,
                         raw=original_output,
+                        stop_reason=result.stop_reason,
                     )
                 )
             )
