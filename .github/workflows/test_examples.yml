@@ -7,12 +7,20 @@ on:
       - "main"
       - "release-**"
     paths:
+      - 'src/**.py'
+      - 'examples/**.py'
+      - 'pyproject.toml'
+      - 'tox.ini'
       - '.github/workflows/test_examples.*' # This workflow
   pull_request:
     branches:
       - "main"
       - "release-**"
     paths:
+      - 'src/**.py'
+      - 'examples/**.py'
+      - 'pyproject.toml'
+      - 'tox.ini'
       - '.github/workflows/test_examples.*' # This workflow
 
 env:
