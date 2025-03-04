@@ -16,12 +16,18 @@ import transformers
 # Local
 from granite_io import make_backend, make_io_processor
 from granite_io.io.granite_3_2 import (
+    _COT_END,
+    _COT_END_ALTERNATIVES,
+    _COT_START,
+    _COT_START_ALTERNATIVES,
     _MODEL_NAME,
     GRANITE_3_2_2B_HF,
     Granite3Point2InputOutputProcessor,
     _Granite3Point2Inputs,
 )
 from granite_io.types import AssistantMessage, ChatCompletionInputs, UserMessage
+
+## Helpers #####################################################################
 
 # All the different chat completion requests that are tested in this file, serialized as
 # JSON strings. Represented as a dictionary instead of a list so that pytest output will
@@ -121,6 +127,28 @@ def io_processor_litellm() -> Granite3Point2InputOutputProcessor:
     )
     # The io factory requires a known model name
     return make_io_processor(_MODEL_NAME, backend=backend)
+
+
+msg = UserMessage(content="Hello")
+no_thinking_input = ChatCompletionInputs(messages=[msg])
+thinking_input = ChatCompletionInputs(messages=[msg], thinking=True)
+
+thought = "Think think"
+response = "respond respond"
+pre_thought = "something before"
+no_cot_output = f"{thought} {response}"
+no_thinking_output = f"{thought} {_COT_END} {response}"
+no_response_output = f"{_COT_START}\n\n{response}"
+cot_output = f"{_COT_START}\n\n{thought}\n{_COT_END}\n\n{response}"
+cot_alt_output = f"{_COT_START_ALTERNATIVES[-1]}\n\n{thought}\n{_COT_END_ALTERNATIVES[-1]}\n\n{response}"
+cot_mixed_output = (
+    f"{_COT_START}\n\n{thought}\n{_COT_END_ALTERNATIVES[-1]}\n\n{response}"
+)
+cot_pre_output = (
+    f"{pre_thought} {_COT_START} {thought} {_COT_END_ALTERNATIVES[-1]} {response}"
+)
+
+## Tests #######################################################################
 
 
 def test_read_inputs(input_json_str):
@@ -257,3 +285,28 @@ def test_run_litellm(
 
     # TODO: Once the prerelease model has settled down and we have implemented
     # temperature controls, verify outputs
+
+
+@pytest.mark.parametrize(
+    ["inputs", "output", "exp_thought", "exp_resp"],
+    [
+        # No thinking flag
+        (no_thinking_input, no_thinking_output, None, no_thinking_output),
+        (no_thinking_input, cot_output, None, cot_output),
+        # Thinking flag
+        (thinking_input, no_cot_output, None, no_cot_output),
+        (thinking_input, no_thinking_output, None, no_thinking_output),
+        (thinking_input, no_response_output, None, no_response_output),
+        (thinking_input, cot_output, thought, response),
+        (thinking_input, cot_alt_output, thought, response),
+        (thinking_input, cot_mixed_output, thought, response),
+        (thinking_input, cot_pre_output, thought, f"{pre_thought} {response}"),
+    ],
+)
+def test_cot_parsing(inputs, output, exp_thought, exp_resp):
+    """Test the parsing logic for CoT reasoning output"""
+    proc = Granite3Point2InputOutputProcessor()
+    result = proc.output_to_result(output, inputs).next_message
+    assert result.reasoning_content == exp_thought
+    assert result.content == exp_resp
+    assert result.raw == output
