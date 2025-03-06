@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: '{"model":"granite3.2:2b","prompt":"what is up?","best_of":3,"n":3}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      rits_api_key:
+      - ollama
+      user-agent:
+      - OpenAI/Python 1.65.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.65.3
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.8
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: '{"id":"cmpl-401","object":"text_completion","created":1741212666,"model":"granite3.2:2b","system_fingerprint":"fp_ollama","choices":[{"text":"I''m
+      here and ready to assist you! As an artificial intelligence, I don''t have feelings
+      or experiences, but I''m functioning as programmed for our interaction. How
+      can I help you today? Is there a topic or question you''d like to discuss or
+      explore?","index":0,"finish_reason":"stop"}],"usage":{"prompt_tokens":47,"completion_tokens":59,"total_tokens":106}}
+
+      '
+    headers:
+      Content-Length:
+      - '497'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 05 Mar 2025 22:11:06 GMT
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1
