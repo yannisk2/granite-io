@@ -31,14 +31,14 @@ def _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run):
     Creates a background thread with its own event loop. The background thread then
     runs a single task in that event loop.
     """
-    result_holder = list()
+    result_holder = []
 
     def _callback():
         # Python's thread library requires you to write your own code to return results
         # or raise exceptions from a background thread.
         try:
             result_holder.append(asyncio.run(coroutine_to_run))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0718
             result_holder.append(e)
 
     thread = threading.Thread(target=_callback)
