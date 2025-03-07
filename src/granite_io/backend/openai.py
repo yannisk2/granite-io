@@ -66,17 +66,6 @@ class OpenAIBackend(Backend):
                 f"implemented. Completion result: {raw_message}"
             )
 
-        # # return before_state.append(AssistantMessage(raw_message.content))
-        # TODO: don't we want this stuff too?
-        # return GenerateResult(
-        # completion_string=raw_message.content,
-        # completion_tokens=result.usage.completion_tokens,
-        # stop_reason=result.choices[0].finish_reason
-        # )
-
-        return raw_message.content
-
-    async def generate(self, input_str: str) -> GenerateResult:
         result = await self._openai_client.completions.create(
             model=self._model_str,
             prompt=input_str,
