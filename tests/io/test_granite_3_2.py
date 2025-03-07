@@ -7,14 +7,12 @@
 import json
 
 # Third Party
-from litellm import APIConnectionError as ACE
-from openai import APIConnectionError
 import pytest
-import torch
 import transformers
 
 # Local
-from granite_io import make_backend, make_io_processor
+from granite_io import make_io_processor
+from granite_io.backend import Backend
 from granite_io.io.granite_3_2 import (
     _COT_END,
     _COT_END_ALTERNATIVES,
@@ -25,7 +23,13 @@ from granite_io.io.granite_3_2 import (
     Granite3Point2InputOutputProcessor,
     _Granite3Point2Inputs,
 )
-from granite_io.types import AssistantMessage, ChatCompletionInputs, UserMessage
+from granite_io.types import (
+    AssistantMessage,
+    ChatCompletionInputs,
+    GenerateResult,
+    GenerateResults,
+    UserMessage,
+)
 
 ## Helpers #####################################################################
 
@@ -67,66 +71,11 @@ def tokenizer() -> transformers.PreTrainedTokenizerBase:
     model_path = GRANITE_3_2_2B_HF
     try:
         ret = transformers.AutoTokenizer.from_pretrained(
-            model_path, local_files_only=True
+            model_path, local_files_only=False
         )
     except Exception as e:
         pytest.skip(f"No tokenizer for {model_path}: {e}")
     return ret
-
-
-@pytest.fixture(scope="session")
-def io_processor_transformers() -> Granite3Point2InputOutputProcessor:
-    model_path = GRANITE_3_2_2B_HF
-
-    if torch.cuda.is_available():
-        device_name = "cuda"
-    # Re-enable once we have a smaller model that can run in a laptop GPU
-    elif torch.backends.mps.is_available():
-        device_name = "mps"
-    else:
-        device_name = "cpu"
-        # CPU mode; prevent thrashing
-        torch.set_num_threads(4)
-    try:
-        backend = make_backend(
-            "transformers",
-            {"model_name": model_path, "device": device_name},
-        )
-    except Exception as e:
-        pytest.skip(f"No transformers backend for '{model_path}': {e}")
-    return make_io_processor(_MODEL_NAME, backend=backend)
-
-
-@pytest.fixture
-def io_processor_openai() -> Granite3Point2InputOutputProcessor:
-    # The backend factory requires a known backend name
-    # You can override config with env vars, but only known config vars
-    backend = make_backend(
-        "openai",
-        {
-            "model_name": "granite3.2:2b",
-            "openai_api_key": "ollama",
-            "openai_base_url": "http://localhost:11434/v1",
-        },
-    )
-    # The io factory requires a known model name
-    return make_io_processor(_MODEL_NAME, backend=backend)
-
-
-@pytest.fixture
-def io_processor_litellm() -> Granite3Point2InputOutputProcessor:
-    # The backend factory requires a known backend name
-    # You can override config with env vars, but only known config vars
-    backend = make_backend(
-        "litellm",
-        {
-            "model_name": "ollama/granite3.2:2b",
-            "openai_api_key": "ollama",
-            "openai_base_url": "http://localhost:11434/v1",
-        },
-    )
-    # The io factory requires a known model name
-    return make_io_processor(_MODEL_NAME, backend=backend)
 
 
 msg = UserMessage(content="Hello")
@@ -245,43 +194,13 @@ def test_basic_inputs_to_string():
     assert chatRequest.endswith("")
 
 
-# Session scope for asyncio because the tests in this class all share the same vLLM
-# backend
-@pytest.mark.asyncio(loop_scope="session")
-async def test_run_transformers(
-    io_processor_transformers: Granite3Point2InputOutputProcessor, input_json_str: str
-):
+@pytest.mark.vcr
+@pytest.mark.block_network
+@pytest.mark.flaky(retries=3, delay=5)  # VCR recording flakey
+def test_run_processor(backend_x: Backend, input_json_str: str):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    _ = await io_processor_transformers.create_chat_completion(inputs)
-
-    # TODO: Once the prerelease model has settled down and we have implemented
-    # temperature controls, verify outputs
-
-
-@pytest.mark.asyncio(loop_scope="session")
-@pytest.mark.xfail(
-    reason="will xfail if APIConnectionError because OpenAI tests are optional",
-    raises=APIConnectionError,
-)
-async def test_run_openai(
-    io_processor_openai: Granite3Point2InputOutputProcessor, input_json_str: str
-):
-    inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    _ = await io_processor_openai.create_chat_completion(inputs)
-
-    # TODO: Once the prerelease model has settled down and we have implemented
-    # temperature controls, verify outputs
-
-
-@pytest.mark.xfail(
-    reason="will xfail if APIConnectionError because LiteLLM tests are optional",
-    raises=ACE,
-)
-def test_run_litellm(
-    io_processor_litellm: Granite3Point2InputOutputProcessor, input_json_str: str
-):
-    inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    _ = io_processor_litellm.create_chat_completion(inputs)
+    io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
+    _ = io_processor.create_chat_completion(inputs)
 
     # TODO: Once the prerelease model has settled down and we have implemented
     # temperature controls, verify outputs
@@ -306,7 +225,14 @@ def test_run_litellm(
 def test_cot_parsing(inputs, output, exp_thought, exp_resp):
     """Test the parsing logic for CoT reasoning output"""
     proc = Granite3Point2InputOutputProcessor()
-    result = proc.output_to_result(output, inputs).next_message
+    generated = GenerateResults(
+        results=[
+            GenerateResult(
+                completion_string=output, completion_tokens=[], stop_reason="?"
+            )
+        ]
+    )
+    result = proc.output_to_result(generated, inputs).results[0].next_message
     assert result.reasoning_content == exp_thought
     assert result.content == exp_resp
     assert result.raw == output

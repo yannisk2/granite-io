@@ -72,7 +72,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[openai]"
           python -m pip install -e ".[litellm]"
+          python -m pip install notebook
+          python -m pip install transformers[torch]
 
       - name: "Test examples"
         run: |
           bash -c "for i in examples/*.py; do python $i; done"
+
+      - name: "Test notebooks"
+        run: |
+          bash -c "jupyter execute notebooks/io.ipynb"
