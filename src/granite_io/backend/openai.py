@@ -55,7 +55,7 @@ class OpenAIBackend(Backend):
                 f"Invalid value for num_return_sequences ({num_return_sequences})"
             )
 
-        result = self.openai_client.completions.create(
+        result = await self._openai_client.completions.create(
             model=self._model_str,
             prompt=input_str,
             best_of=num_return_sequences,

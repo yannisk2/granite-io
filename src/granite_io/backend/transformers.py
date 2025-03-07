@@ -17,20 +17,22 @@ from granite_io.types import GenerateResult, GenerateResults
 
 if TYPE_CHECKING:
     # Third Party
-    import torch  # noqa: F401
     import transformers
 
 
 def _detect_hw_accel():
     """:returns: Pytorch's name for the best available hardware accelerator on the
     current machine."""
+    with import_optional("transformers"):
+        # Third Party
+        import torch
     if torch.cuda.is_available():
-        return "cuda"
-    # Re-enable once we have a smaller model that can run in a laptop GPU
+        result = "cuda"
     elif torch.backends.mps.is_available():
-        return "mps"
+        result = "mps"
     else:
-        return "cpu"
+        result = "cpu"
+    return result
 
 
 @dataclasses.dataclass
