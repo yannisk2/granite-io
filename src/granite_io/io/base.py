@@ -7,6 +7,7 @@ Base classes for Input/Output processors
 # Standard
 import abc
 import asyncio
+import threading
 
 # Third Party
 import aconfig
@@ -20,6 +21,32 @@ from granite_io.types import (
     ChatCompletionResults,
     GenerateResults,
 )
+
+
+def _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run):
+    """
+    Horrible hack that seems to be the only way to call a coroutine from a non-async
+    function that is being called from an async function.
+
+    Creates a background thread with its own event loop. The background thread then
+    runs a single task in that event loop.
+    """
+    result_holder = list()
+
+    def _callback():
+        # Python's thread library requires you to write your own code to return results
+        # or raise exceptions from a background thread.
+        try:
+            result_holder.append(asyncio.run(coroutine_to_run))
+        except Exception as e:
+            result_holder.append(e)
+
+    thread = threading.Thread(target=_callback)
+    thread.start()
+    thread.join()
+    if isinstance(result_holder[0], Exception):
+        raise result_holder[0]
+    return result_holder[0]
 
 
 class InputOutputProcessor(FactoryConstructible):
@@ -61,7 +88,15 @@ class InputOutputProcessor(FactoryConstructible):
         """
         # Fall back on async version of this method by default.  Subclasses may override
         # this method if they have a more efficient way of doing non-async operation.
-        return asyncio.run(self.acreate_chat_completion(inputs))
+        coroutine_to_run = self.acreate_chat_completion(inputs)
+        try:  # Exceptions as control flow. Sorry, asyncio forces this design on us.
+            asyncio.get_running_loop()
+        except RuntimeError:
+            # If we get here, this code is not running inside an async function.
+            return asyncio.run(coroutine_to_run)
+
+        # If we get here, this code is running inside an async function.
+        return _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run)
 
 
 class ModelDirectInputOutputProcessor(InputOutputProcessor):
