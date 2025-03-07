@@ -26,6 +26,7 @@ from granite_io.io.granite_3_2 import (
 from granite_io.types import (
     AssistantMessage,
     ChatCompletionInputs,
+    ChatCompletionResults,
     GenerateResult,
     GenerateResults,
     UserMessage,
@@ -201,10 +202,12 @@ async def test_run_transformers(
     io_processor_transformers: Granite3Point2InputOutputProcessor, input_json_str: str
 ):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    _ = await io_processor_transformers.create_chat_completion(inputs)
+    io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
+    results: ChatCompletionResults = io_processor.create_chat_completion(inputs)
 
-    # TODO: Once the prerelease model has settled down and we have implemented
-    # temperature controls, verify outputs
+    assert isinstance(results, ChatCompletionResults)
+    assert len(results.results) == 1
+    # TODO: Verify outputs in greater detail
 
 
 @pytest.mark.asyncio(loop_scope="session")

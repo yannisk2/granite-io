@@ -6,6 +6,7 @@ Base classes for Input/Output processors
 
 # Standard
 import abc
+import asyncio
 
 # Third Party
 import aconfig
@@ -33,7 +34,7 @@ class InputOutputProcessor(FactoryConstructible):
         """By default an IO processor doesn't require config"""
 
     @abc.abstractmethod
-    async def create_chat_completion(
+    async def acreate_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResult:
         """
@@ -44,6 +45,23 @@ class InputOutputProcessor(FactoryConstructible):
         :returns: The next message that the model produces when fed the specified
             inputs, plus additional information about the low-level request.
         """
+
+    def create_chat_completion(
+        self, inputs: ChatCompletionInputs
+    ) -> ChatCompletionResult:
+        """
+        Non-async version of :func:`acreate_chat_completion()`
+
+        :param inputs: Structured representation of the inputs to a chat completion
+            request, possibly including additional fields that only this input-output
+            processor can consume
+
+        :returns: The next message that the model produces when fed the specified
+            inputs, plus additional information about the low-level request.
+        """
+        # Fall back on async version of this method by default.  Subclasses may override
+        # this method if they have a more efficient way of doing non-async operation.
+        return asyncio.run(self.acreate_chat_completion(inputs))
 
 
 class ModelDirectInputOutputProcessor(InputOutputProcessor):
@@ -68,7 +86,7 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
         super().__init__(config)
         self._backend = backend
 
-    async def create_chat_completion(
+    async def acreate_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
         if self._backend is None:
