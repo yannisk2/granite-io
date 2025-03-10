@@ -6,7 +6,7 @@ import pytest
 # Local
 from granite_io import make_backend
 from granite_io.backend import Backend
-from granite_io.io.granite_3_2 import GRANITE_3_2_2B_HF
+from granite_io.io.granite_3_2.granite_3_2 import GRANITE_3_2_2B_HF
 
 
 @pytest.fixture(scope="session")
