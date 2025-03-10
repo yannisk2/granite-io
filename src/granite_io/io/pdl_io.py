@@ -1,7 +1,7 @@
 
 import aconfig
 
-from pdl.pdl_ast import FunctionBlock, CallBlock
+from pdl.pdl_ast import FunctionBlock, CallBlock, Program
 from pdl.pdl import parse_str, parse_file, exec_program
 
 from granite_io.types import ChatCompletionInputs
@@ -27,15 +27,17 @@ class PdlInputOutputProcessor(InputOutputProcessor):
         """
         super().__init__(config)
         if isinstance(pdl, str):
-            self.pdl_function = parse_str(pdl, file_name=pdl_file)
+            prog, _ = parse_str(pdl, file_name=pdl_file)
+            self._pdl_function = prog.root
         elif pdl is None and pdl_file is not None:
-            self.pdl_function = parse_file(pdl_file)
+            prog, _ = parse_file(pdl_file)
+            self._pdl_function = prog.root
         else:
-            self.pdl_function = pdl
+            self._pdl_function = pdl
 
     def create_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
-        prog = CallBlock(call=self._pdl_function, args={"inputs": ChatCompletionInputs.model_dump()})
+        prog = Program(CallBlock(call=self._pdl_function, args={"inputs": inputs.model_dump()}))
         results = exec_program(prog)
         return ChatCompletionResults.model_validate(results)
