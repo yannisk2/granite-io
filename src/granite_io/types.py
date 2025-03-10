@@ -78,9 +78,9 @@ class AssistantMessage(_ChatMessageBase):
     reasoning_content: str | None = None
     # Raw response content without any parsing for re-serialization
     _raw: str | None = None
-    citations: list[Citation] = []
-    documents: list[Document] = []
-    hallucinations: list[Hallucination] = []
+    citations: list[Citation] | None = None
+    documents: list[Document] | None = None
+    hallucinations: list[Hallucination] | None = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

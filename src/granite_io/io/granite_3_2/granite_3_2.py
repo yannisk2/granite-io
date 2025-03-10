@@ -11,7 +11,7 @@ import pydantic
 # Local
 from granite_io.backend.base import Backend
 from granite_io.io.base import ModelDirectInputOutputProcessor
-from granite_io.io.granite_output_parser import parse_model_output
+from granite_io.io.granite_3_2.granite_output_parser import parse_model_output
 from granite_io.io.registry import io_processor
 from granite_io.types import (
     AssistantMessage,

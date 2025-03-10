@@ -45,11 +45,13 @@ print("\n\n>> Response:\n")
 response = outputs.results[0].next_message.content
 print(response)
 
-print("\n\n>> Citations:\n")
-pprint.pprint(outputs.results[0].next_message.citations, sort_dicts=False)
+if outputs.results[0].next_message.citations:
+    print("\n\n>> Citations:\n")
+    pprint.pprint(outputs.results[0].next_message.citations, sort_dicts=False)
 
-print("\n\n>> Documents:\n")
-pprint.pprint(outputs.results[0].next_message.documents, sort_dicts=False)
+    print("\n\n>> Documents:\n")
+    pprint.pprint(outputs.results[0].next_message.documents, sort_dicts=False)
 
-print("\n\n>> Hallucinations:\n")
-pprint.pprint(outputs.results[0].next_message.hallucinations, sort_dicts=False)
+if outputs.results[0].next_message.hallucinations:
+    print("\n\n>> Hallucinations:\n")
+    pprint.pprint(outputs.results[0].next_message.hallucinations, sort_dicts=False)

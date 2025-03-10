@@ -7,13 +7,9 @@ Tests for the model output parser
 # Standard
 from pathlib import Path
 import os
-import re
-
-# Third Party
-import pytest
 
 # Local
-from granite_io.io.granite_output_parser import parse_model_output
+from granite_io.io.granite_3_2.granite_output_parser import parse_model_output
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
 
@@ -39,14 +35,9 @@ def test_output():
     assert isinstance(response, str)
     assert "To efficiently find the fastest way for a seller" in response
 
-    docs = parsed_output["docs"]
-    assert len(docs) == 0
-
-    citations = parsed_output["citations"]
-    assert len(citations) == 0
-
-    hallucinations = parsed_output["hallucinations"]
-    assert len(hallucinations) == 0
+    assert parsed_output["docs"] is None
+    assert parsed_output["citations"] is None
+    assert parsed_output["hallucinations"] is None
 
 
 def test_output_with_citation():
@@ -63,7 +54,7 @@ def test_output_with_citation():
 
     docs = parsed_output["docs"]
     assert len(docs) == 1
-    doc = docs[0]
+    doc = docs[0]  # pylint: disable = unsubscriptable-object
     keys = ["doc_id", "text"]
     for key in keys:
         assert key in doc
@@ -98,21 +89,18 @@ def test_output_with_citation():
     assert citation["response_begin"] == 0
     assert citation["response_end"] == 46
 
-    hallucinations = parsed_output["hallucinations"]
-    assert len(hallucinations) == 0
+    assert parsed_output["hallucinations"] is None
 
 
 def test_output_with_invalid_citation():
     model_output = _load_model_output_file(
         os.path.join(TEST_DATA_DIR, "test_output_with_invalid_citation.txt")
     )
-    with pytest.raises(
-        AssertionError,
-        match=re.escape(
-            "Error in extracting citation info: Expected citations but found none"
-        ),
-    ):
-        parse_model_output(model_output)
+    parsed_output = parse_model_output(model_output)
+
+    assert parsed_output["docs"] is None
+    assert parsed_output["citations"] is None
+    assert parsed_output["hallucinations"] is None
 
 
 def test_output_with_citation_hallucinations():
@@ -129,7 +117,7 @@ def test_output_with_citation_hallucinations():
 
     docs = parsed_output["docs"]
     assert len(docs) == 1
-    doc = docs[0]
+    doc = docs[0]  # pylint: disable = unsubscriptable-object
     keys = ["doc_id", "text"]
     for key in keys:
         assert key in doc

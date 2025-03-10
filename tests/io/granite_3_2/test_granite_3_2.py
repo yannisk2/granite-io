@@ -13,7 +13,7 @@ import transformers
 # Local
 from granite_io import make_io_processor
 from granite_io.backend import Backend
-from granite_io.io.granite_3_2 import (
+from granite_io.io.granite_3_2.granite_3_2 import (
     _COT_END,
     _COT_END_ALTERNATIVES,
     _COT_START,
@@ -23,7 +23,7 @@ from granite_io.io.granite_3_2 import (
     Granite3Point2InputOutputProcessor,
     _Granite3Point2Inputs,
 )
-from granite_io.io.granite_output_parser import (
+from granite_io.io.granite_3_2.granite_output_parser import (
     _CITATION_START,
     _HALLUCINATION_START,
 )
@@ -285,14 +285,21 @@ def test_cot_parsing(inputs, output, exp_thought, exp_resp):
     ],
     [
         # No constituents
-        (no_thinking_input, no_constituent_output, [], [], [], no_constituent_output),
+        (
+            no_thinking_input,
+            no_constituent_output,
+            None,
+            None,
+            None,
+            no_constituent_output,
+        ),
         # Citation
         (
             no_thinking_input,
             citation_output,
             [expected_document],
             [expected_citation],
-            [],
+            None,
             no_constituent_output,
         ),
         # Citation and hallucination

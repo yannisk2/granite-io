@@ -75,8 +75,11 @@ def _parse_hallucinations_text(hallucinations_text: str) -> list[dict]:
     for match in matches_iter:
         matches.append({"match_begin": match.start()})
 
-    assert len(matches) > 0, """Error in extracting hallucination info: \
-    Expected hallucination info but found none"""
+    if len(matches) == 0:
+        logging.error(
+            "Failed to extract hallucination info."
+            "Expected hallucination info but none found."
+        )
 
     # For each hallucination, extract its components (hallucination ID,
     # risk, response text)
@@ -113,13 +116,11 @@ def _parse_hallucinations_text(hallucinations_text: str) -> list[dict]:
             idx += 1
 
         if idx == 0:
-            # pylint: disable=broad-exception-raised
-            raise Exception("""Error in finding components of hallucination: \
-                            Expected single RegEx match but found none.""")
+            logging.error("""Error in finding components of hallucination: \
+                         Expected single RegEx match but found none.""")
         if idx > 1:
-            # pylint: disable=broad-exception-raised
-            raise Exception("""Error in finding components of hallucination: \
-                            Expected single RegEx match but found several.""")
+            logging.error("""Error in finding components of hallucination: \
+                          Expected single RegEx match but found several.""")
 
     return hallucinations
 
@@ -163,9 +164,9 @@ def _add_hallucination_response_spans(
             response_text_without_citations,
         )
         if len(matches) == 0:
-            # pylint: disable=broad-exception-raised
-            raise Exception("""Error in adding the response spans to hallucination: \
-                            Hallucination text not found in response""")
+            logging.error("""Error in adding the response spans to hallucination: \
+                          Hallucination text not found in response""")
+            continue
 
         if len(matches) > 1:
             logging.warning("""Hallucination text found multiple times in \
@@ -200,9 +201,11 @@ def _parse_citations_text(citations_text: str) -> list[dict]:
     for match in matches_iter:
         matches.append({"match_begin": match.start()})
 
-    assert len(matches) > 0, (
-        "Error in extracting citation info: Expected citations but found none"
-    )
+    if len(matches) == 0:
+        logging.error(
+            "Error in extracting citation info. Expected citations but found none."
+        )
+        return citations
 
     # For each citation, extract its components (citation ID, doc ID, context text)
     for i in range(len(matches)):  # pylint: disable=consider-using-enumerate
@@ -251,12 +254,10 @@ def _parse_citations_text(citations_text: str) -> list[dict]:
             idx += 1
 
         if idx == 0:
-            # pylint: disable=broad-exception-raised
-            raise Exception("""Error in finding components of citation: \
+            logging.error("""Error in finding components of citation: \
                             Expected single RegEx match but found none.""")
         if idx > 1:
-            # pylint: disable=broad-exception-raised
-            raise Exception("""Error in finding components of citation: \
+            logging.error("""Error in finding components of citation: \
                             Expected single RegEx match but found several.""")
 
     return citations
@@ -290,9 +291,9 @@ def _add_citation_context_spans(
             citation["context_text"], docs_by_docid[citation["doc_id"]]["text"]
         )
         if len(matches) == 0:
-            # pylint: disable=broad-exception-raised
-            raise Exception("""Error in adding the context spans to citation: \
+            logging.error("""Error in adding the context spans to citation: \
                             Cited text not found in corresponding document""")
+            continue
 
         if len(matches) > 1:
             logging.warning("""Cited text found multiple times in corresponding \
@@ -356,13 +357,15 @@ def _add_citation_response_spans(
                             response_sentences[sent_idx - 1]
                         )
                     else:
-                        raise ValueError("""Error in extracting the response sentence \
+                        logging.error("""Error in extracting the response sentence \
                                         of a citation: Found empty sentence""")
+                        continue
                 response_sents_by_citation_id[citation_id] = sent_without_citations
             else:
-                raise ValueError("""Error in extracting the response sentence of a \
+                logging.error("""Error in extracting the response sentence of a \
                                 citation: Citation ID appears in more than one \
                                 response sentences""")
+                continue
 
     # For each citation bring the response sentence to which it refers and its
     # begin/end spans
@@ -373,9 +376,9 @@ def _add_citation_response_spans(
                 response_text, response_text_without_citations
             )
             if len(matches) == 0:
-                # pylint: disable=broad-exception-raised
-                raise Exception("""Error in extracting the response sentence of a \
-                                citation: Unexpected error""")
+                logging.error("""Error in extracting the response sentence of a \
+                                citation: Unexpected error.""")
+                continue
 
             if len(matches) > 1:
                 # Find the citation ID and the text preceding it
@@ -384,10 +387,12 @@ def _add_citation_response_spans(
                     response_text_with_citations,
                 )
                 citation_id_matches = tuple(citation_id_matches_iter)
-                assert (
-                    len(citation_id_matches) > 0
-                ), """Error in extracting the response sentence of a citation: \
-                    Citation ID does not appear in the response text"""
+                if len(citation_id_matches) == 0:
+                    logging.error(
+                        """Error in extracting the response sentence of a citation. \
+                        Citation ID does not appear in the response text."""
+                    )
+                    continue
                 citation_id_match_begin = citation_id_matches[0].start()
 
                 text_before_citation_id = response_text_with_citations[
@@ -405,9 +410,11 @@ def _add_citation_response_spans(
                 response_text_matches = _find_substring_in_text(
                     search_str, text_before_citation_id_without_citations
                 )
-                assert len(citation_id_matches) > 0, (
-                    "Error in extracting the response sentence of a citation"
-                )
+                if len(citation_id_matches) == 0:
+                    logging.error(
+                        "Error in extracting the response sentence of a citation"
+                    )
+                    continue
                 last_response_text_match = response_text_matches[-1]
 
                 citation["response_text"] = response_text
@@ -416,20 +423,25 @@ def _add_citation_response_spans(
                     response_text
                 )
 
-                assert (
+                if (
                     citation["response_text"]
-                    == response_text_without_citations[
+                    != response_text_without_citations[
                         citation["response_begin"] : citation["response_end"]
                     ]
-                ), "Error in extracting the response sentence of a citation"
+                ):
+                    logging.error(
+                        "Error in extracting the response sentence of a citation."
+                    )
+                    continue
             else:
                 citation["response_text"] = response_text
                 citation["response_begin"] = matches[0]["begin_idx"]
                 citation["response_end"] = matches[0]["end_idx"]
         else:
-            raise ValueError("""Error in extracting the response sentence of a \
-                            citation: Citation ID does not appear in the response \
-                            text""")
+            logging.error("""Error in extracting the response sentence of a \
+                          citation. Citation ID does not appear in the response \
+                          text.""")
+            continue
 
     return augmented_citation_info
 
@@ -470,11 +482,9 @@ def _create_dict(input_array: object, key_attrib_name: str) -> dict:
 
     for item in input_array:
         if item[key_attrib_name] in new_dict:
-            # pylint: disable=broad-exception-raised
-            raise Exception(
-                """Found unexpected duplicate key while creating \
-                            dictionary: """
-                + item[key_attrib_name]
+            logging.error(
+                f"""Found unexpected duplicate key while creating \
+                dictionary: {item[key_attrib_name]}"""
             )
 
         new_dict[item[key_attrib_name]] = item
@@ -560,30 +570,35 @@ def _validate_spans_in_parser_output(parsed_task: object):
     Validate that the hallunication and citation spans correspond to
     the model reponse
     """
-    for hallucination in parsed_task["hallucinations"]:
-        assert (
+    for hallucination in (
+        parsed_task["hallucinations"] if parsed_task["hallucinations"] else []
+    ):
+        if (
             hallucination["response_text"]
-            == parsed_task["response"][
+            != parsed_task["response"][
                 hallucination["response_begin"] : hallucination["response_end"]
             ]
-        ), "Unexpected error in generated hallucination response span"
-    for citation in parsed_task["citations"]:
-        assert (
+        ):
+            logging.error("Unexpected error in generated hallucination response span")
+    for citation in parsed_task["citations"] if parsed_task["citations"] else []:
+        if (
             citation["response_text"]
-            == parsed_task["response"][
+            != parsed_task["response"][
                 citation["response_begin"] : citation["response_end"]
             ]
-        ), "Unexpected error in generated citation response span"
+        ):
+            logging.error("Unexpected error in generated citation response span")
         docs_by_id = _create_dict(parsed_task["docs"], "doc_id")
-        assert (
+        if (
             citation["context_text"]
-            == docs_by_id[citation["doc_id"]]["text"][
+            != docs_by_id[citation["doc_id"]]["text"][
                 citation["context_begin"] : citation["context_end"]
             ]
-        ), "Unexpected error in generated citation context span"
+        ):
+            logging.error("Unexpected error in generated citation context span")
 
 
-def parse_model_output(model_output: str) -> dict[str, dict]:
+def parse_model_output(model_output: str) -> list[str | dict]:
     """
     Parse the constituents of the output (response) of a model into
     a format where they can be accessed individually
@@ -645,10 +660,16 @@ def parse_model_output(model_output: str) -> dict[str, dict]:
 
     # Join all objects into single output
     result = {
-        "docs": doc_dicts,
+        "docs": doc_dicts if doc_dicts else None,
         "response": response_text_without_citations,
-        "citations": citation_info_with_context_response_spans,
-        "hallucinations": augmented_hallucination_info,
+        "citations": (
+            citation_info_with_context_response_spans
+            if citation_info_with_context_response_spans
+            else None
+        ),
+        "hallucinations": (
+            augmented_hallucination_info if augmented_hallucination_info else None
+        ),
     }
     logging.info(f"Combined parser output:\n\n{result}\n")
 
