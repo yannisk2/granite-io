@@ -446,7 +446,7 @@ def _add_citation_response_spans(
     return augmented_citation_info
 
 
-def _convert_doc_strs_to_dicts(docs: str) -> list[dict]:
+def _get_docs_from_citations(docs: str) -> list[dict]:
     """
     Given a multi-line string with document information per line, extract
     and add to dictionary list with "doc_id" and "text" fields
@@ -599,7 +599,31 @@ def _validate_spans_in_parser_output(parsed_task: object):
             logging.error("Unexpected error in generated citation context span")
 
 
-def parse_model_output(model_output: str) -> list[str | dict]:
+def _update_docs_text_with_input_docs(
+    docs_from_input: list[dict[str, str]], docs_from_citation: list[dict[str, str]]
+) -> list[dict[str, str]]:
+    """
+    The documents passed in the chat completion call is the source of the documents
+    used for the model output. The document text output by the model may not show
+    the full context. Therefore, to have the full context, need to retrieve from the
+    input passed to chat completion call, all documents and update the text in the
+    citation documents to be aligned before finding the context spans.
+    """
+
+    augmented_docs_from_citation = copy.deepcopy(docs_from_citation)
+    print(f"augmented_docs_from_citation: {augmented_docs_from_citation}\n\n")
+    print(f"docs_from_input: {docs_from_input}\n\n")
+    for citation_doc in augmented_docs_from_citation:
+        for input_doc in docs_from_input:
+            if citation_doc["text"].strip() in input_doc["text"].strip():
+                citation_doc["text"] = input_doc["text"].strip()
+
+    return augmented_docs_from_citation
+
+
+def parse_model_output(
+    model_output: str, docs_from_input: list[dict[str, str]]
+) -> list[str | dict]:
     """
     Parse the constituents of the output (response) of a model into
     a format where they can be accessed individually
@@ -620,8 +644,13 @@ def parse_model_output(model_output: str) -> list[str | dict]:
         model_output
     )
 
-    # Covert docs str to dictionary for parsing
-    doc_dicts = _convert_doc_strs_to_dicts(citations_text)
+    # Get documents from citations
+    docs_from_citation = _get_docs_from_citations(citations_text)
+
+    # Update 'docs_from_citation' with text from docs used as input to model prompt
+    # as they are the full source of text. The full text is required to retrieve
+    # context spans.
+    docs = _update_docs_text_with_input_docs(docs_from_input, docs_from_citation)
 
     # Model output
     logging.info(f"Model output:\n\n{model_output}\n")
@@ -646,7 +675,7 @@ def parse_model_output(model_output: str) -> list[str | dict]:
     if len(citations_text) > 0:
         citation_info = _parse_citations_text(citations_text)
         citation_info_with_context_spans = _add_citation_context_spans(
-            citation_info, doc_dicts
+            citation_info, docs
         )
         citation_info_with_context_response_spans = _add_citation_response_spans(
             citation_info_with_context_spans,
@@ -661,7 +690,7 @@ def parse_model_output(model_output: str) -> list[str | dict]:
 
     # Join all objects into single output
     result = {
-        "docs": doc_dicts if doc_dicts else None,
+        "docs": docs if docs else None,
         "response": response_text_without_citations,
         "citations": (
             citation_info_with_context_response_spans

@@ -106,7 +106,7 @@ cot_pre_output = (
 )
 
 no_constituent_output = "Mad about dog!"
-citation_example = '<co>1</co> Document 1: "Dog info"'
+citation_example = '<co>1</co> Document 0: "Dog info"'
 citation_output = (
     f"{no_constituent_output}<co>1</co>\n\n{_CITATION_START}\n\n{citation_example}\n\n"
 )
@@ -116,7 +116,7 @@ citation_hallucination_output = (
 )
 expected_citation = Citation(
     citation_id="1",
-    doc_id="1",
+    doc_id="0",
     context_text="Dog info",
     context_begin=0,
     context_end=8,
@@ -124,7 +124,10 @@ expected_citation = Citation(
     response_begin=0,
     response_end=14,
 )
-expected_document = Document(doc_id="1", text="Dog info")
+expected_document = Document(doc_id="0", text="Dog info")
+doc_input = ChatCompletionInputs(
+    messages=[msg], documents=[{"doc_id": "0", "text": "Dog info"}]
+)
 expected_hallucination = Hallucination(
     hallucination_id="1",
     risk="low",
@@ -286,7 +289,7 @@ def test_cot_parsing(inputs, output, exp_thought, exp_resp):
         ),
         # Citation
         (
-            no_thinking_input,
+            doc_input,
             citation_output,
             [expected_document],
             [expected_citation],
@@ -295,7 +298,7 @@ def test_cot_parsing(inputs, output, exp_thought, exp_resp):
         ),
         # Citation and hallucination
         (
-            no_thinking_input,
+            doc_input,
             citation_hallucination_output,
             [expected_document],
             [expected_citation],

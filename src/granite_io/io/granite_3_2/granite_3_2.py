@@ -596,7 +596,7 @@ class Granite3Point2InputOutputProcessor(ModelDirectInputOutputProcessor):
 
             # Parse out citations, documents and hallucinations
             try:
-                parsed_output = parse_model_output(output)
+                parsed_output = parse_model_output(output, inputs.documents)
             except Exception as err:
                 raise ValueError(
                     "Failed to parse citations, documents and hallucinations "
