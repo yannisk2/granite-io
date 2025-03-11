@@ -58,11 +58,11 @@ class _GenerationInputs:
 class TransformersBackend(Backend):
     _model_str: str
     _torch_device_name: str
-    """Device used for hardware acceleration by this backend."""
+    "Device used for hardware acceleration by this backend."
     _model: "transformers.AutoModelForCausalLM"
     _tokenizer: "transformers.AutoTokenizer"
     _executor: concurrent.futures.ThreadPoolExecutor
-    """Single background thread, wrapped in an executor for queueing"""
+    "Single background thread, wrapped in an executor for queueing"
 
     def __init__(self, config: aconfig.Config):
         """
