@@ -454,6 +454,7 @@ def _convert_doc_strs_to_dicts(docs: str) -> list[dict]:
     doc_dicts = []
     start_citation = "<co>"
     end_citation = "</co>"
+    start_document = "Document "
     colon = ":"
     if not docs or docs.isspace():
         return doc_dicts
@@ -463,7 +464,7 @@ def _convert_doc_strs_to_dicts(docs: str) -> list[dict]:
         if start_citation not in line or end_citation not in line or colon not in line:
             continue
         doc_id = line[
-            line.find(start_citation) + len(start_citation) : line.rfind(end_citation)
+            line.find(start_document) + len(start_document) : line.rfind(colon)
         ].strip()
         line_separated = line.split(colon, 1)
         if len(line_separated) <= 1:
