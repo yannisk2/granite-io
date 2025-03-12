@@ -22,9 +22,8 @@ return:
             then: 
               text: This is not a valid answer. DO NOT GENERATE THE SAME ANSWER AGAIN.
               contribute: [context]
-            else:
-              data: ${ results }
-              contribute: [result]
+          - data: ${ results }
+            contribute: [result]
       until: ${ valid }
       max_iterations: ${ k }
       join:
