@@ -1,6 +1,6 @@
 # Standard
-import pathlib
 from typing import Any, Callable
+import pathlib
 
 # Third Party
 from pdl.pdl import exec_program, parse_file, parse_str
@@ -51,7 +51,11 @@ class PdlInputOutputProcessor(InputOutputProcessor):
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
         prog = Program(
-            CallBlock(defs= {"_pdl_function": self._pdl_function},call="${_pdl_function}", args={"inputs": inputs.model_dump()})
+            CallBlock(
+                defs={"_pdl_function": self._pdl_function},
+                call="${_pdl_function}",
+                args={"inputs": inputs.model_dump()},
+            )
         )
         results = exec_program(prog, scope=self._pdl_scope)
         return ChatCompletionResults.model_validate(results)
