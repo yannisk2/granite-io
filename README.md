@@ -67,7 +67,7 @@ messages=[
 # Without Thinking
 outputs = io_processor.create_chat_completion(ChatCompletionInputs(messages=messages))
 print("------ WITHOUT THINKING ------")
-print(outputs.next_message.content)
+print(outputs.results[0].next_message.content)
 
 # With Thinking
 outputs = io_processor.create_chat_completion(
@@ -75,9 +75,9 @@ outputs = io_processor.create_chat_completion(
 )
 print("------ WITH THINKING ------")
 print(">> Thoughts:")
-print(outputs.next_message.reasoning_content)
+print(outputs.results[0].next_message.reasoning_content)
 print(">> Response:")
-print(outputs.next_message.content)
+print(outputs.results[0].next_message.content)
 ```
 
 > [!IMPORTANT]
