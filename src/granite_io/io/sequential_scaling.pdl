@@ -17,7 +17,7 @@ return:
               valid:
                 lang: python
                 code: result = validator(results)
-                # fallback: false
+                fallback: false
             if: ${ not valid }
             then: 
               text: This is not a valid answer. DO NOT GENERATE THE SAME ANSWER AGAIN.

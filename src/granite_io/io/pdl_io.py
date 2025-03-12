@@ -61,7 +61,7 @@ class PdlInputOutputProcessor(InputOutputProcessor):
         return ChatCompletionResults.model_validate(results)
 
 
-class MultiShotInputOutputProcessor(PdlInputOutputProcessor):
+class SequentialScalingInputOutputProcessor(PdlInputOutputProcessor):
     """
     Input-output processor asking multiple answers until a predicate is satisfied.
     """
@@ -84,7 +84,7 @@ class MultiShotInputOutputProcessor(PdlInputOutputProcessor):
         cwd = pathlib.Path(__file__).parent.resolve()
         super().__init__(
             config,
-            pdl_file=cwd / "multi_shot.pdl",
+            pdl_file=cwd / "sequential_scaling.pdl",
             pdl_scope={
                 "model": model,
                 "backend": backend,

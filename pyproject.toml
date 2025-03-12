@@ -83,7 +83,7 @@ issues = "https://github.com/ibm-granite/granite-io/issues"
 package-dir = { "" = "src" }
 
 [tool.setuptools.package-data]
-granite_io = ["io/multi_shot.pdl"]
+granite_io = ["io/sequential_scaling.pdl"]
 
 [tool.setuptools_scm]
 version_file = "src/granite_io/_version.py"
