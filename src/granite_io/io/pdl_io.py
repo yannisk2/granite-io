@@ -4,7 +4,7 @@ import pathlib
 
 # Third Party
 from pdl.pdl import exec_program, parse_file, parse_str
-from pdl.pdl_ast import CallBlock, FunctionBlock, Program
+from pdl.pdl_ast import CallBlock, FunctionBlock, PdlLocationType, Program
 import aconfig
 
 # Local
@@ -22,6 +22,8 @@ class PdlInputOutputProcessor(InputOutputProcessor):
     """PDL function used to process the input."""
     _pdl_scope: dict[str, Any] | None
     """Initial scope in which the PDL program is executed"""
+    _pdl_loc: PdlLocationType
+    """Location information in the source code of the PDL function."""
 
     def __init__(
         self,
@@ -33,18 +35,21 @@ class PdlInputOutputProcessor(InputOutputProcessor):
         """
         :param config: Setup config for this IO processor
         :param pdl: PDL function processing the `ChatCompletionInputs`
-        :param pdl_file: Name of the PDL file containing the function processing the `ChatCompletionInputs`
+        :param pdl_file: Name of the PDL file containing the function PDL function
         :param pdl_scope: Initial environment in which the function is executed
         """
         super().__init__(config)
         if isinstance(pdl, str):
-            prog, _ = parse_str(pdl, file_name=pdl_file)
+            prog, loc = parse_str(pdl, file_name=pdl_file)
             self._pdl_function = prog.root
+            self._pdl_loc = loc
         elif pdl is None and pdl_file is not None:
-            prog, _ = parse_file(pdl_file)
+            prog, loc = parse_file(pdl_file)
             self._pdl_function = prog.root
+            self._pdl_loc = loc
         else:
             self._pdl_function = pdl
+            self._pdl_loc = None
         self._pdl_scope = pdl_scope
 
     def create_chat_completion(
