@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: Testing examples
+name: Testing examples, notebooks, and readme snippet
 on:
   push:
     branches:
@@ -82,3 +82,7 @@ jobs:
       - name: "Test notebooks"
         run: |
           bash -c "jupyter execute notebooks/io.ipynb"
+
+      - name: "Test README.md code snippet"
+        run: |
+          bash -c "sed -n '/\x60\x60\x60py/,/\x60\x60\x60/p' README.md | sed '1d;$ d' | python -"
