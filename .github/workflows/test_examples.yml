@@ -67,22 +67,19 @@ jobs:
       - name: Setup Ollama server
         uses: ./.github/actions/ollama-setup
 
-      - name: Install dependencies
+      - name: "Install tox"
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[openai]"
-          python -m pip install -e ".[litellm]"
-          python -m pip install notebook
-          python -m pip install transformers[torch]
+          python -m pip install tox tox-gh
 
       - name: "Test examples"
         run: |
-          bash -c "for i in examples/*.py; do python $i; done"
+          tox -e examples
 
       - name: "Test notebooks"
         run: |
-          bash -c "jupyter execute notebooks/io.ipynb"
+          tox -e notebooks
 
-      - name: "Test README.md code snippet"
+      - name: "Test README code snippet"
         run: |
-          bash -c "sed -n '/\x60\x60\x60py/,/\x60\x60\x60/p' README.md | sed '1d;$ d' | python -"
+          tox -e readme

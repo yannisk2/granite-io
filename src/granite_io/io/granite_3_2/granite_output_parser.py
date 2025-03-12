@@ -611,8 +611,6 @@ def _update_docs_text_with_input_docs(
     """
 
     augmented_docs_from_citation = copy.deepcopy(docs_from_citation)
-    print(f"augmented_docs_from_citation: {augmented_docs_from_citation}\n\n")
-    print(f"docs_from_input: {docs_from_input}\n\n")
     for citation_doc in augmented_docs_from_citation:
         for input_doc in docs_from_input:
             if citation_doc["text"].strip() in input_doc["text"].strip():
