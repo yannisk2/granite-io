@@ -8,8 +8,8 @@ from pdl.pdl_ast import CallBlock, FunctionBlock, PdlLocationType, Program
 import aconfig
 
 # Local
-from .base import ChatCompletionResults, InputOutputProcessor
-from granite_io.types import ChatCompletionInputs
+from .base import InputOutputProcessor
+from granite_io.types import ChatCompletionInputs, ChatCompletionResults
 
 
 class PdlInputOutputProcessor(InputOutputProcessor):
@@ -51,6 +51,11 @@ class PdlInputOutputProcessor(InputOutputProcessor):
             self._pdl_function = pdl
             self._pdl_loc = None
         self._pdl_scope = pdl_scope
+
+    async def acreate_chat_completion(
+        self, inputs: ChatCompletionInputs
+    ) -> ChatCompletionResults:
+        return self.create_chat_completion(inputs)
 
     def create_chat_completion(
         self, inputs: ChatCompletionInputs
