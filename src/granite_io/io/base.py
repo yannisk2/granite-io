@@ -170,3 +170,55 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
 
         :returns: The parsed output so far
         """
+
+
+class InputProcessor(abc.ABC):
+    """
+    Interface for generic input processors. An input processor exposes an
+    API to transform model completion request into a string representation.
+    """
+
+    @abc.abstractmethod
+    def transform(
+        self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
+    ) -> str:
+        """
+        Convert the structured representation of the inputs to a completion request into
+        the string representation of the tokens that should be sent to the model to
+        implement said request.
+
+        :param inputs: Structured representation of the inputs
+        :param add_generation_prompt: If ``True``, the returned prompt string will
+            contain a prefix of the next assistant response for use as a prompt to a
+            generation request. Otherwise, the prompt will only contain the messages and
+            documents in ``input``.
+
+        :returns: String that can be passed to the model's tokenizer to create a prompt
+            for generation.
+        """
+
+
+class OutputProcessor(abc.ABC):
+    """
+    Interface for generic output processors. An putput processor exposes an
+    API to transform model output into a structured representation of the
+    information.
+    """
+
+    @abc.abstractmethod
+    def transform(
+        self, output: GenerateResults, inputs: ChatCompletionInputs | None = None
+    ) -> ChatCompletionResults:
+        """
+        Convert the model output generated into a structured representation of the
+        information.
+
+        :param output: Output of the a generation request, potentially incomplete
+           if it was a streaming request
+        :param inputs: Optional reference to the inputs that caused the model to produce
+           ``output``, for validating the correctness of the output. If no inputs are
+           provided, this method may skip some validations but will still produce the
+           same result.
+
+        :returns: The parsed output so far
+        """

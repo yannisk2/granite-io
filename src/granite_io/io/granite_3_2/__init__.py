@@ -7,4 +7,3 @@ processing.
 
 # Local
 import granite_io.io.granite_3_2.granite_3_2  # noqa: F401
-import granite_io.io.granite_3_2.granite_output_parser  # noqa: F401

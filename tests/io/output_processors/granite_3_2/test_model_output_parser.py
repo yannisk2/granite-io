@@ -9,7 +9,9 @@ from pathlib import Path
 import os
 
 # Local
-from granite_io.io.granite_3_2.granite_output_parser import parse_model_output
+from granite_io.io.output_processors.granite_3_2.granite_output_parser import (
+    parse_model_output,
+)
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
 
