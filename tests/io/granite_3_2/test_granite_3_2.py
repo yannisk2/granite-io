@@ -13,17 +13,21 @@ import transformers
 # Local
 from granite_io import make_io_processor
 from granite_io.backend import Backend
+from granite_io.io.consts import (
+    _GRANITE_3_2_COT_END,
+    _GRANITE_3_2_COT_START,
+)
 from granite_io.io.granite_3_2.granite_3_2 import (
-    _COT_END,
-    _COT_END_ALTERNATIVES,
-    _COT_START,
-    _COT_START_ALTERNATIVES,
     _MODEL_NAME,
     GRANITE_3_2_2B_HF,
     Granite3Point2InputOutputProcessor,
-    _Granite3Point2Inputs,
 )
-from granite_io.io.granite_3_2.granite_output_parser import (
+from granite_io.io.input_processors.granite_3_2.granite_3_2 import _Granite3Point2Inputs
+from granite_io.io.output_processors.granite_3_2.granite_3_2 import (
+    _COT_END_ALTERNATIVES,
+    _COT_START_ALTERNATIVES,
+)
+from granite_io.io.output_processors.granite_3_2.granite_output_parser import (
     _CITATION_START,
     _HALLUCINATION_START,
 )
@@ -94,16 +98,16 @@ thought = "Think think"
 response = "respond respond"
 pre_thought = "something before"
 no_cot_output = f"{thought} {response}"
-no_thinking_output = f"{thought} {_COT_END} {response}"
-no_response_output = f"{_COT_START}\n\n{response}"
-cot_output = f"{_COT_START}\n\n{thought}\n{_COT_END}\n\n{response}"
+no_thinking_output = f"{thought} {_GRANITE_3_2_COT_END} {response}"
+no_response_output = f"{_GRANITE_3_2_COT_START}\n\n{response}"
+cot_output = (
+    f"{_GRANITE_3_2_COT_START}\n\n{thought}\n{_GRANITE_3_2_COT_END}\n\n{response}"
+)
 cot_alt_output = f"{_COT_START_ALTERNATIVES[-1]}\n\n{thought}\n{_COT_END_ALTERNATIVES[-1]}\n\n{response}"
 cot_mixed_output = (
-    f"{_COT_START}\n\n{thought}\n{_COT_END_ALTERNATIVES[-1]}\n\n{response}"
+    f"{_GRANITE_3_2_COT_START}\n\n{thought}\n{_COT_END_ALTERNATIVES[-1]}\n\n{response}"
 )
-cot_pre_output = (
-    f"{pre_thought} {_COT_START} {thought} {_COT_END_ALTERNATIVES[-1]} {response}"
-)
+cot_pre_output = f"{pre_thought} {_GRANITE_3_2_COT_START} {thought} {_COT_END_ALTERNATIVES[-1]} {response}"
 
 no_constituent_output = "Mad about dog!"
 citation_example = '<co>1</co> Document 0: "Dog info"'
