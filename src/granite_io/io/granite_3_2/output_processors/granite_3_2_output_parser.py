@@ -600,7 +600,7 @@ def _validate_spans_in_parser_output(parsed_task: object):
 
 
 def _update_docs_text_with_input_docs(
-    docs_from_input: list[dict[str, str]], docs_from_citation: list[dict[str, str]]
+    docs_from_input: list[object], docs_from_citation: list[dict[str, str]]
 ) -> list[dict[str, str]]:
     """
     The documents passed in the chat completion call is the source of the documents
@@ -613,14 +613,14 @@ def _update_docs_text_with_input_docs(
     augmented_docs_from_citation = copy.deepcopy(docs_from_citation)
     for citation_doc in augmented_docs_from_citation:
         for input_doc in docs_from_input:
-            if citation_doc["text"].strip() in input_doc["text"].strip():
-                citation_doc["text"] = input_doc["text"].strip()
+            if citation_doc["text"].strip() in input_doc.text.strip():
+                citation_doc["text"] = input_doc.text.strip()
 
     return augmented_docs_from_citation
 
 
 def parse_model_output(
-    model_output: str, docs_from_input: list[dict[str, str]]
+    model_output: str, docs_from_input: list[object]
 ) -> list[str | dict]:
     """
     Parse the constituents of the output (response) of a model into

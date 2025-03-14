@@ -9,7 +9,12 @@ from pathlib import Path
 import os
 
 # Local
-from granite_io.io.granite_3_2.granite_output_parser import parse_model_output
+from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    _Document,
+)
+from granite_io.io.granite_3_2.output_processors.granite_3_2_output_parser import (
+    parse_model_output,
+)
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
 
@@ -178,7 +183,7 @@ def test_output_with_citation_from_source():
     doc_source = _load_model_output_file(
         os.path.join(TEST_DATA_DIR, "test_document_source.txt")
     )
-    doc_input = [{"text": f"{doc_source}"}]
+    doc_input = [_Document(text=f"{doc_source}")]
     parsed_output = parse_model_output(model_output, doc_input)
 
     assert parsed_output
@@ -194,7 +199,7 @@ def test_output_with_citation_from_source():
     for key in keys:
         assert key in doc
     assert doc["doc_id"] == "0"
-    assert doc["text"] == doc_input[0]["text"]
+    assert doc["text"] == doc_input[0].text
 
     response = parsed_output["response"]
     assert isinstance(response, str)
