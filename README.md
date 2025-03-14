@@ -32,7 +32,11 @@ To install from release ([PyPi package](https://pypi.org/project/granite-io/)):
 python3 -m venv granite_io_venv
 source granite_io_venv/bin/activate
 pip install granite-io
+sudo python3 -m nltk.downloader -d /usr/local/share/nltk_data punkt punkt_tab
 ```
+
+> [!NOTE]
+> `granite-io` uses [NLTK Data](https://www.nltk.org/data.html) [Punkt Sentence Tokenizer](https://www.nltk.org/api/nltk.tokenize.punkt.html) for extracting contents when parsing output from a model. The command above shows how to install tokenizers for MacOS. Check out [install guide](https://www.nltk.org/install.html) for other OSes.
 
 #### From Source
 
@@ -44,7 +48,11 @@ source granite_io_venv/bin/activate
 git clone https://github.com/ibm-granite/granite-io
 cd granite-io
 pip install -e .
+python3 sudo python -m nltk.downloader -d /usr/local/share/nltk_data punkt punkt_tab
 ```
+
+> [!NOTE]
+> `granite-io` uses [NLTK Data](https://www.nltk.org/data.html) [Punkt Sentence Tokenizer](https://www.nltk.org/api/nltk.tokenize.punkt.html) for extracting contents when parsing output from a model. The command above shows how to install tokenizers for MacOS. Check out [install guide](https://www.nltk.org/install.html) for other OSes.
 
 ### Framework Example
 
