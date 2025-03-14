@@ -6,8 +6,12 @@ import aconfig
 # Local
 from granite_io.backend.base import Backend
 from granite_io.io.base import ModelDirectInputOutputProcessor
-from granite_io.io.input_processors import Granite3Point2InputProcessor
-from granite_io.io.output_processors import Granite3Point2OutputProcessor
+from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    Granite3Point2InputProcessor,
+)
+from granite_io.io.granite_3_2.output_processors.granite_3_2_output_processor import (
+    Granite3Point2OutputProcessor,
+)
 from granite_io.io.registry import io_processor
 from granite_io.types import (
     ChatCompletionInputs,
