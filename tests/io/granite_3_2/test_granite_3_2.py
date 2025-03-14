@@ -22,14 +22,16 @@ from granite_io.io.granite_3_2.granite_3_2 import (
     GRANITE_3_2_2B_HF,
     Granite3Point2InputOutputProcessor,
 )
-from granite_io.io.input_processors.granite_3_2.granite_3_2 import _Granite3Point2Inputs
-from granite_io.io.output_processors.granite_3_2.granite_3_2 import (
-    _COT_END_ALTERNATIVES,
-    _COT_START_ALTERNATIVES,
+from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    _Granite3Point2Inputs,
 )
-from granite_io.io.output_processors.granite_3_2.granite_output_parser import (
+from granite_io.io.granite_3_2.output_processors.granite_3_2_output_parser import (
     _CITATION_START,
     _HALLUCINATION_START,
+)
+from granite_io.io.granite_3_2.output_processors.granite_3_2_output_processor import (
+    _COT_END_ALTERNATIVES,
+    _COT_START_ALTERNATIVES,
 )
 from granite_io.types import (
     AssistantMessage,
