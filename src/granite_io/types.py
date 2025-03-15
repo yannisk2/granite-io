@@ -134,7 +134,7 @@ class ChatCompletionInputs(pydantic.BaseModel):
 
     messages: list[ChatMessage]
     tools: list[FunctionDefinition] = []
-    
+
     num_return_sequences: int = 1
 
     model_config = pydantic.ConfigDict(

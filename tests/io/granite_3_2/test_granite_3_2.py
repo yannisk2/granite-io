@@ -7,9 +7,9 @@
 import json
 
 # Third Party
+from litellm import UnsupportedParamsError
 import pytest
 import transformers
-from litellm import UnsupportedParamsError
 
 # Local
 from granite_io import make_io_processor
