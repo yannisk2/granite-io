@@ -186,7 +186,8 @@ class ChatCompletionInputs(pydantic.BaseModel):
 
     messages: list[ChatMessage]
     tools: list[FunctionDefinition] = []
-    generate_inputs: Optional[GenerateInputs] = None
+    
+    num_return_sequences: int = 1
 
     model_config = pydantic.ConfigDict(
         # Pass through arbitrary additional keyword arguments for handling by model- or
@@ -200,6 +201,13 @@ class ChatCompletionInputs(pydantic.BaseModel):
             return super().__getattr__(name)
         except AttributeError:
             return None
+
+    def with_next_message(self, next_message: ChatMessage) -> "ChatCompletionInputs":
+        """Create a version of this object with one additional message in the messages
+        list. Does not modify the original object."""
+        new_messages = self.messages.copy()
+        new_messages.append(next_message)
+        return self.model_copy(update={"messages": new_messages})
 
 
 class ChatCompletionResult(pydantic.BaseModel):

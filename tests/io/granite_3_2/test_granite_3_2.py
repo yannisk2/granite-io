@@ -10,6 +10,7 @@ import json
 from litellm.exceptions import UnsupportedParamsError
 import pytest
 import transformers
+from litellm import UnsupportedParamsError
 
 # Local
 from granite_io import make_io_processor
@@ -415,3 +416,22 @@ def test_citation_hallucination_parsing(
     assert result.citations == exp_citation
     assert result.documents == exp_document
     assert result.hallucinations == exp_hallucination
+
+
+@pytest.mark.vcr()
+@pytest.mark.block_network
+def test_multiple_return(backend_x: Backend, input_json_str: str):
+    inputs = ChatCompletionInputs.model_validate_json(input_json_str)
+    inputs = inputs.model_copy(update={"num_return_sequences": 3})
+    io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
+    try:
+        results: ChatCompletionResults = io_processor.create_chat_completion(inputs)
+    except UnsupportedParamsError:
+        # Known issue with LiteLLMBackend
+        pytest.xfail(
+            "LiteLLMBackend support for num_return_sequences > 1 varies by provider"
+        )
+
+    assert isinstance(results, ChatCompletionResults)
+    assert len(results.results) == 3
+    # TODO: Verify outputs in greater detail

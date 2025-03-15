@@ -51,7 +51,18 @@ class OpenAIBackend(Backend):
         # pylint: disable-next=missing-kwoa
         return await self._openai_client.completions.create(**inputs.dict())
 
-    def process_output(self, outputs):
+        if num_return_sequences < 1:
+            raise ValueError(
+                f"Invalid value for num_return_sequences ({num_return_sequences})"
+            )
+
+        result = await self._openai_client.completions.create(
+            model=self._model_str,
+            prompt=input_str,
+            best_of=num_return_sequences,
+            n=num_return_sequences,
+            max_tokens=1024,  # TODO: make this configurable
+        )
         results = []
         for choice in outputs.choices:
             results.append(

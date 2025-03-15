@@ -47,8 +47,8 @@ litellm = [
     "litellm",
     "python-dotenv==1.0.1",
 ]
-pdl = [
-    "prompt-declaration-language",
+voting = [
+    "pandas"
 ]
 dev = [
     "isort==6.0.1",
@@ -67,7 +67,7 @@ dev = [
     "granite-io[transformers]",
     "granite-io[openai]",
     "granite-io[litellm]",
-    "granite-io[pdl]",
+    "granite-io[voting]"
 ]
 notebook = [
     "ipywidgets",
