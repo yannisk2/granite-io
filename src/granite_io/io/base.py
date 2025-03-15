@@ -91,12 +91,17 @@ class InputOutputProcessor(FactoryConstructible):
         coroutine_to_run = self.acreate_chat_completion(inputs)
         try:  # Exceptions as control flow. Sorry, asyncio forces this design on us.
             asyncio.get_running_loop()
+            
+            # If we get here, this code is running inside an async function.
+            return _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run)
         except RuntimeError:
-            # If we get here, this code is not running inside an async function.
-            return asyncio.run(coroutine_to_run)
+            # If we get here, this code is not running inside an async function. 
+            # First we exit the the exception handler; otherwise any exceptions that are
+            # thrown from the coroutine will be chained off the current RuntimeError.
+            pass
+        return asyncio.run(coroutine_to_run)
 
-        # If we get here, this code is running inside an async function.
-        return _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run)
+        
 
 
 class ModelDirectInputOutputProcessor(InputOutputProcessor):
@@ -130,7 +135,9 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
                 "configuring an inference backend."
             )
         input_string = self.inputs_to_string(inputs)
-        generation_results = await self._backend.generate(input_string)
+        generation_results = await self._backend.generate(
+            input_string, num_return_sequences=inputs.num_return_sequences
+        )
         return self.output_to_result(generation_results, inputs)
 
     @abc.abstractmethod

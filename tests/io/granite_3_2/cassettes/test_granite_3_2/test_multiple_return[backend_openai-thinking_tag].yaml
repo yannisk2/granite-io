@@ -1,0 +1,153 @@
+interactions:
+- request:
+    body: '{"model":"granite3.2:2b","prompt":"<|start_of_role|>system<|end_of_role|>Knowledge
+      Cutoff Date: April 2024.\nToday''s Date: March 14, 2025.\nYou are Granite, developed
+      by IBM. You are a helpful AI assistant.\nRespond to every user query in a comprehensive
+      and detailed way. You can write down your thoughts and reasoning process before
+      responding. In the thought process, engage in a comprehensive cycle of analysis,
+      summarization, exploration, reassessment, reflection, backtracing, and iteration
+      to develop well-considered thinking process. In the response section, based
+      on various attempts, explorations, and reflections from the thoughts section,
+      systematically present the final solution that you deem correct. The response
+      should summarize the thought process. Write your thoughts after ''Here is my
+      thought process:'' and write your response after ''Here is my response:'' for
+      each user query.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>How much
+      wood could a wood chuck chuck?<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>","best_of":3,"max_tokens":1024,"n":3}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1084'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      rits_api_key:
+      - ollama
+      user-agent:
+      - AsyncOpenAI/Python 1.66.3
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.66.3
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '1'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.11
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: "{\"id\":\"cmpl-e33b8b3a9263431cad9ac71d0d9f1de2\",\"object\":\"text_completion\",\"created\":1741998878,\"model\":\"granite3.2:2b\",\"choices\":[{\"index\":0,\"text\":\"Here
+      is my thought process:\\n\\nThis is a classic tongue twister and has no definitive,
+      measurable answer because it's a figurative question rather than an inquiry
+      into the actual physical capabilities of a woodchuck (a land creature known
+      for its burrowing abilities). The phrase \\\"how much wood could a woodchuck
+      chuck\\\" comes from a children's poem, not from scientific research in woodchuck
+      burial habits or digging techniques.\\n\\nA popular humorous estimate was proposed
+      in the 1950s: approximately 700 pounds. This figure was derived from a combination
+      of imaginatively creative conjecture and scaling up from the known weight of
+      chucking earth (when digging burrows), which woodchucks can move in the tons.
+      Woodchucks don't actually \\\"chuck\\\" wood in their actual behavior, though
+      this fanciful question has led to lively discussions about animal strength and
+      labor.\\n\\nHere is my response:\\n\\nThe phrase \\\"how much wood could a woodchuck
+      chuck\\\" is a whimsical bit of tongue twisting, drawn from a popular children's
+      rhyme. It doesn't have a scientifically verifiable answer as woodchucks don't
+      actually transport wood in their natural habitat. However, the rhyme suggests
+      that woodchucks, when digging their burrows, could move around 700 pounds of
+      earth, not wood.\\n\\nThis estimate appeared in the 1950s, and it's a humorous
+      way of transposing burrowing strength to the ability to move (and presumably
+      lift) wood. In reality, woodchucks' earth-moving is essential for their survival
+      \u2013 construction and maintenance of intricate underground systems for habitation,
+      food preservation, and shelter. They don't consume or \\\"chuck\\\" actual wood
+      as part of their diet or daily activities.\\n\\nThus, while it's an enjoyable
+      mental exercise, there's no concrete \\\"how much\\\" for woodchucks, as their
+      behavior concerning wood is fundamentally different from the common man's 'chucking.'
+      It's a charming bit of folklore and a testament to the playful side of language!\",\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null,\"prompt_logprobs\":null},{\"index\":1,\"text\":\"Here
+      is my thought process:\\n\\nThis is a classic tongue-twister and an old question
+      about an animal that doesn't exist in reality\u2014the common chuckwalla lizard,
+      often referred to in this context as \\\"wood chuck\\\" due to its squirrel-like
+      nature. The original origin of this joke has its roots in the idea that groundhogs
+      (or woodchucks as they're often called) are not capable of digging and moving
+      large amounts of wood.\\n\\nHowever, if we break down the rhyme and ignore the
+      literal animal for the sake of fun:\\n\\n\\\"How much wood would a woodchuck
+      chuck\\\" \u2013 This is asking how much wood a mythical, clump-digging creature
+      could move.\\n\\n\\\"If a woodchuck could chuck wood...\\\" \u2013 This suggests
+      hypothetical capability.\\n\\n\\\"He'd chuck as much wood as a woodchuck could
+      / If a woodchuck could chuck wood.\\\" \u2013 The phrase that repeats, suggesting
+      an amount relative to what he could manage.\\n\\nHere's my response:\\n\\nThe
+      humorous framework of this saying implies that very little wood would be moved,
+      given the misconception of woodchucks' digging abilities. The phrase ends in,
+      \\\"If a woodchuck could chuck wood,\\\" suggesting not much wood at all. The
+      colloquial wisdom and jokes often invoke a board measuring a few cubic feet,
+      which translates to approximately \\\"a chuckness\\\" in everyday language.
+      \\n\\nIn practical terms, though, there's no accurate scientific measurement.
+      Woodchucks are burrowing animals, feeding largely on vegetation and not wood.
+      So, they have no functional need to transport wood. The entire premise of this
+      question is to poke fun at rural stereotypes about groundhogs moving substantial
+      quantities of timber. In reality, a typical woodchuck, weighing between 4-13
+      pounds, can push about 700 pounds of soil and rock while digging its burrow,
+      indicative of relatively small-scaled physical motion compared to wood moving!\",\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null,\"prompt_logprobs\":null},{\"index\":2,\"text\":\"Here
+      is my thought process:\\n\\nThis is a classic tongue-twister and a lighthearted,
+      unquantifiable question associated with the mythical \\\"woodchuck\\\" or \\\"
+      groundhog.\\\" The phrase \\\"how much wood could a woodchuck chuck\\\" is a
+      playful extension of the \\\"how much wood would a woodchuck chuck\\\" rhyme.
+      The exact science of how much a real woodchuck (a burrowing rodent) can move
+      or \\\"chuck\\\" wood doesn't have a reliable, fact-based answer because it's
+      a humorous, metaphorical question, not based on empirical evidence. \\n\\nWoodchucks,
+      however, are known to be efficient diggers and can move large amounts of dirt
+      using their strong claws during burrowing. An estimate based on their digging
+      capabilities might range from 700 to 7000 pounds (roughly 3-3,175 kg) of soil
+      a day. As for actual wood mass, they're herbivores and consume a varied diet
+      of plants, not wood. Therefore, if we hypothetically extrapolated from their
+      digging, a woodchuck could potentially move quite a bit of dirt or small wood
+      material during excavation, but it wouldn't be 'chucking' wood in the literal
+      sense.\\n\\nHere is my response:\\n\\nThe phrase \\\"how much wood could a woodchuck
+      chuck\\\" is a delightful but imaginary riddle. A woodchuck, scientifically
+      known as a groundhog, is an animal that primarily digs burrows for shelter,
+      not a logger. Therefore, there isn't a definitive answer based on real-world
+      wood-chucking behavior.\\n\\nHowever, if we were to imagine and playfully quantify
+      burial or activity-related wood movement in a fanciful context:\\n\\nAssuming
+      a woodchuck uses its formidable claws to move large quantities of earth during
+      digging, an estimate might range from 700 to 7000 pounds (3-3,175 kg) per day.
+      This figure incorporates the woodchuck's digging energy and the volume of soil
+      it displaces.\\n\\nIf we further extend this playful concept into the realm
+      of \\\"wood\\\" (whether that be twigs, branches, or short logs left behind
+      in excavations), a woodchuck could possibly \\\"displace\\\" or \\\"spend\\\"
+      a portion of this soil volume in a wood-like form, given the burrowing nature
+      and the woodchuck's diet, which includes a variety of plants and roots.\\n\\nHere's
+      a rough, imaginative calculation for clarity:\\n\\n1. Daily soil displacement:
+      700 to 7000 pounds.\\n2. Let's say 30% of that weight in this hypothetical scenario
+      is converted into \\\"wood\\\" form due to bits of lost roots or short sticks
+      that the woodchuck displaces during its burrowing activities.\\n   (30% of 700
+      to 7000 pounds) = 210 to 2100 pounds (or approximately 95 to 955 kg).\\n\\nThis
+      is highly speculative and quite far removed from actual woodchuck behavior,
+      as this creature is an herbivore and mostly concerned with creating tunnels
+      for shelter rather than selectively consuming wood. The endearing tradition
+      of \\\"chucking wood\\\" revolves around a tongue-twisting meta-question, not
+      what a woodchuck is known to do in reality.\",\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null,\"prompt_logprobs\":null}],\"usage\":{\"prompt_tokens\":203,\"total_tokens\":1973,\"completion_tokens\":1770,\"prompt_tokens_details\":null}}"
+    headers:
+      content-length:
+      - '7253'
+      content-type:
+      - application/json
+      date:
+      - Sat, 15 Mar 2025 00:34:38 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1
