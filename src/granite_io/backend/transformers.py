@@ -108,7 +108,50 @@ class TransformersBackend(Backend):
         async_future = asyncio.wrap_future(concurrent_futures_future)
         return await async_future
 
-    def process_input(self, inputs: GenerateInputs) -> GenerateInputs:
+        # The result of generate() is of course the prompt concatenated with the
+        # additional tokens generated. Strip off the prompt.
+        generated_results = []
+
+        # for i, sequence in enumerate(model_output.sequences):
+        for sequence in model_output.sequences:
+            full_token_sequence = sequence.cpu().tolist()
+            generated_tokens = full_token_sequence[
+                len(generation_inputs.model_input["input_ids"][0]) :
+            ]
+
+            # The generate() method doesn't explicitly tell us why it stopped
+            # generating. We are supposed to infer that from the output.
+            if generated_tokens[-1] == self._tokenizer.eos_token_id:
+                stop_reason = "end_of_turn"
+                # We're also supposed to strip off the end-of-turn tokens ourselves.
+                generated_tokens = generated_tokens[:-1]
+                
+                # When one requests multiple completions, the shorter completions will
+                # come out padded with extra end-of-turn tokens so that everything is
+                # the same length.
+                while (len(generated_tokens) > 0 
+                       and generated_tokens[-1] == self._tokenizer.eos_token_id):
+                    generated_tokens = generated_tokens[:-1]
+                
+            else:
+                stop_reason = "out_of_tokens"
+
+            # Of course, the model does not have a pointer to its tokenizer, so
+            # we need to post-process the model's output to get a usable string.
+            completion_string = self._tokenizer.decode(generated_tokens)
+            generated_results.append(
+                GenerateResult(
+                    completion_string=completion_string,
+                    completion_tokens=generated_tokens,
+                    stop_reason=stop_reason,
+                )
+            )
+
+        return GenerateResults(results=generated_results)
+
+    def _prepare_for_generate(
+        self, prompt: str, num_return_sequences: int = 1
+    ) -> _GenerationInputs:
         """Subroutine that encapsulates all the prerequisites
         that are necessary to call ``AutoModelForCausalLM.generate()``."""
 
