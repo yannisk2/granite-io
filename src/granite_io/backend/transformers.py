@@ -124,14 +124,16 @@ class TransformersBackend(Backend):
                 stop_reason = "end_of_turn"
                 # We're also supposed to strip off the end-of-turn tokens ourselves.
                 generated_tokens = generated_tokens[:-1]
-                
+
                 # When one requests multiple completions, the shorter completions will
                 # come out padded with extra end-of-turn tokens so that everything is
                 # the same length.
-                while (len(generated_tokens) > 0 
-                       and generated_tokens[-1] == self._tokenizer.eos_token_id):
+                while (
+                    len(generated_tokens) > 0
+                    and generated_tokens[-1] == self._tokenizer.eos_token_id
+                ):
                     generated_tokens = generated_tokens[:-1]
-                
+
             else:
                 stop_reason = "out_of_tokens"
 
