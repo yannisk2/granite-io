@@ -4,33 +4,27 @@
 Tests for the majority voting I/O processor
 """
 
+# Third Party
+from litellm import UnsupportedParamsError
 import pytest
 
-from litellm import UnsupportedParamsError
-
+# Local
 from granite_io import make_io_processor
 from granite_io.backend import Backend
-
-from granite_io.io.granite_3_2.granite_3_2 import (
-    _MODEL_NAME
-)
-from granite_io.io.voting import MajorityVotingProcessor, integer_normalizer
-
-from granite_io.types import (
-    ChatCompletionInputs,
-    ChatCompletionResults
-)
-from granite_io.backend.transformers import TransformersBackend
 from granite_io.backend.litellm import LiteLLMBackend
+from granite_io.backend.transformers import TransformersBackend
+from granite_io.io.granite_3_2.granite_3_2 import _MODEL_NAME
+from granite_io.io.voting import MajorityVotingProcessor, integer_normalizer
+from granite_io.types import ChatCompletionInputs, ChatCompletionResults
 
-@pytest.mark.vcr(
-    record_mode="all"
-)
+
+@pytest.mark.vcr
 @pytest.mark.block_network
 def test_numeric_voting(backend_x: Backend):
     if isinstance(backend_x, TransformersBackend):
         pytest.xfail(
-            "TransformersBackend top-k currently returning low-quality results")
+            "TransformersBackend top-k currently returning low-quality results"
+        )
 
     # At the moment, git LFS is broken on the current repo, so we have reduced the
     # number of samples to keep the cassette file size small.
@@ -38,8 +32,9 @@ def test_numeric_voting(backend_x: Backend):
 
     base_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
     voting_processor = MajorityVotingProcessor(
-        base_processor, integer_normalizer,
-        samples_per_completion=SAMPLES_PER_COMPLETION
+        base_processor,
+        integer_normalizer,
+        samples_per_completion=SAMPLES_PER_COMPLETION,
     )
 
     first_number = 1
@@ -49,7 +44,7 @@ def test_numeric_voting(backend_x: Backend):
             {
                 "role": "user",
                 "content": f"What is {first_number} + {second_number}?\n"
-                           f"Answer with just a number please.",
+                f"Answer with just a number please.",
             }
         ],
         thinking=True,
