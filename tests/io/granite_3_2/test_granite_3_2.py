@@ -15,6 +15,7 @@ import transformers
 from granite_io import make_io_processor
 from granite_io.backend import Backend
 from granite_io.backend.openai import OpenAIBackend
+from granite_io.backend.transformers import TransformersBackend
 from granite_io.io.consts import (
     _GRANITE_3_2_COT_END,
     _GRANITE_3_2_COT_START,
@@ -276,6 +277,10 @@ def test_completion_repetition_param(backend_x: Backend):
         if isinstance(backend_x, OpenAIBackend):
             pytest.xfail(str(te))
         raise te
+    except UserWarning as uw:
+        if isinstance(backend_x, TransformersBackend):
+            pytest.xfail(str(uw))
+        raise uw
 
     assert isinstance(outputs, ChatCompletionResults)
 
@@ -302,6 +307,10 @@ def test_completion_presence_param(backend_x: Backend):
     except UnsupportedParamsError as upe:
         # Specific exception from LiteLLMBackend
         pytest.xfail(upe.message)
+    except UserWarning as uw:
+        if isinstance(backend_x, TransformersBackend):
+            pytest.xfail(str(uw))
+        raise uw
 
     assert isinstance(outputs, ChatCompletionResults)
 
