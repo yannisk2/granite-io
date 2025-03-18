@@ -134,14 +134,15 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
                 "configuring an inference backend."
             )
 
-        generate_inputs = inputs.generate_inputs or GenerateInputs()
+        # Do not modify `inputs` in place. It is VERY VERY IMPORTANT not to do so.
+        # The caller may be using that object for something else.
+        generate_inputs = (
+            inputs.generate_inputs.model_copy()
+            if inputs.generate_inputs is not None
+            else GenerateInputs()
+        )
         generate_inputs.prompt = self.inputs_to_string(inputs)
-
-        # kwargs = inputs.model_dump()
-        # kwargs["prompt"] = prompt
-
         model_output = await self._backend.pipeline(generate_inputs)
-
         return self.output_to_result(output=model_output, inputs=inputs)
 
     @abc.abstractmethod

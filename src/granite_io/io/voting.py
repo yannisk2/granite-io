@@ -57,9 +57,14 @@ class MajorityVotingProcessor(InputOutputProcessor):
             import pandas as pd
 
         # Step 1: Collect samples from the "generator" sub-processor
-        num_samples = self._samples_per_completion * inputs.num_return_sequences
+        original_n = (
+            1
+            if inputs.generate_inputs is None or inputs.generate_inputs.n is None
+            else inputs.generate_inputs.n
+        )
+        num_samples = self._samples_per_completion * original_n
         base_results = await self._generator.acreate_chat_completion(
-            inputs.model_copy(update={"num_return_sequences": num_samples})
+            inputs.with_addl_generate_params({"n": num_samples})
         )
 
         # Step 2: Normalize the samples
@@ -85,7 +90,7 @@ class MajorityVotingProcessor(InputOutputProcessor):
 
         # If the caller requested multiple completions, return multiple results that
         # each have different normalized forms.
-        num_outputs = min(len(indices), inputs.num_return_sequences)
+        num_outputs = min(len(indices), original_n)
 
         return ChatCompletionResults(
             results=[base_results.results[indices[i]] for i in range(num_outputs)]

@@ -33,4 +33,4 @@ class LiteLLMBackend(Backend):
             # Third Party
             import litellm
 
-        return await litellm.atext_completion(**inputs.dict())
+        return await litellm.atext_completion(**inputs.model_dump())
