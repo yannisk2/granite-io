@@ -5,12 +5,19 @@ Base class for backends
 """
 
 # Standard
-from typing import Any, Dict
 import abc
+
+# Third Party
+import aconfig
 
 # Local
 from granite_io.factory import FactoryConstructible
-from granite_io.types import ChatCompletionInputs, GenerateResults
+from granite_io.types import (
+    ChatCompletionInputs,
+    GenerateInputs,
+    GenerateResult,
+    GenerateResults,
+)
 
 
 # We put this base class here to avoid circular imports
@@ -24,43 +31,70 @@ class Backend(FactoryConstructible):
     be optional dependencies of this Python package.
     """
 
-    # TODO: decide between __call__ and pipeline. Don't expand kwargs 2x
-    async def __call__(self, **kwargs: Any) -> GenerateResults:
-        return await self.pipeline(**kwargs)
+    _model_str: str
 
-    async def pipeline(self, **kwargs: Any) -> GenerateResults:
+    def __init__(self, config: aconfig.Config):
+        self._model_str = config.model_name
+
+    async def __call__(self, inputs: GenerateInputs) -> GenerateResults:
+        return await self.pipeline(inputs)
+
+    async def pipeline(self, inputs: GenerateInputs) -> GenerateResults:
         """
         Process input, call completion (generate), process and return output
         """
-        inputs = self.process_input(**kwargs)
-        output = await self.generate(**inputs)
+        inputs = self.process_input(inputs)
+        output = await self.generate(inputs)
         return self.process_output(output)
 
-    @abc.abstractmethod
-    def process_input(self, **kwargs) -> Dict[str, Any]:
+    def process_input(self, inputs: GenerateInputs) -> GenerateInputs:
         """
         Process kwargs to prepare them for completion.create() (or generate())
 
         Args:
-            kwargs (dict): This is not just the kwargs for this function, but is
-             intended to be the inputs which are being processed (modified)
+            inputs (GenerateInputs): the inputs which are being processed (modified)
              to be used in target backend call.
         """
-        raise NotImplementedError()
+
+        # Add required model, if missing
+        if not inputs.model:
+            inputs.model = self._model_str
+
+        # n (a.k.a. num_return_sequences) validation
+        n = inputs.n
+        if n is not None:  # noqa SIM102
+            if n < 1:
+                raise ValueError(f"Invalid value for n ({n})")
+            if n > 1:
+                # best_of must be >= n
+                best_of = inputs.best_of
+                if best_of is None or best_of < n:
+                    inputs.best_of = n
+
+        return inputs
 
     @abc.abstractmethod
-    async def generate(self, **kwargs) -> GenerateResults:
+    async def generate(self, inputs: GenerateInputs) -> GenerateResults:
         """
         Callback to invoke the model to generate a response.
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
-    def process_output(self, output, **kwargs):
+    def process_output(self, outputs):
         """
         Process output from completion.create() (or generate())
         """
-        raise NotImplementedError()
+        results = []
+        for choice in outputs.choices:
+            results.append(
+                GenerateResult(
+                    completion_string=choice.text,
+                    completion_tokens=[],  # Not part of the OpenAI spec
+                    stop_reason=choice.finish_reason,
+                )
+            )
+
+        return GenerateResults(results=results)
 
     @staticmethod
     def kwarg_alias(kw_dict, preferred_key, alias_key):

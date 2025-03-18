@@ -19,6 +19,7 @@ from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
+    GenerateInputs,
     GenerateResults,
 )
 
@@ -130,11 +131,13 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
                 "configuring an inference backend."
             )
 
-        prompt = self.inputs_to_string(inputs)
-        kwargs = inputs.model_dump()
-        kwargs["prompt"] = prompt
+        generate_inputs = inputs.generate_inputs or GenerateInputs()
+        generate_inputs.prompt = self.inputs_to_string(inputs)
 
-        model_output = await self._backend(**kwargs)
+        # kwargs = inputs.model_dump()
+        # kwargs["prompt"] = prompt
+
+        model_output = await self._backend.pipeline(generate_inputs)
 
         return self.output_to_result(output=model_output, inputs=inputs)
 
