@@ -13,6 +13,7 @@ from granite_io.io.consts import (
     _GRANITE_3_2_COT_END,
     _GRANITE_3_2_COT_START,
 )
+from granite_io.io.registry import input_processor
 from granite_io.types import (
     AssistantMessage,
     ChatCompletionInputs,
@@ -187,6 +188,9 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
         return messages
 
 
+@input_processor(
+    _MODEL_NAME,
+)
 class Granite3Point2InputProcessor(InputProcessor):
     """
     Input processor for version 3.2 of the main Granite models, all sizes.
