@@ -128,47 +128,46 @@ class FunctionDefinition(pydantic.BaseModel):
 
 
 class GenerateInputs(pydantic.BaseModel):
-    """Common inputs for backends"""
+    """Common inputs for backends
+
+    prompt: The prompt(s) to generate completions for.
+    model: Model name or ID.
+    best_of: Generates best_of completions server-side.
+    echo: Echo back the prompt in addition to the completion.
+    frequency_penalty: Penalize new tokens based on their existing frequency.
+    logit_bias: Modify the likelihood of specified tokens.
+    logprobs: Include the log probabilities on the most likely tokens.
+    max_tokens: The maximum number of tokens to generate in the completion.
+    n: How many completions to generate for each prompt.
+    presence_penalty: Penalize new tokens based on whether they appear in the text.
+    stop: Sequences where the API will stop generating further tokens.
+    stream: Whether to stream back partial progress.
+    stream_options: A dictionary containing options for the streaming response.
+    suffix: The suffix that comes after a completion of inserted text.
+    temperature: The temperature parameter for controlling the randomness of the output.
+    top_p: The top-p parameter for nucleus sampling.
+    user: A unique identifier representing your end-user.
+    timeout: The maximum execution time in seconds for the completion request.
+    """
 
     prompt: Optional[Union[str, List[Union[str, List[Union[str, List[int]]]]]]] = None
     model: Optional[str] = None
     best_of: Optional[int] = None
-    timeout: Optional[Union[float, str, httpx.Timeout]] = None
-    temperature: Optional[float] = None
-    top_p: Optional[float] = None
-    n: Optional[int] = None
-    stream: Optional[bool] = None
-    stream_options: Optional[dict] = None
-    stop: Union[Optional[str], List[str], None] = None
-    # max_completion_tokens: Optional[int] = None
-    max_tokens: Optional[int] = None
-    # modalities: Optional[List[ChatCompletionModality]] = None
-    # prediction: Optional[ChatCompletionPredictionContentParam] = None
-    # audio: Optional[ChatCompletionAudioParam] = None
-    presence_penalty: Optional[float] = None
+    echo: Optional[bool] = None
     frequency_penalty: Optional[float] = None
     logit_bias: Optional[dict] = None
+    logprobs: Optional[Union[int, bool]] = None
+    max_tokens: Optional[int] = None
+    n: Optional[int] = None
+    presence_penalty: Optional[float] = None
+    stop: Union[Optional[str], List[str], None] = None
+    stream: Optional[bool] = None
+    stream_options: Optional[dict] = None
+    suffix: Optional[str] = None
+    temperature: Optional[float] = None
+    top_p: Optional[float] = None
     user: Optional[str] = None
-    # reasoning_effort: Optional[Literal["low", "medium", "high"]] = None
-    # response_format: Optional[Union[dict, Type[BaseModel]]] = None
-    seed: Optional[int] = None
-    # tools: Optional[List] = None
-    # tool_choice: Optional[Union[str, dict]] = None
-    # ??? bool or int?  logprobs: Optional[bool] = None
-    # top_logprobs: Optional[int] = None
-    # parallel_tool_calls: Optional[bool] = None
-    # deployment_id=None
-    extra_headers: Optional[dict] = None
-    # soon to be deprecated params by OpenAI
-    # functions: Optional[List] = None
-    # function_call: Optional[str] = None
-    # # set api_base, api_version, api_key
-    # base_url: Optional[str] = None
-    # api_version: Optional[str] = None
-    # api_key: Optional[str] = None
-    # model_list: Optional[list] = None  # pass in a list of api_base,keys, etc.
-    # thinking: Optional[AnthropicThinkingParam] = None
-    # **kwargs
+    timeout: Optional[Union[float, str, httpx.Timeout]] = None
 
     model_config = pydantic.ConfigDict(
         # Pass through arbitrary additional keyword arguments for handling by model- or
