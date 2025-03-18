@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: '{"model":"granite3.2:2b","prompt":"<|start_of_role|>system<|end_of_role|>Knowledge
+      Cutoff Date: April 2024.\nToday''s Date: March 17, 2025.\nYou are Granite, developed
+      by IBM. You are a helpful AI assistant.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>Can
+      you answer my question?<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>","best_of":null,"frequency_penalty":null,"logit_bias":null,"max_tokens":null,"n":null,"presence_penalty":null,"seed":null,"stop":null,"stream":null,"stream_options":null,"temperature":null,"top_p":null,"user":null}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '559'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      rits_api_key:
+      - ollama
+      user-agent:
+      - AsyncOpenAI/Python 1.66.3
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.66.3
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.6
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: '{"id":"cmpl-41","object":"text_completion","created":1742278393,"model":"granite3.2:2b","system_fingerprint":"fp_ollama","choices":[{"text":"Of
+      course! Please go ahead and ask your question, and I''ll do my best to provide
+      a helpful response based on the information that was cut off for me in April
+      2024.","index":0,"finish_reason":"stop"}],"usage":{"prompt_tokens":108,"completion_tokens":41,"total_tokens":149}}
+
+      '
+    headers:
+      Content-Length:
+      - '414'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 18 Mar 2025 06:13:14 GMT
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

@@ -5,10 +5,11 @@ Common shared types
 """
 
 # Standard
-from typing import Any
+from typing import Any, List, Optional, Union
 
 # Third Party
 from typing_extensions import Literal, TypeAlias
+import httpx
 import pydantic
 
 
@@ -81,6 +82,7 @@ class AssistantMessage(_ChatMessageBase):
     citations: list[Citation] | None = None
     documents: list[Document] | None = None
     hallucinations: list[Hallucination] | None = None
+    stop_reason: str | None = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -125,6 +127,57 @@ class FunctionDefinition(pydantic.BaseModel):
         raise NotImplementedError("TODO: Implement this")
 
 
+class GenerateInputs(pydantic.BaseModel):
+    """Common inputs for backends"""
+
+    prompt: Optional[Union[str, List[Union[str, List[Union[str, List[int]]]]]]] = None
+    model: Optional[str] = None
+    best_of: Optional[int] = None
+    timeout: Optional[Union[float, str, httpx.Timeout]] = None
+    temperature: Optional[float] = None
+    top_p: Optional[float] = None
+    n: Optional[int] = None
+    stream: Optional[bool] = None
+    stream_options: Optional[dict] = None
+    stop: Union[Optional[str], List[str], None] = None
+    # max_completion_tokens: Optional[int] = None
+    max_tokens: Optional[int] = None
+    # modalities: Optional[List[ChatCompletionModality]] = None
+    # prediction: Optional[ChatCompletionPredictionContentParam] = None
+    # audio: Optional[ChatCompletionAudioParam] = None
+    presence_penalty: Optional[float] = None
+    frequency_penalty: Optional[float] = None
+    logit_bias: Optional[dict] = None
+    user: Optional[str] = None
+    # reasoning_effort: Optional[Literal["low", "medium", "high"]] = None
+    # response_format: Optional[Union[dict, Type[BaseModel]]] = None
+    seed: Optional[int] = None
+    # tools: Optional[List] = None
+    # tool_choice: Optional[Union[str, dict]] = None
+    # ??? bool or int?  logprobs: Optional[bool] = None
+    # top_logprobs: Optional[int] = None
+    # parallel_tool_calls: Optional[bool] = None
+    # deployment_id=None
+    extra_headers: Optional[dict] = None
+    # soon to be deprecated params by OpenAI
+    # functions: Optional[List] = None
+    # function_call: Optional[str] = None
+    # # set api_base, api_version, api_key
+    # base_url: Optional[str] = None
+    # api_version: Optional[str] = None
+    # api_key: Optional[str] = None
+    # model_list: Optional[list] = None  # pass in a list of api_base,keys, etc.
+    # thinking: Optional[AnthropicThinkingParam] = None
+    # **kwargs
+
+    model_config = pydantic.ConfigDict(
+        # Pass through arbitrary additional keyword arguments for handling by model- or
+        # specific I/O processors.
+        arbitrary_types_allowed=True,
+        extra="allow",
+    )
+
+
 class ChatCompletionInputs(pydantic.BaseModel):
     """
     Class that represents the lowest-common-denominator inputs to a chat completion
@@ -134,6 +187,7 @@ class ChatCompletionInputs(pydantic.BaseModel):
 
     messages: list[ChatMessage]
     tools: list[FunctionDefinition] = []
+    generate_inputs: Optional[GenerateInputs] = None
 
     model_config = pydantic.ConfigDict(
         # Pass through arbitrary additional keyword arguments for handling by model- or

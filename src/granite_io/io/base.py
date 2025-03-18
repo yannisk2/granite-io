@@ -19,6 +19,7 @@ from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
+    GenerateInputs,
     GenerateResults,
 )
 
@@ -129,9 +130,16 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
                 "Attempted to call create_chat_completion() without "
                 "configuring an inference backend."
             )
-        input_string = self.inputs_to_string(inputs)
-        generation_results = await self._backend.generate(input_string)
-        return self.output_to_result(generation_results, inputs)
+
+        generate_inputs = inputs.generate_inputs or GenerateInputs()
+        generate_inputs.prompt = self.inputs_to_string(inputs)
+
+        # kwargs = inputs.model_dump()
+        # kwargs["prompt"] = prompt
+
+        model_output = await self._backend.pipeline(generate_inputs)
+
+        return self.output_to_result(output=model_output, inputs=inputs)
 
     @abc.abstractmethod
     def inputs_to_string(
