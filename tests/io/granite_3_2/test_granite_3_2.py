@@ -78,7 +78,10 @@ INPUT_JSON_STRS = {
         [
             {"role": "user", "content": "How much wood could a wood chuck chuck?"}
         ],
-    "stop": "woodchuck"
+    "generate_inputs":
+        {
+            "stop": "woodchuck"
+        }
 }
 """,
 }
@@ -250,7 +253,6 @@ def test_basic_inputs_to_string():
 
 
 @pytest.mark.vcr
-@pytest.mark.block_network
 def test_completion_repetition_param(backend_x: Backend):
     messages = [
         {
@@ -260,12 +262,12 @@ def test_completion_repetition_param(backend_x: Backend):
     ]
 
     # What a client might be sending to a backend
-    kwargs = {
+    generate_inputs = {
         "prompt": "Just give me an example of what you can do",
         "temperature": 0.5,
         "repetition_penalty": 0.5,
     }
-    inputs = ChatCompletionInputs(messages=messages, **kwargs)
+    inputs = ChatCompletionInputs(messages=messages, generate_inputs=generate_inputs)
 
     io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
     try:
@@ -279,7 +281,6 @@ def test_completion_repetition_param(backend_x: Backend):
 
 
 @pytest.mark.vcr
-@pytest.mark.block_network
 def test_completion_presence_param(backend_x: Backend):
     messages = [
         {
@@ -287,13 +288,13 @@ def test_completion_presence_param(backend_x: Backend):
             "content": "Can you answer my question?",
         }
     ]
-    kwargs = {
+    generate_inputs = {
         "prompt": "Just give me an example of what you can do",
         "temperature": 0.5,
         "presence_penalty": 0.5,
         "frequency_penalty": 0.5,
     }
-    inputs = ChatCompletionInputs(messages=messages, **kwargs)
+    inputs = ChatCompletionInputs(messages=messages, generate_inputs=generate_inputs)
 
     io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
     try:
@@ -306,7 +307,6 @@ def test_completion_presence_param(backend_x: Backend):
 
 
 @pytest.mark.vcr
-@pytest.mark.block_network
 def test_run_processor(backend_x: Backend, input_json_str: str):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
     io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
@@ -319,8 +319,8 @@ def test_run_processor(backend_x: Backend, input_json_str: str):
     assert content  # Make sure we don't get empty result (I had a bug)
 
     # Test for stop reason
-    if inputs.stop:
-        stop = inputs.stop
+    if inputs.generate_inputs and inputs.generate_inputs.stop:
+        stop = inputs.generate_inputs.stop
         # Note: currently transformers includes the stop tokens,
         # but OpenAI does not. So, either endswith or not-in.
         assert stop not in content

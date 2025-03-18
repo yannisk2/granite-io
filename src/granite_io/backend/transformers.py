@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Standard
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 import asyncio
 import concurrent.futures
 import dataclasses
@@ -13,7 +13,7 @@ import aconfig
 from granite_io.backend.base import Backend
 from granite_io.backend.registry import backend
 from granite_io.optional import import_optional
-from granite_io.types import GenerateResult, GenerateResults
+from granite_io.types import GenerateInputs, GenerateResult, GenerateResults
 
 if TYPE_CHECKING:
     # Third Party
@@ -72,61 +72,59 @@ class TransformersBackend(Backend):
             be a local filesystem path or a URL.
         :param device: Optional Pytorch device string, usually "cpu" or "cuda"
         """
+        super().__init__(config)
 
         with import_optional("transformers"):
             # Third Party
             import torch  # noqa: F401
             import transformers
 
-        self._model_str = config.model_name
-        self._torch_device_name = config.device
+        self._torch_device_name = config.device if config.device else _detect_hw_accel()
+        if self._torch_device_name == "cpu":
+            # CPU mode; prevent thrashing
+            torch.set_num_threads(4)
         self._model = transformers.AutoModelForCausalLM.from_pretrained(
             config.model_name
         ).to(config.device)
         self._tokenizer = transformers.AutoTokenizer.from_pretrained(config.model_name)
         self._executor = concurrent.futures.ThreadPoolExecutor()
 
-    async def pipeline(self, **kwargs: Any) -> GenerateResults:
+    async def pipeline(self, inputs: GenerateInputs) -> GenerateResults:
         """
         Process input, call completion (generate), process and return output
 
         Override to pass inputs for prefix tokens trimming.
         """
-        inputs = self.process_input(**kwargs)
-        return self.process_output(await self.generate(**inputs), inputs=inputs)
+        inputs = self.process_input(inputs)
+        outputs = await self.generate(inputs)
+        return self.process_output(outputs=outputs, inputs=inputs)
 
-    async def generate(self, **kwargs):
-        generation_inputs = _GenerationInputs(**kwargs)
-
+    async def generate(self, inputs: _GenerationInputs) -> GenerateResults:
         # Wrap the call to the non-async Transformers library in a thread pool
         concurrent_futures_future = self._executor.submit(
             self._generate_callback,
-            generation_inputs,
+            inputs,
         )
         async_future = asyncio.wrap_future(concurrent_futures_future)
         return await async_future
 
-    def process_input(self, **kwargs: Any) -> Dict[str, Any]:
+    def process_input(self, inputs: GenerateInputs) -> GenerateInputs:
         """Subroutine that encapsulates all the prerequisites
         that are necessary to call ``AutoModelForCausalLM.generate()``."""
 
-        # model is required
-        if not kwargs.get("model"):
-            kwargs["model"] = self._model_str
+        kwargs = super().process_input(inputs).model_dump(exclude_unset=True)
 
         # Migrate alias kwargs to this flavor of backend
         self.kwarg_alias(kwargs, "stop_strings", "stop")
         self.kwarg_alias(kwargs, "num_return_sequences", "n")
 
-        # Validation
-
+        # num_beams > num_return_sequences
         n = kwargs.get("num_return_sequences", 1)
-        num_beams = kwargs.get("num_beams", 1)
-
-        if n is not None:  # noqa SIM102
-            if not isinstance(n, int) or n < 1:
-                raise ValueError(f"Invalid value for num_return_sequences ({n})")
-            if n > 1 and (not isinstance(num_beams, int) or num_beams < n):
+        if n is not None and n < 1:
+            raise ValueError(f"Invalid value for num_return_sequences ({n})")
+        if n is not None:
+            num_beams = kwargs.get("num_beams", 1)
+            if num_beams is None or num_beams < n:
                 num_beams = n
 
         # Import packages from extras "transformers"
@@ -223,24 +221,22 @@ class TransformersBackend(Backend):
         #     tokenizer, response_format
         # )
 
-        return dataclasses.asdict(
-            _GenerationInputs(
-                generation_config=generation_config,
-                model_input=model_input,
-                # prefix_allowed_tokens_fn=prefix_allowed_tokens_fn
-            )
+        return _GenerationInputs(
+            generation_config=generation_config,
+            model_input=model_input,
+            # prefix_allowed_tokens_fn=prefix_allowed_tokens_fn
         )
 
-    def process_output(self, output, *, inputs=None, **kwargs):
+    def process_output(self, outputs, *, inputs=None):
         # The result of generate() is of course the prompt concatenated with the
         # additional tokens generated. Strip off the prompt.
         generated_results = []
 
         # Generation inputs are needed for special processing below
-        input_len = len(inputs["model_input"]["input_ids"][0]) if inputs else 0
+        input_len = len(inputs.model_input["input_ids"][0]) if inputs else 0
 
         # for i, sequence in enumerate(model_output.sequences):
-        for sequence in output.sequences:
+        for sequence in outputs.sequences:
             full_token_sequence = sequence.cpu().tolist()
             generated_tokens = full_token_sequence[input_len:]
 
@@ -259,7 +255,7 @@ class TransformersBackend(Backend):
             completion_string = self._tokenizer.decode(generated_tokens)
 
             # Now we can see if the stop reason was actually a stop string.
-            if stop_strings := inputs["generation_config"].stop_strings:
+            if stop_strings := inputs.generation_config.stop_strings:
                 if isinstance(stop_strings, str):
                     stop_strings = [stop_strings]
                 for s in stop_strings:
