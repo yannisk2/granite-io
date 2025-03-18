@@ -12,6 +12,7 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
 from granite_io.io.granite_3_2.output_processors.granite_3_2_output_parser import (
     parse_model_output,
 )
+from granite_io.io.registry import output_processor
 from granite_io.types import (
     AssistantMessage,
     ChatCompletionInputs,
@@ -31,7 +32,12 @@ _COT_END_ALTERNATIVES = [
     "Here's my response:",
 ]
 
+_MODEL_NAME = "Granite 3.2"
 
+
+@output_processor(
+    _MODEL_NAME,
+)
 class Granite3Point2OutputProcessor(OutputProcessor):
     """
     Output processor for version 3.2 of the main Granite models, all sizes.

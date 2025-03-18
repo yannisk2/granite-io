@@ -184,11 +184,14 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
         """
 
 
-class InputProcessor(abc.ABC):
+class InputProcessor(FactoryConstructible):
     """
     Interface for generic input processors. An input processor exposes an
     API to transform model completion request into a string representation.
     """
+
+    def __init__(self, config: aconfig.Config | None = None):  # pylint: disable=unused-argument
+        """By default an input processor doesn't require config"""
 
     @abc.abstractmethod
     def transform(
@@ -210,12 +213,15 @@ class InputProcessor(abc.ABC):
         """
 
 
-class OutputProcessor(abc.ABC):
+class OutputProcessor(FactoryConstructible):
     """
     Interface for generic output processors. An putput processor exposes an
     API to transform model output into a structured representation of the
     information.
     """
+
+    def __init__(self, config: aconfig.Config | None = None):  # pylint: disable=unused-argument
+        """By default an output processor doesn't require config"""
 
     @abc.abstractmethod
     def transform(
