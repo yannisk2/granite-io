@@ -5,6 +5,7 @@ Common shared types
 """
 
 # Standard
+from collections.abc import Mapping
 from typing import Any, List, Optional, Union
 
 # Third Party
@@ -186,9 +187,7 @@ class ChatCompletionInputs(pydantic.BaseModel):
 
     messages: list[ChatMessage]
     tools: list[FunctionDefinition] = []
-
-    num_return_sequences: int = 1
-
+    generate_inputs: Optional[GenerateInputs] = None
     model_config = pydantic.ConfigDict(
         # Pass through arbitrary additional keyword arguments for handling by model- or
         # specific I/O processors.
@@ -203,11 +202,33 @@ class ChatCompletionInputs(pydantic.BaseModel):
             return None
 
     def with_next_message(self, next_message: ChatMessage) -> "ChatCompletionInputs":
-        """Create a version of this object with one additional message in the messages
-        list. Does not modify the original object."""
+        """
+        :param next_message: Additional message to add to the conversation
+
+        :returns: a version of this object with one additional message in the messages
+        list. Does not modify the original object.
+        """
         new_messages = self.messages.copy()
         new_messages.append(next_message)
         return self.model_copy(update={"messages": new_messages})
+
+    def with_addl_generate_params(
+        self, params: Mapping[str, object]
+    ) -> "ChatCompletionInputs":
+        """
+        :param params: Additional parameters to add.
+
+        :returns: a version of this object with one additional message in the messages
+        list. Does not modify the original object.
+        Leaves in place any generation parameters already present.
+        """
+        previous_inputs = (
+            self.generate_inputs
+            if self.generate_inputs is not None
+            else GenerateInputs()
+        )
+        new_inputs = previous_inputs.model_copy(update=params)
+        return self.model_copy(update={"generate_inputs": new_inputs})
 
 
 class ChatCompletionResult(pydantic.BaseModel):

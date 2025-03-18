@@ -14,6 +14,7 @@ import transformers
 # Local
 from granite_io import make_io_processor
 from granite_io.backend import Backend
+from granite_io.backend.litellm import LiteLLMBackend
 from granite_io.backend.openai import OpenAIBackend
 from granite_io.backend.transformers import TransformersBackend
 from granite_io.io.consts import (
@@ -42,6 +43,7 @@ from granite_io.types import (
     ChatCompletionResults,
     Citation,
     Document,
+    GenerateInputs,
     GenerateResult,
     GenerateResults,
     Hallucination,
@@ -417,19 +419,19 @@ def test_citation_hallucination_parsing(
     assert result.hallucinations == exp_hallucination
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr(record_mode="new_episodes")
 @pytest.mark.block_network
 def test_multiple_return(backend_x: Backend, input_json_str: str):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
-    inputs = inputs.model_copy(update={"num_return_sequences": 3})
+    inputs = inputs.model_copy(
+        update={"generate_inputs": GenerateInputs(max_tokens=1024, n=3)}
+    )
     io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
     try:
         results: ChatCompletionResults = io_processor.create_chat_completion(inputs)
     except UnsupportedParamsError:
-        # Known issue with LiteLLMBackend
-        pytest.xfail(
-            "LiteLLMBackend support for num_return_sequences > 1 varies by provider"
-        )
+        if isinstance(backend_x, LiteLLMBackend):
+            pytest.xfail("LiteLLMBackend support for n > 1 varies by provider")
 
     assert isinstance(results, ChatCompletionResults)
     assert len(results.results) == 3

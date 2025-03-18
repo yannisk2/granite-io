@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"model":"granite3.2:2b","prompt":"<|start_of_role|>system<|end_of_role|>Knowledge
-      Cutoff Date: April 2024.\nToday''s Date: March 17, 2025.\nYou are Granite, developed
+      Cutoff Date: April 2024.\nToday''s Date: March 18, 2025.\nYou are Granite, developed
       by IBM. You are a helpful AI assistant.\nRespond to every user query in a comprehensive
       and detailed way. You can write down your thoughts and reasoning process before
       responding. In the thought process, engage in a comprehensive cycle of analysis,
@@ -12,7 +12,7 @@ interactions:
       should summarize the thought process. Write your thoughts after ''Here is my
       thought process:'' and write your response after ''Here is my response:'' for
       each user query.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>What is
-      1 + 22?\nAnswer with just a number please.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>","best_of":3,"max_tokens":1024,"n":3}'
+      1 + 22?\nAnswer with just a number please.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>","best_of":3,"n":3}'
     headers:
       accept:
       - application/json
@@ -21,7 +21,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1095'
+      - '1077'
       content-type:
       - application/json
       host:
@@ -51,23 +51,17 @@ interactions:
     method: POST
     uri: http://localhost:11434/v1/completions
   response:
-    content: '{"id":"cmpl-5919a80523494acdbbe46ee638536b0b","object":"text_completion","created":1742238406,"model":"granite3.2:2b","choices":[{"index":0,"text":"1
-      + 22 equals 23.\n\nHere is my thought process:\nThis is a straightforward arithmetic
-      addition problem. Adding 1 and 22 involves grouping the ones place together
-      (1 + 2 = 3) and the tens place (0 + 22 = 22), which is a straightforward single-digit
-      number.\n\nHere is my response:\n23","logprobs":null,"finish_reason":"stop","stop_reason":null,"prompt_logprobs":null},{"index":1,"text":"Here
-      is my thought process:\nThe user has requested a single number result of the
-      arithmetic operation 1 + 22. This is a straightforward addition problem.\n\nHere
-      is my response:\n23","logprobs":null,"finish_reason":"stop","stop_reason":null,"prompt_logprobs":null},{"index":2,"text":"Here
-      is my thought process:\nThe user''s query asks for a numerical result, so I
-      need to calculate the sum of 1 and 22.\n\nHere is my response:\n133","logprobs":null,"finish_reason":"stop","stop_reason":null,"prompt_logprobs":null}],"usage":{"prompt_tokens":209,"total_tokens":382,"completion_tokens":173,"prompt_tokens_details":null}}'
+    content: '{"id":"cmpl-d885d5b37a31477fad9c4417209edbcc","object":"text_completion","created":1742329211,"model":"granite3.2:2b","choices":[{"index":0,"text":"Here
+      is my thought process:\nThis is a straightforward arithmetic problem. To find","logprobs":null,"finish_reason":"length","stop_reason":null,"prompt_logprobs":null},{"index":1,"text":"Here
+      is my thought process:\nThe user requested a numerical answer to the addition","logprobs":null,"finish_reason":"length","stop_reason":null,"prompt_logprobs":null},{"index":2,"text":"Here
+      is my thought process:\nThe problem is a simple arithmetic addition.\n","logprobs":null,"finish_reason":"length","stop_reason":null,"prompt_logprobs":null}],"usage":{"prompt_tokens":209,"total_tokens":257,"completion_tokens":48,"prompt_tokens_details":null}}'
     headers:
       content-length:
-      - '1154'
+      - '785'
       content-type:
       - application/json
       date:
-      - Mon, 17 Mar 2025 19:06:45 GMT
+      - Tue, 18 Mar 2025 20:20:11 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1

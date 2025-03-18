@@ -18,7 +18,7 @@ from granite_io.io.voting import MajorityVotingProcessor, integer_normalizer
 from granite_io.types import ChatCompletionInputs, ChatCompletionResults
 
 
-@pytest.mark.vcr
+@pytest.mark.vcr(record_mode="new_episodes")
 @pytest.mark.block_network
 def test_numeric_voting(backend_x: Backend):
     if isinstance(backend_x, TransformersBackend):
@@ -55,9 +55,7 @@ def test_numeric_voting(backend_x: Backend):
     except UnsupportedParamsError:
         # Known issue with LiteLLMBackend
         if isinstance(backend_x, LiteLLMBackend):
-            pytest.xfail(
-                "LiteLLMBackend support for num_return_sequences > 1 varies by provider"
-            )
+            pytest.xfail("LiteLLMBackend support for n > 1 varies by provider")
 
     assert isinstance(results, ChatCompletionResults)
     assert len(results.results) == 1
