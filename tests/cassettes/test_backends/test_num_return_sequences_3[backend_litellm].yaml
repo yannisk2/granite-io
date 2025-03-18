@@ -1,19 +1,7 @@
 interactions:
 - request:
-    body: '{"model": "granite3.2:2b", "prompt": "### User:\n<|start_of_role|>system<|end_of_role|>Knowledge
-      Cutoff Date: April 2024.\nToday''s Date: March 05, 2025.\nYou are Granite, developed
-      by IBM. You are a helpful AI assistant.\nRespond to every user query in a comprehensive
-      and detailed way. You can write down your thoughts and reasoning process before
-      responding. In the thought process, engage in a comprehensive cycle of analysis,
-      summarization, exploration, reassessment, reflection, backtracing, and iteration
-      to develop well-considered thinking process. In the response section, based
-      on various attempts, explorations, and reflections from the thoughts section,
-      systematically present the final solution that you deem correct. The response
-      should summarize the thought process. Write your thoughts after ''Here is my
-      thought process:'' and write your response after ''Here is my response:'' for
-      each user query.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>How much
-      wood could a wood chuck chuck?<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>\n\n",
-      "options": {}, "stream": false}'
+    body: '{"model": "granite3.2:2b", "prompt": "### User:\nwhat is up?\n\n", "options":
+      {"num_return_sequences": 3}, "stream": false, "images": []}'
     headers:
       accept:
       - '*/*'
@@ -22,39 +10,28 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1098'
+      - '137'
       host:
       - localhost:11434
       user-agent:
-      - litellm/1.62.1
+      - litellm/1.63.11
     method: POST
     uri: http://localhost:11434/api/generate
   response:
-    content: '{"model":"granite3.2:2b","created_at":"2025-03-06T00:55:01.826468Z","response":"This
-      question is based on a popular tongue twister, not a factual inquiry into the
-      actual chucking capacity of woodchucks (also known as groundhogs). Woodchucks
-      are burrowing animals and do not physically \"chuck\" wood. Therefore, there
-      isn''t an accurate measurement for how much wood they could chuck.\n\nHere is
-      my thought process:\n- Recognize that this is a whimsical question, not based
-      on scientific fact or biological research about woodchucks'' digging abilities.\n-
-      Understand the popular connotation of \"how much wood\" a creature can chuck
-      from the tongue twister implies it''s an exaggerated figure, as woodchucks are
-      burrowers and don''t physically move or push wood.\n- Consequently, there is
-      no realistic answer to this question because woodchucks do not engage in such
-      activity.\n\nHere is my response:\nThe question \"How much wood could a wood
-      chuck chuck?\" is a playful expression that doesn''t correspond to any factual
-      information about woodchucks'' digging habits or capacity for moving wood. Therefore,
-      I cannot provide an accurate answer because it''s based on a metaphorical or
-      tongue twisting concept rather than real-world behavior of woodchucks.\n\nIn
-      essence, the phrase serves as a fun figurative way to describe burrowing, not
-      an actual measure of wood movement by these animals!","done":true,"done_reason":"stop","context":[49152,2946,49153,39558,390,17071,2821,44,30468,225,36,34,36,38,32,203,4282,884,8080,278,659,30,18909,810,25697,32,2448,884,312,17247,19551,47330,32,0,203,49152,496,49153,1482,2680,44,203,49152,2946,49153,39558,390,17071,2821,44,30468,225,36,34,36,38,32,203,23669,1182,2821,44,29195,225,34,39,30,225,36,34,36,39,32,203,4282,884,8080,278,659,30,18909,810,25697,32,2448,884,312,17247,19551,47330,32,203,33797,372,3638,1256,2467,328,312,44888,461,16360,3352,32,2448,883,2866,2835,1370,26103,461,5966,299,2164,2670,18641,2414,32,701,322,10889,2164,30,14707,381,328,312,44888,14770,432,9209,30,23943,1649,30,49100,30,316,31289,30,26158,30,1751,30000,30,461,13330,372,10227,4487,31,33711,318,19383,2164,32,701,322,1789,4169,30,4122,544,10297,20130,30,27514,993,30,461,26158,101,645,322,26103,4169,30,2664,20725,5024,322,1158,5295,688,844,409,405,3809,32,886,1789,1395,46053,322,10889,2164,32,5950,1370,26103,2685,330,10921,438,1672,10889,2164,6078,461,2866,1370,1789,2685,330,10921,438,1672,1789,6078,436,2504,1256,2467,32,0,203,49152,496,49153,8257,5610,41878,3065,312,41878,663,7194,663,7194,49,0,203,49152,17594,49153,478,0,203,49152,17594,49153,2272,7000,438,4122,544,312,23068,273,788,340,8206,19240,30,646,312,296,7975,328,32885,1991,322,4648,663,7194,299,13802,432,41878,380,36546,308,12227,8967,619,16398,44770,101,547,624,4907,380,36546,884,23598,643,299,26261,101,461,745,646,26571,7637,313,380,7194,20,41878,32,20750,30,2017,7735,1330,600,26572,18583,436,2624,5610,41878,2953,3065,663,7194,32,478,10921,438,1672,10889,2164,44,203,31,902,18646,688,458,438,312,640,16150,1578,7000,30,646,4122,544,31722,8434,556,16331,11081,13234,2625,41878,380,36546,25,7338,2563,41863,32,203,31,20107,5362,322,23068,457,5198,432,313,6893,5610,41878,20,312,29472,883,663,7194,645,322,273,788,340,8206,19240,34506,561,1182,600,538,7066,733,10986,30,619,41878,380,36546,884,23598,643,483,461,2800,1330,26571,7637,5169,556,5840,41878,32,203,31,390,824,7795,631,30,2017,438,1289,4011,5401,7592,372,458,7000,3301,41878,380,36546,745,646,14707,381,328,3751,8790,32,478,10921,438,1672,1789,44,203,1318,7000,313,8257,5610,41878,3065,312,41878,663,7194,663,7194,12791,438,312,4654,2790,6101,688,4163,1330,20630,372,1346,296,7975,2471,2625,41878,380,36546,25,7338,2563,22815,1507,556,13802,436,14089,41878,32,20750,30,439,4881,2355,600,26572,7592,3301,561,1182,4122,544,312,3279,2158,271,1578,556,273,788,340,8206,7978,10243,9283,2784,4011,31,5860,5853,432,41878,380,36546,32,478,383,12170,942,30,322,23909,35181,619,312,3333,6531,305,1353,3352,372,5510,23598,643,299,30,646,600,4648,9413,432,41878,22061,810,3282,26261,101,19],"total_duration":3271700167,"load_duration":5157209,"prompt_eval_count":251,"prompt_eval_duration":131000000,"eval_count":318,"eval_duration":3134000000}'
+    content: '{"model":"granite3.2:2b","created_at":"2025-03-18T00:03:54.117045Z","response":"I''m
+      here to assist you with any questions or tasks you have! How can I help you
+      today? If you''d like to share what''s on your mind, feel free to tell me. For
+      instance, you might ask about current events, need information on a specific
+      topic, seek recommendations, or just want to engage in casual conversation.
+      My purpose is to provide accurate and concise responses based on the data I''ve
+      been trained on, which currently extends up to April 2024.","done":true,"done_reason":"stop","context":[49152,2946,49153,39558,390,17071,2821,44,30468,225,36,34,36,38,32,203,4282,884,8080,278,659,30,18909,810,25697,32,2448,884,312,17247,19551,47330,32,0,203,49152,496,49153,1482,2680,44,203,7733,438,973,49,478,0,203,49152,17594,49153,59,3464,2442,372,34916,844,623,1346,10017,556,8253,844,1159,19,4971,883,439,3049,844,11610,49,1670,844,5438,2124,372,8623,2769,1182,544,1370,12204,30,10871,3741,372,8883,597,32,2616,1980,30,844,4796,7660,2625,1550,5216,30,1849,2471,544,312,2818,8456,30,22848,39149,30,556,2258,2637,372,14707,381,328,11969,1029,19509,32,4300,11664,438,372,2355,26572,461,30836,14812,4122,544,322,706,439,4763,2583,24763,544,30,1510,5927,2026,973,372,30468,225,36,34,36,38,32],"total_duration":1931447250,"load_duration":342057625,"prompt_eval_count":52,"prompt_eval_duration":681000000,"eval_count":102,"eval_duration":906000000}'
     headers:
+      Content-Length:
+      - '1416'
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 06 Mar 2025 00:55:01 GMT
-      Transfer-Encoding:
-      - chunked
+      - Tue, 18 Mar 2025 00:03:54 GMT
     http_version: HTTP/1.1
     status_code: 200
 - request:
@@ -73,7 +50,7 @@ interactions:
       host:
       - localhost:11434
       user-agent:
-      - litellm/1.62.1
+      - litellm/1.63.11
     method: POST
     uri: http://localhost:11434/api/show
   response:
@@ -525,7 +502,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 06 Mar 2025 00:55:01 GMT
+      - Tue, 18 Mar 2025 00:03:54 GMT
       Transfer-Encoding:
       - chunked
     http_version: HTTP/1.1
@@ -546,7 +523,7 @@ interactions:
       host:
       - localhost:11434
       user-agent:
-      - litellm/1.62.1
+      - litellm/1.63.11
     method: POST
     uri: http://localhost:11434/api/show
   response:
@@ -998,7 +975,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 06 Mar 2025 00:55:01 GMT
+      - Tue, 18 Mar 2025 00:03:54 GMT
       Transfer-Encoding:
       - chunked
     http_version: HTTP/1.1
@@ -1019,7 +996,7 @@ interactions:
       host:
       - localhost:11434
       user-agent:
-      - litellm/1.62.1
+      - litellm/1.63.11
     method: POST
     uri: http://localhost:11434/api/show
   response:
@@ -1471,7 +1448,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 06 Mar 2025 00:55:01 GMT
+      - Tue, 18 Mar 2025 00:03:54 GMT
       Transfer-Encoding:
       - chunked
     http_version: HTTP/1.1
@@ -1492,7 +1469,7 @@ interactions:
       host:
       - localhost:11434
       user-agent:
-      - litellm/1.62.1
+      - litellm/1.63.11
     method: POST
     uri: http://localhost:11434/api/show
   response:
@@ -1944,7 +1921,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 06 Mar 2025 00:55:01 GMT
+      - Tue, 18 Mar 2025 00:03:54 GMT
       Transfer-Encoding:
       - chunked
     http_version: HTTP/1.1
@@ -1965,7 +1942,7 @@ interactions:
       host:
       - localhost:11434
       user-agent:
-      - litellm/1.62.1
+      - litellm/1.63.11
     method: POST
     uri: http://localhost:11434/api/show
   response:
@@ -2417,7 +2394,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 06 Mar 2025 00:55:01 GMT
+      - Tue, 18 Mar 2025 00:03:54 GMT
       Transfer-Encoding:
       - chunked
     http_version: HTTP/1.1

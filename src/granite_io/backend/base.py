@@ -7,9 +7,17 @@ Base class for backends
 # Standard
 import abc
 
+# Third Party
+import aconfig
+
 # Local
 from granite_io.factory import FactoryConstructible
-from granite_io.types import ChatCompletionInputs, GenerateResults
+from granite_io.types import (
+    ChatCompletionInputs,
+    GenerateInputs,
+    GenerateResult,
+    GenerateResults,
+)
 
 
 # We put this base class here to avoid circular imports
@@ -23,14 +31,84 @@ class Backend(FactoryConstructible):
     be optional dependencies of this Python package.
     """
 
+    _model_str: str
+
+    def __init__(self, config: aconfig.Config):
+        self._model_str = config.model_name
+
+    async def __call__(self, inputs: GenerateInputs) -> GenerateResults:
+        return await self.pipeline(inputs)
+
+    async def pipeline(self, inputs: GenerateInputs) -> GenerateResults:
+        """
+        Process input, call completion (generate), process and return output
+        """
+        inputs = self.process_input(inputs)
+        output = await self.generate(inputs)
+        return self.process_output(output)
+
+    def process_input(self, inputs: GenerateInputs) -> GenerateInputs:
+        """
+        Process kwargs to prepare them for completion.create() (or generate())
+
+        Args:
+            inputs (GenerateInputs): the inputs which are being processed (modified)
+             to be used in target backend call.
+        """
+
+        # Add required model, if missing
+        if not inputs.model:
+            inputs.model = self._model_str
+
+        # n (a.k.a. num_return_sequences) validation
+        n = inputs.n
+        if n is not None:  # noqa SIM102
+            if n < 1:
+                raise ValueError(f"Invalid value for n ({n})")
+            if n > 1:
+                # best_of must be >= n
+                best_of = inputs.best_of
+                if best_of is None or best_of < n:
+                    inputs.best_of = n
+
+        return inputs
+
     @abc.abstractmethod
-    async def generate(
-        self, input_str: str, num_return_sequences: int = 1
-    ) -> GenerateResults:
+    async def generate(self, inputs: GenerateInputs) -> GenerateResults:
         """
         Callback to invoke the model to generate a response.
         """
         raise NotImplementedError()
+
+    def process_output(self, outputs):
+        """
+        Process output from completion.create() (or generate())
+        """
+        results = []
+        for choice in outputs.choices:
+            results.append(
+                GenerateResult(
+                    completion_string=choice.text,
+                    completion_tokens=[],  # Not part of the OpenAI spec
+                    stop_reason=choice.finish_reason,
+                )
+            )
+
+        return GenerateResults(results=results)
+
+    @staticmethod
+    def kwarg_alias(kw_dict, preferred_key, alias_key):
+        """Migrate kwarg k,v from alias key to preferred key"""
+        if alias_key in kw_dict:
+            alias_value = kw_dict.get(alias_key)
+            # Alias is removed
+            del kw_dict[alias_key]
+            # Preferred key/value gets priority if both are specified
+            # TODO: optionally error on redundant kwargs(?)
+            if preferred_key not in kw_dict:
+                # Alias value is set to preferred key (iff not already set)
+                kw_dict[preferred_key] = alias_value
+        return kw_dict  # return reference for convenience
 
 
 class ChatCompletionBackend(FactoryConstructible):

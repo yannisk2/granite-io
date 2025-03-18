@@ -14,6 +14,8 @@ import transformers
 # Local
 from granite_io import make_io_processor
 from granite_io.backend import Backend
+from granite_io.backend.openai import OpenAIBackend
+from granite_io.backend.transformers import TransformersBackend
 from granite_io.io.consts import (
     _GRANITE_3_2_COT_END,
     _GRANITE_3_2_COT_START,
@@ -69,6 +71,18 @@ INPUT_JSON_STRS = {
         {"role": "user", "content": "How much wood could a wood chuck chuck?"}
     ],
     "thinking": true
+}
+""",
+    "stop_strings": """
+{
+    "messages":
+        [
+            {"role": "user", "content": "How much wood could a wood chuck chuck?"}
+        ],
+    "generate_inputs":
+        {
+            "stop": "woodchuck"
+        }
 }
 """,
 }
@@ -240,15 +254,87 @@ def test_basic_inputs_to_string():
 
 
 @pytest.mark.vcr
-@pytest.mark.block_network
-@pytest.mark.flaky(retries=3, delay=5)  # VCR recording flakey
+def test_completion_repetition_param(backend_x: Backend):
+    messages = [
+        {
+            "role": "user",
+            "content": "Can you answer my question?",
+        }
+    ]
+
+    # What a client might be sending to a backend
+    generate_inputs = {
+        "prompt": "Just give me an example of what you can do",
+        "temperature": 0.5,
+        "repetition_penalty": 0.5,
+    }
+    inputs = ChatCompletionInputs(messages=messages, generate_inputs=generate_inputs)
+
+    io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
+    try:
+        outputs: ChatCompletionResults = io_processor.create_chat_completion(inputs)
+    except TypeError as te:
+        if isinstance(backend_x, OpenAIBackend):
+            pytest.xfail(str(te))
+        raise te
+    except UserWarning as uw:
+        if isinstance(backend_x, TransformersBackend):
+            pytest.xfail(str(uw))
+        raise uw
+
+    assert isinstance(outputs, ChatCompletionResults)
+
+
+@pytest.mark.vcr
+def test_completion_presence_param(backend_x: Backend):
+    messages = [
+        {
+            "role": "user",
+            "content": "Can you answer my question?",
+        }
+    ]
+    generate_inputs = {
+        "prompt": "Just give me an example of what you can do",
+        "temperature": 0.5,
+        "presence_penalty": 0.5,
+        "frequency_penalty": 0.5,
+    }
+    inputs = ChatCompletionInputs(messages=messages, generate_inputs=generate_inputs)
+
+    io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
+    try:
+        outputs: ChatCompletionResults = io_processor.create_chat_completion(inputs)
+    except UnsupportedParamsError as upe:
+        # Specific exception from LiteLLMBackend
+        pytest.xfail(upe.message)
+    except UserWarning as uw:
+        if isinstance(backend_x, TransformersBackend):
+            pytest.xfail(str(uw))
+        raise uw
+
+    assert isinstance(outputs, ChatCompletionResults)
+
+
+@pytest.mark.vcr
 def test_run_processor(backend_x: Backend, input_json_str: str):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
     io_processor = make_io_processor(_MODEL_NAME, backend=backend_x)
-    results: ChatCompletionResults = io_processor.create_chat_completion(inputs)
+    outputs: ChatCompletionResults = io_processor.create_chat_completion(inputs)
 
-    assert isinstance(results, ChatCompletionResults)
-    assert len(results.results) == 1
+    assert isinstance(outputs, ChatCompletionResults)
+    assert len(outputs.results) == 1
+
+    content = outputs.results[0].next_message.content
+    assert content  # Make sure we don't get empty result (I had a bug)
+
+    # Test for stop reason
+    if inputs.generate_inputs and inputs.generate_inputs.stop:
+        stop = inputs.generate_inputs.stop
+        # Note: currently transformers includes the stop tokens,
+        # but OpenAI does not. So, either endswith or not-in.
+        assert stop not in content
+        assert outputs.results[0].next_message.stop_reason == "stop"
+
     # TODO: Verify outputs in greater detail
 
 
