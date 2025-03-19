@@ -5,7 +5,7 @@
 from collections.abc import Callable
 
 # Local
-from .base import ChatCompletionResults, InputOutputProcessor
+from granite_io.io.base import ChatCompletionResults, InputOutputProcessor
 from granite_io.optional import import_optional
 from granite_io.types import ChatCompletionInputs
 
