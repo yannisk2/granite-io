@@ -46,8 +46,13 @@ class OpenAIBackend(Backend):
 
     async def generate(self, inputs: GenerateInputs):
         """Run a direct /completions call"""
+
+        # Implementations of the OpenAI APIs tend to get upset if you pass them null
+        # values, particularly if those values are associated with arguments that the
+        # implementation doesn't support. So strip out null parameters.
+        args_dict = inputs.model_dump(exclude_none=True)
         # pylint: disable-next=missing-kwoa
-        return await self._openai_client.completions.create(**inputs.dict())
+        return await self._openai_client.completions.create(**args_dict)
 
     def process_output(self, outputs):
         results = []

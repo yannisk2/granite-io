@@ -242,11 +242,20 @@ class TransformersBackend(Backend):
 
             # The generate() method doesn't explicitly tell us why it stopped
             # generating. We are supposed to infer that from the output.
-            if full_token_sequence[-1] == self._tokenizer.eos_token_id:
+            if generated_tokens[-1] == self._tokenizer.eos_token_id:
                 stop_reason = "end_of_turn"
                 # We're also supposed to strip off the end-of-turn tokens ourselves.
-                if generated_tokens:
+                generated_tokens = generated_tokens[:-1]
+
+                # When one requests multiple completions, the shorter completions will
+                # come out padded with extra end-of-turn tokens so that everything is
+                # the same length.
+                while (
+                    len(generated_tokens) > 0
+                    and generated_tokens[-1] == self._tokenizer.eos_token_id
+                ):
                     generated_tokens = generated_tokens[:-1]
+
             else:
                 stop_reason = "out_of_tokens"
 

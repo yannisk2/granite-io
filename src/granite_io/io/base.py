@@ -92,12 +92,15 @@ class InputOutputProcessor(FactoryConstructible):
         coroutine_to_run = self.acreate_chat_completion(inputs)
         try:  # Exceptions as control flow. Sorry, asyncio forces this design on us.
             asyncio.get_running_loop()
+
+            # If we get here, this code is running inside an async function.
+            return _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run)
         except RuntimeError:
             # If we get here, this code is not running inside an async function.
-            return asyncio.run(coroutine_to_run)
-
-        # If we get here, this code is running inside an async function.
-        return _workaround_for_horrible_design_flaw_in_asyncio(coroutine_to_run)
+            # First we exit the the exception handler; otherwise any exceptions that are
+            # thrown from the coroutine will be chained off the current RuntimeError.
+            pass
+        return asyncio.run(coroutine_to_run)
 
 
 class ModelDirectInputOutputProcessor(InputOutputProcessor):
@@ -131,14 +134,15 @@ class ModelDirectInputOutputProcessor(InputOutputProcessor):
                 "configuring an inference backend."
             )
 
-        generate_inputs = inputs.generate_inputs or GenerateInputs()
+        # Do not modify `inputs` in place. It is VERY VERY IMPORTANT not to do so.
+        # The caller may be using that object for something else.
+        generate_inputs = (
+            inputs.generate_inputs.model_copy()
+            if inputs.generate_inputs is not None
+            else GenerateInputs()
+        )
         generate_inputs.prompt = self.inputs_to_string(inputs)
-
-        # kwargs = inputs.model_dump()
-        # kwargs["prompt"] = prompt
-
         model_output = await self._backend.pipeline(generate_inputs)
-
         return self.output_to_result(output=model_output, inputs=inputs)
 
     @abc.abstractmethod
