@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
+# Standard
+import json
+import uuid
+
+# Third Party
+import pydantic
+
 # Local
 from granite_io.io.base import OutputProcessor
 from granite_io.io.consts import (
@@ -18,6 +25,7 @@ from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
+    FunctionCall,
     GenerateResults,
 )
 
@@ -33,6 +41,11 @@ _COT_END_ALTERNATIVES = [
 ]
 
 _MODEL_NAME = "Granite 3.2"
+
+
+def _random_uuid() -> str:
+    """:returns: hexadecimal data suitable to use as a unique identifier"""
+    return str(uuid.uuid4())
 
 
 @output_processor(
@@ -85,8 +98,27 @@ class Granite3Point2OutputProcessor(OutputProcessor):
                     )
 
             # Parse out tool calls
-            if output.startswith("<tool_call>"):
-                raise NotImplementedError("TODO: Implement tool call parsing")
+            tool_calls = []
+            if inputs.tools and output.startswith("<tool_call>"):
+                # Basic tool call parsing: assume well-formed JSON that adheres to the
+                # argument schema specified in the request.
+                try:
+                    tool_calls = json.loads(output[len("<tool_call>") :])
+                    if not isinstance(tool_calls, list):
+                        raise TypeError("Model didn't output a list of tool calls")
+                    tool_calls = [
+                        FunctionCall.model_validate(tool_call_json)
+                        for tool_call_json in tool_calls
+                    ]
+                    for function_call in tool_calls:
+                        # Model may decide not to produce IDs
+                        if function_call.id is None:
+                            function_call.id = _random_uuid()
+                    # Output has been turned to tools
+                    output = ""
+                except (ValueError, TypeError, pydantic.ValidationError):
+                    # Parsing failed; flow through
+                    pass
 
             # Parse out citations, documents and hallucinations
             try:
@@ -107,6 +139,7 @@ class Granite3Point2OutputProcessor(OutputProcessor):
                         reasoning_content=cot,
                         raw=original_output,
                         stop_reason=result.stop_reason,
+                        tool_calls=tool_calls,
                     )
                 )
             )
