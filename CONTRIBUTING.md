@@ -52,11 +52,17 @@ The following tools are required:
 - [python](https://www.python.org) (v3.10)
 - [pip](https://pypi.org/project/pip/) (v23.0+)
 
-You can setup your dev environment using `tox`, an environment orchestrator which allows for setting up environments for and invoking builds, unit tests, formatting, linting, etc. Install `tox` with:
+The first step is to install the necessary Python packages required for development. The command to do this is as follows:
 
 ```shell
-pip install tox
+pip install -e ".[dev]"
 ```
+
+> [!NOTE]
+> The `[all]` target can be used to install all packages `dev` and `notebook` with following command:
+> `pip install -e ".[all]"`
+
+You can run your dev environment using [tox](https://tox.wiki), which is an environment orchestrator that allows for setting up environments for and invoking builds, unit tests, formatting, linting, etc. `tox` is installed when you install the `dev` target in the `pip install` command above.
 
 If you want to manage your own virtual environment instead of using `tox`, you can install granite io processing and all dependencies. Check out [README](./README.md) for more details.
 
