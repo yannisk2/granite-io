@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Standard
-from pathlib import Path
 import os
 
 # Local
@@ -10,14 +9,10 @@ from granite_io.types import (
     ChatCompletionInputs,
     UserMessage,
 )
+from tests.test_utils import load_text_file
 
 _GENERALE_MODEL_NAME = "Granite 3.2"
 _TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
-
-
-def _load_model_output_file(file_name: str) -> str:
-    response = Path(file_name).read_text(encoding="UTF-8")
-    return response
 
 
 def test_run_processor_reasoning():
@@ -30,8 +25,21 @@ def test_run_processor_reasoning():
         ChatCompletionInputs(messages=messages, thinking=True)
     )
 
-    expected_prompt = _load_model_output_file(
+    expected_prompt = load_text_file(
         os.path.join(_TEST_DATA_DIR, "test_reasoning_prompt.txt")
     )
     assert isinstance(prompt, str)
-    assert prompt == expected_prompt
+    assert len(prompt) == len(expected_prompt)
+
+    # Prompt contains dates in first two lines of the text which change.
+    # Therefore need to extract and test them separately first.
+    # Then we test the remaining text.
+    assert (
+        prompt.split("\n", 1)[0].split(":")[0]
+        == (expected_prompt.split("\n", 1)[0].split(":")[0])
+    )
+    assert (
+        prompt.split("\n", 1)[1].split(":")[0]
+        == (expected_prompt.split("\n", 1)[1].split(":")[0])
+    )
+    assert prompt.split("\n", 2)[-1] == expected_prompt.split("\n", 2)[-1]
