@@ -15,7 +15,7 @@ import pydantic
 
 
 class FunctionCall(pydantic.BaseModel):
-    id: str
+    id: str | None = None
     name: str
 
     # This field should adhere to the argument schema from the  associated
