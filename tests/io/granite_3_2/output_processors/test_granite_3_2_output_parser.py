@@ -5,7 +5,6 @@ Tests for the model output parser
 """
 
 # Standard
-from pathlib import Path
 import os
 
 # Local
@@ -15,19 +14,13 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
 from granite_io.io.granite_3_2.output_processors.granite_3_2_output_parser import (
     parse_model_output,
 )
+from tests.test_utils import load_text_file
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
 
 
-def _load_model_output_file(file_name: str) -> str:
-    response = Path(file_name).read_text(encoding="UTF-8")
-    return response
-
-
 def test_output():
-    model_output = _load_model_output_file(
-        os.path.join(TEST_DATA_DIR, "test_output.txt")
-    )
+    model_output = load_text_file(os.path.join(TEST_DATA_DIR, "test_output.txt"))
     parsed_output = parse_model_output(model_output, "")
 
     assert parsed_output
@@ -46,7 +39,7 @@ def test_output():
 
 
 def test_output_with_citation():
-    model_output = _load_model_output_file(
+    model_output = load_text_file(
         os.path.join(TEST_DATA_DIR, "test_output_with_citation.txt")
     )
     parsed_output = parse_model_output(model_output, "")
@@ -98,7 +91,7 @@ def test_output_with_citation():
 
 
 def test_output_with_invalid_citation():
-    model_output = _load_model_output_file(
+    model_output = load_text_file(
         os.path.join(TEST_DATA_DIR, "test_output_with_invalid_citation.txt")
     )
     parsed_output = parse_model_output(model_output, "")
@@ -109,7 +102,7 @@ def test_output_with_invalid_citation():
 
 
 def test_output_with_citation_hallucinations():
-    model_output = _load_model_output_file(
+    model_output = load_text_file(
         os.path.join(TEST_DATA_DIR, "test_output_with_citation_hallucinations.txt")
     )
     parsed_output = parse_model_output(model_output, "")
@@ -177,12 +170,10 @@ def test_output_with_citation_hallucinations():
 
 
 def test_output_with_citation_from_source():
-    model_output = _load_model_output_file(
+    model_output = load_text_file(
         os.path.join(TEST_DATA_DIR, "test_output_with_citation_from_source.txt")
     )
-    doc_source = _load_model_output_file(
-        os.path.join(TEST_DATA_DIR, "test_document_source.txt")
-    )
+    doc_source = load_text_file(os.path.join(TEST_DATA_DIR, "test_document_source.txt"))
     doc_input = [_Document(text=f"{doc_source}")]
     parsed_output = parse_model_output(model_output, doc_input)
 
