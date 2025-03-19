@@ -52,7 +52,7 @@ class OpenAIBackend(Backend):
         # Implementations of the OpenAI APIs tend to get upset if you pass them null
         # values, particularly if those values are associated with arguments that the
         # implementation doesn't support. So strip out null parameters.
-        args_dict = {k: v for k, v in inputs.model_dump().items() if v is not None}
+        args_dict = inputs.model_dump(exclude_none=True)
         # pylint: disable-next=missing-kwoa
         return await self._openai_client.completions.create(**args_dict)
 
