@@ -98,7 +98,7 @@ class Granite3Point2OutputProcessor(OutputProcessor):
                     )
 
             # Parse out tool calls
-            tool_calls = None
+            tool_calls = []
             if inputs.tools and output.startswith("<tool_call>"):
                 # Basic tool call parsing: assume well-formed JSON that adheres to the
                 # argument schema specified in the request.
