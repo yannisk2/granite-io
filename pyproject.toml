@@ -69,9 +69,6 @@ dev = [
     "granite-io[voting]"
 ]
 notebook = [
-    "nltk",
-    "openai",
-    "pandas",
     "notebook"
 ]
 all = [
