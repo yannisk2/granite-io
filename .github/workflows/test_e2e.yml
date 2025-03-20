@@ -34,8 +34,8 @@ permissions:
   contents: read
 
 jobs:
-  test_examples:
-    name: "test-examples: using ${{ matrix.python }} on ${{ matrix.platform }}"
+  test_e2e:
+    name: "test-e2e: using ${{ matrix.python }} on ${{ matrix.platform }}"
     runs-on: "${{ matrix.platform }}"
     strategy:
       matrix:
