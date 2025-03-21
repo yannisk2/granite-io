@@ -3,12 +3,11 @@ from typing import Any, Callable
 import pathlib
 
 # Third Party
-from pdl.pdl import exec_program, parse_file, parse_str
-from pdl.pdl_ast import CallBlock, FunctionBlock, PdlLocationType, Program
 import aconfig
 
 # Local
 from .base import InputOutputProcessor
+from granite_io.optional import import_optional
 from granite_io.types import ChatCompletionInputs, ChatCompletionResults
 
 
@@ -17,6 +16,10 @@ class PdlInputOutputProcessor(InputOutputProcessor):
     Base class for input-output processors that work by executing a
     Prompt Declaration Language (PDL) function processing `ChatCompletionInputs`.
     """
+
+    with import_optional("pdl"):
+        # Third Party
+        from pdl.pdl_ast import FunctionBlock, PdlLocationType
 
     _pdl_function: FunctionBlock | None
     """PDL function used to process the input."""
@@ -28,7 +31,7 @@ class PdlInputOutputProcessor(InputOutputProcessor):
     def __init__(
         self,
         config: aconfig.Config | None = None,
-        pdl: FunctionBlock | str | None = None,
+        pdl: "FunctionBlock" | str | None = None,
         pdl_file: str | None = None,
         pdl_scope: dict[str, Any] | None = None,
     ):
@@ -38,6 +41,9 @@ class PdlInputOutputProcessor(InputOutputProcessor):
         :param pdl_file: Name of the PDL file containing the function PDL function
         :param pdl_scope: Initial environment in which the function is executed
         """
+        with import_optional("pdl"):
+            # Third Party
+            from pdl.pdl import parse_file, parse_str
         super().__init__(config)
         if isinstance(pdl, str):
             prog, loc = parse_str(pdl, file_name=pdl_file)
@@ -60,6 +66,10 @@ class PdlInputOutputProcessor(InputOutputProcessor):
     def create_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
+        with import_optional("pdl"):
+            # Third Party
+            from pdl.pdl import exec_program
+            from pdl.pdl_ast import CallBlock, Program
         prog = Program(
             CallBlock(
                 defs={"_pdl_function": self._pdl_function},
