@@ -31,10 +31,11 @@ The key architectural components are:
 
 The overall architecture is fairly straightforward. At the top level, there are _InputProcessors_ and _OutputProcessors_. The Input Processor transforms chat request into the format the model requires to perform its baked in additional cpability. The Output Processor transforms the output from the model into a format more easily parsed. The _InputOutputProcessor_ is a component that combines both an input processor and an output processor within a single entity. It also contains a _Backend_ so that it can perform the chat request with the model and then pipe the output to the output processor. The first diagram below shows the IO Processor integrates both processors and backend within a single component.
 
-> [!NOTE]
-> The IO processor architecture below represents more succiently a single turn chat request. In other words, you process the chat request input, inference the model, and finally process the output from the model. The IO processor is flexible to be able to handle more multi-turn scenarios where there are multiple inference calls which feeds output from one call as input to the next.
-
 <img src="./images/granite-io-full-architecture.png" width="600">
+
+The IO processor architecture above represents more succiently a single turn chat request. In other words, you process the chat request input, inference the model, and finally process the output from the model. The IO processor architecture is howevere flexible and able to handle more multi-turn scenarios where there are multiple inference calls which feeds output from one call as input to the next. The diagram that follows demonstrates how the IO processor can be implemeted without specific input and output processors 
+
+<img src="./images/granite-io-io-proc-architecture.png" width="600">
 
 The next diagram that follows below show how Input and Output Processors can be used independently with the user performing chat request directly with the model. In this instance the user is free to configure what input or output processor to use, or  if only an input or an output processor is required.
 
