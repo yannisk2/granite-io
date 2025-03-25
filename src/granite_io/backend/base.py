@@ -71,6 +71,10 @@ class Backend(FactoryConstructible):
                 if best_of is None or best_of < n:
                     inputs.best_of = n
 
+        # Some backends prefer an array to a string
+        if isinstance(inputs.stop, str):
+            inputs.stop = [inputs.stop]
+
         return inputs
 
     @abc.abstractmethod
