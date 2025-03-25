@@ -3,7 +3,7 @@
 """
 This example show how to infer or call a model using the framework
 and an Ollama backend to serve the model. It uses the framework capability
-to create custom IO processor using a specific input processor and output
+to create a custom IO processor using a specific input processor and output
 processor.
 
 In this scenario the chat request enables thinking mode in the model
@@ -28,7 +28,8 @@ from granite_io import (  # make_new_io_processor,
 
 ollama_model_name = "granite3.2:8b"
 
-# Create IO processor using specified input and output processors
+# Create a custom IO processor using specified input and output processors
+# This use case uses the 'make_new_io_processor' wrapper function.
 # io_processor = make_new_io_processor(
 #    input_processor=get_input_processor(ollama_model_name),
 #    output_processor=get_output_processor(ollama_model_name),
@@ -36,6 +37,11 @@ ollama_model_name = "granite3.2:8b"
 # )
 
 
+# Alternative approach to creating a custom IO processor. In this scenario
+# we will inherit from base class 'ModelDirectInputOutputProcessor' and add
+# custom input and output processing to it. In this case will use input and output
+# processors from the library. You can also implement without using input and output
+# processors.
 class _MyInputOutputProcessor(ModelDirectInputOutputProcessor):
     """
     Custom IO processor which uses specifc Granite 3.2 input and output

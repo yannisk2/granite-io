@@ -249,8 +249,8 @@ def make_new_io_processor(
     backend: Backend | None = None,
 ) -> ModelDirectInputOutputProcessor:
     """
-    Creates an instance of an InputOutputProcessor based on the InputProcessor
-    and OutputProcessor passed in the function call.
+    Wrapper function that creates an instance of an InputOutputProcessor based on the
+    InputProcessor and OutputProcessor passed in the function call.
 
     :param input_processor: Processor that performs processing of input to model
     :param input_processor: Processor that performs processing of output from the model
@@ -263,7 +263,7 @@ def make_new_io_processor(
     :raise: ValueError - If input or output processor is None
     """
 
-    class NewInputOutputProcessor(ModelDirectInputOutputProcessor):
+    class _InputOutputProcessor(ModelDirectInputOutputProcessor):
         """
         InputOutputProcessor template.
 
@@ -317,7 +317,7 @@ def make_new_io_processor(
         ) -> ChatCompletionResults:
             return self._output_processor.transform(output, inputs)
 
-    return NewInputOutputProcessor(
+    return _InputOutputProcessor(
         input_processor=input_processor,
         output_processor=output_processor,
         config=config,
