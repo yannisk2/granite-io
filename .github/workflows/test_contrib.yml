@@ -76,4 +76,4 @@ jobs:
 
       - name: "Test each contrib project"
         run: |
-          ls -1d contrib/*/tox.ini | xargs tox -c 
+          find contrib/**/tox.ini -print0 | xargs -0 -n1 tox -c
