@@ -54,22 +54,22 @@ in the documents, inform the user that the question cannot be answered based on 
 available data."""
 
 # String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START
-# if there are tools in the current request but there are no documents in the current
-# request.
-_NO_TOOLS_AND_DOCS_SYSTEM_MESSAGE_PART = """\
- You are a helpful AI assistant with access to the following tools. When a tool is \
-required to answer the user's query, respond with <|tool_call|> followed by a JSON \
-list of tools used. If a tool does not exist in the provided list of tools, notify the \
-user that you do not have the ability to fulfill the request."""
-
-# String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START
 # if there are documents in the current request but there are no tools in the current
 # request.
-_TOOLS_AND_NO_DOCS_SYSTEM_MESSAGE_PART = """\
- Write the response to the user's input by strictly aligning with the facts in the \
+_NO_TOOLS_AND_DOCS_SYSTEM_MESSAGE_PART = """\
+Write the response to the user's input by strictly aligning with the facts in the \
 provided documents. If the information needed to answer the question is not available \
 in the documents, inform the user that the question cannot be answered based on the \
 available data."""
+
+# String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START
+# if there are tools in the current request but there are no documents in the current
+# request.
+_TOOLS_AND_NO_DOCS_SYSTEM_MESSAGE_PART = """\
+You are a helpful AI assistant with access to the following tools. When a tool is \
+required to answer the user's query, respond with <|tool_call|> followed by a JSON \
+list of tools used. If a tool does not exist in the provided list of tools, notify the \
+user that you do not have the ability to fulfill the request."""
 
 # String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START
 # if there are no tools or documents in the current request and the "thinking" flag is
@@ -174,9 +174,7 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
         # Models are not guaranteed to produce a valid response if there are zero
         # messages.
         if len(messages) == 0:
-            raise ValueError(
-                "No messages. Model behavior for this case is not defined."
-            )
+            raise ValueError("No messages. Model behavior for this case is not defined.")
 
         # The first message, and only the first message, may be the system message.
         first_message_is_system_message = isinstance(messages[0], SystemMessage)
@@ -186,8 +184,7 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
             # assistant message.
             if len(messages) == 0:
                 raise ValueError(
-                    "Input contains only a system message. Model behavior for this "
-                    "case is not defined."
+                    "Input contains only a system message. Model behavior for this " "case is not defined."
                 )
 
         # The first message that is not a system message must be
@@ -198,10 +195,7 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
                     f"First message after system message must be a user or "
                     f"assistant message. Found type {type(messages[0])}"
                 )
-            raise ValueError(
-                f"First message must be a system, user, or assistant "
-                f"Found type {type(messages[0])}"
-            )
+            raise ValueError(f"First message must be a system, user, or assistant " f"Found type {type(messages[0])}")
 
         # Undocumented constraint: All other messages form a conversation that
         # alternates strictly between user and assistant, possibly with tool calls
@@ -322,9 +316,7 @@ class Granite3Point2InputProcessor(InputProcessor):
     ```
     """
 
-    def _split_messages(
-        self, inputs: _Granite3Point2Inputs
-    ) -> tuple[SystemMessage | None, list[UserMessage]]:
+    def _split_messages(self, inputs: _Granite3Point2Inputs) -> tuple[SystemMessage | None, list[UserMessage]]:
         """
         Separate the system message from other messages.
 
@@ -414,23 +406,14 @@ class Granite3Point2InputProcessor(InputProcessor):
 
     def _message_to_prompt_string(self, message: UserMessage | AssistantMessage) -> str:
         if isinstance(message, UserMessage):
-            return (
-                f"<|start_of_role|>user<|end_of_role|>{message.content}"
-                f"<|end_of_text|>\n"
-            )
+            return f"<|start_of_role|>user<|end_of_role|>{message.content}" f"<|end_of_text|>\n"
         if isinstance(message, AssistantMessage):
             # Note that we discard any tool calls in the message, per the Jinja
             # template.
-            return (
-                f"<|start_of_role|>assistant<|end_of_role|>{message.content}"
-                f"<|end_of_text|>\n"
-            )
+            return f"<|start_of_role|>assistant<|end_of_role|>{message.content}" f"<|end_of_text|>\n"
         if isinstance(message, ToolResultMessage):
             # Note that we discard the tool call ID, per the Jinja template.
-            return (
-                f"<|start_of_role|>tool<|end_of_role|>{message.content}"
-                f"<|end_of_text|>\n"
-            )
+            return f"<|start_of_role|>tool<|end_of_role|>{message.content}" f"<|end_of_text|>\n"
         raise TypeError(f"Unexpected message type {type(message)}")
 
     def _build_controls_record(self, inputs: _Granite3Point2Inputs) -> dict | None:
@@ -460,9 +443,7 @@ class Granite3Point2InputProcessor(InputProcessor):
             return None
         return result
 
-    def transform(
-        self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
-    ) -> str:
+    def transform(self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True) -> str:
         # Downcast to a Granite-specific request type with possible additional fields.
         # This operation also performs additional validation.
         inputs = _Granite3Point2Inputs.model_validate(inputs.model_dump())
@@ -515,38 +496,19 @@ class Granite3Point2InputProcessor(InputProcessor):
             documents_part = ""
         else:
             documents_body = "\n\n".join(
-                [
-                    f"Document {i}\n{inputs.documents[i].text}"
-                    for i in range(len(inputs.documents))
-                ]
+                [f"Document {i}\n{inputs.documents[i].text}" for i in range(len(inputs.documents))]
             )
-            documents_part = (
-                "<|start_of_role|>documents<|end_of_role|>"
-                + documents_body
-                + "<|end_of_text|>\n"
-            )
+            documents_part = "<|start_of_role|>documents<|end_of_role|>" + documents_body + "<|end_of_text|>\n"
 
-        messages_part = "".join(
-            [self._message_to_prompt_string(message) for message in loop_messages]
-        )
+        messages_part = "".join([self._message_to_prompt_string(message) for message in loop_messages])
 
         # Jinja template expects arbitrary JSON, while our dataclass has specific
         # fields for supported controls.
         controls_record = self._build_controls_record(inputs)
-        controls_str = (
-            "" if controls_record is None else " " + json.dumps(controls_record)
-        )
+        controls_str = "" if controls_record is None else " " + json.dumps(controls_record)
 
         generation_prompt_part = (
-            ""
-            if not add_generation_prompt
-            else f"<|start_of_role|>assistant{controls_str}<|end_of_role|>"
+            "" if not add_generation_prompt else f"<|start_of_role|>assistant{controls_str}<|end_of_role|>"
         )
 
-        return (
-            system_message
-            + tools_part
-            + documents_part
-            + messages_part
-            + generation_prompt_part
-        )
+        return system_message + tools_part + documents_part + messages_part + generation_prompt_part
