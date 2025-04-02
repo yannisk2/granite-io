@@ -4,7 +4,6 @@
 from typing import TYPE_CHECKING
 
 # Third Party
-from openai import AsyncOpenAI
 import aconfig
 
 # Local
@@ -39,7 +38,6 @@ class OpenAIBackend(Backend):
 
         api_key = config.get("openai_api_key", "ollama")
         base_url = config.get("openai_base_url", "http://localhost:11434/v1")
-
         default_headers = {"RITS_API_KEY": api_key} if api_key else None
 
         self._openai_client = openai.AsyncOpenAI(
@@ -56,18 +54,7 @@ class OpenAIBackend(Backend):
         # pylint: disable-next=missing-kwoa
         return await self._openai_client.completions.create(**args_dict)
 
-        if num_return_sequences < 1:
-            raise ValueError(
-                f"Invalid value for num_return_sequences ({num_return_sequences})"
-            )
-
-        result = await self._openai_client.completions.create(
-            model=self._model_str,
-            prompt=input_str,
-            best_of=num_return_sequences,
-            n=num_return_sequences,
-            max_tokens=1024,  # TODO: make this configurable
-        )
+    def process_output(self, outputs):
         results = []
         for choice in outputs.choices:
             results.append(

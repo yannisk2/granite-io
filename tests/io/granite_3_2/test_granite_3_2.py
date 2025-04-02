@@ -365,10 +365,21 @@ def test_run_processor(backend_x: Backend, input_json_str: str):
     # TODO: Verify outputs in greater detail
 
 
-@pytest.mark.asyncio(loop_scope="session")
-@pytest.mark.xfail(
-    reason="APIConnectionError, but OpenAI tests are optional.",
-    raises=APIConnectionError,
+@pytest.mark.parametrize(
+    ["inputs", "output", "exp_thought", "exp_resp"],
+    [
+        # No thinking flag
+        (no_thinking_input, no_thinking_output, None, no_thinking_output),
+        (no_thinking_input, cot_output, None, cot_output),
+        # Thinking flag
+        (thinking_input, no_cot_output, None, no_cot_output),
+        (thinking_input, no_thinking_output, None, no_thinking_output),
+        (thinking_input, no_response_output, None, no_response_output),
+        (thinking_input, cot_output, thought, response),
+        (thinking_input, cot_alt_output, thought, response),
+        (thinking_input, cot_mixed_output, thought, response),
+        (thinking_input, cot_pre_output, thought, f"{pre_thought} {response}"),
+    ],
 )
 def test_cot_parsing(inputs, output, exp_thought, exp_resp):
     """Test the parsing logic for CoT reasoning output"""

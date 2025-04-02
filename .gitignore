@@ -180,11 +180,9 @@ cython_debug/
 # Mac personalization files
 *.DS_Store
 
+# VSCode local config
+.vscode/
+
 # Setuptools scm version
 /src/granite_io/_version.py
 
-# Mac personalization files
-*.DS_Store
-
-# VSCode local config
-.vscode/
