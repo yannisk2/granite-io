@@ -5,8 +5,7 @@ Prompt Description Language (PDL) I/O processor
 """
 
 # Standard
-from typing import Any, Callable
-import pathlib
+from typing import Any
 
 # Third Party
 import aconfig
@@ -86,36 +85,3 @@ class PdlInputOutputProcessor(InputOutputProcessor):
         )
         results = exec_program(prog, scope=self._pdl_scope)
         return ChatCompletionResults.model_validate(results)
-
-
-class SequentialScalingInputOutputProcessor(PdlInputOutputProcessor):
-    """
-    Input-output processor asking multiple answers until a predicate is satisfied.
-    """
-
-    def __init__(
-        self,
-        config: aconfig.Config | None = None,
-        model: str | None = None,
-        backend: str | None = None,
-        max_iterations: int = 5,
-        validator: Callable[[ChatCompletionResults], bool] | None = None,
-    ):
-        """
-        :param config: Setup config for this IO processor
-        :param model: Model name used by the backend.
-        :param backend: Backend name.
-        :param max_iterations: Maximal number of model calls.
-        :param validator: predicate that the response must satisfy.
-        """
-        cwd = pathlib.Path(__file__).parent.resolve()
-        super().__init__(
-            config,
-            pdl_file=cwd / "sequential_scaling.pdl",
-            pdl_scope={
-                "model": model,
-                "backend": backend,
-                "k": max_iterations,
-                "validator": validator,
-            },
-        )
