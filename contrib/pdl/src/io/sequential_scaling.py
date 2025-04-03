@@ -4,16 +4,19 @@
 Sequential Scaling I/O processor
 """
 
-# Third Party
-import aconfig
-
-
 # Standard
 from typing import Callable
 import pathlib
 
+# Third Party
+import aconfig
+
+# First Party
 from contrib.pdl.src.io.pdl_io import PdlInputOutputProcessor
+
+# Local
 from granite_io.types import ChatCompletionResults
+
 
 class SequentialScalingInputOutputProcessor(PdlInputOutputProcessor):
     """
