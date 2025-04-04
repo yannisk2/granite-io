@@ -13,6 +13,7 @@ import shutil
 import signal
 import socketserver
 import subprocess
+import sys
 import time
 import urllib.request
 import uuid
@@ -23,6 +24,15 @@ import aiohttp
 
 # Local
 from granite_io.backend.openai import OpenAIBackend
+
+# Perform the "set sensible defaults for Python logging" ritual.
+logger = logging.getLogger("granite_io.backend.vllm_server")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(stream=sys.stdout)
+handler.setFormatter(
+    logging.Formatter("%(levelname)s %(asctime)s %(message)s", datefmt="%H:%M:%S")
+)
+logger.addHandler(handler)
 
 
 class LocalVLLMServer:
@@ -114,7 +124,7 @@ class LocalVLLMServer:
                 command_parts.append(f"{k}={v}")
 
         # logging.info(f"Environment: {environment}")
-        logging.info("Running: %s", " ".join(command_parts))
+        logger.info("Running: %s" % " ".join(command_parts))
         self._subproc = subprocess.Popen(command_parts, env=environment)  # noqa
 
     def __repr__(self):
