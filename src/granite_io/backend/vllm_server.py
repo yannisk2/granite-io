@@ -123,9 +123,10 @@ class LocalVLLMServer:
             for k, v in lora_adapters:
                 command_parts.append(f"{k}={v}")
 
-        # logging.info(f"Environment: {environment}")
-        logger.info("Running: %s" % " ".join(command_parts))
-        self._subproc = subprocess.Popen(command_parts, env=environment)  # noqa
+        # We would like to use lazy formatting here, but this code needs to run on
+        # Python 3.10.
+        logger.info("Running: %s" % " ".join(command_parts))  # pylint: disable=logging-not-lazy
+        self._subproc = subprocess.Popen(command_parts, env=environment)  # pylint: disable=consider-using-with
 
     def __repr__(self):
         return f"LocalVLLMServer({self._model_name} -> {self._base_url()})"
