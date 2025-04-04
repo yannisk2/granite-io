@@ -17,7 +17,6 @@ from granite_io.backend.base import Backend, ChatCompletionBackend
 from granite_io.factory import FactoryConstructible
 from granite_io.types import (
     ChatCompletionInputs,
-    ChatCompletionResult,
     ChatCompletionResults,
     GenerateInputs,
     GenerateResults,
@@ -64,7 +63,7 @@ class InputOutputProcessor(FactoryConstructible):
     @abc.abstractmethod
     async def acreate_chat_completion(
         self, inputs: ChatCompletionInputs
-    ) -> ChatCompletionResult:
+    ) -> ChatCompletionResults:
         """
         :param inputs: Structured representation of the inputs to a chat completion
             request, possibly including additional fields that only this input-output
@@ -76,7 +75,7 @@ class InputOutputProcessor(FactoryConstructible):
 
     def create_chat_completion(
         self, inputs: ChatCompletionInputs
-    ) -> ChatCompletionResult:
+    ) -> ChatCompletionResults:
         """
         Non-async version of :func:`acreate_chat_completion()`
 
