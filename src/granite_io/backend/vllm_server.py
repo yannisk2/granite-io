@@ -43,6 +43,7 @@ class LocalVLLMServer:
     def __init__(
         self,
         model_name: str,
+        device_name: str = "auto",
         served_model_name: str | None = None,
         api_key: str | None = None,
         port: int | None = None,
@@ -57,6 +58,9 @@ class LocalVLLMServer:
         :param model_name: Path to local file or Hugging Face coordinates of model
         :param served_model_name: Optional alias under which the model should be named
          in the OpenAI API
+        :param device_name: Name of vLLM device to use for inference. Current options
+         are {auto,cuda,neuron,cpu,tpu,xpu,hpu}.
+         Note that the "cpu" option requires building vLLM from source.
         :param api_key: Optional API key for the server to require. Otherwise this class
          will generate a random key.
         :param port: Optional port on localhost to use. If not specified, this class
@@ -111,6 +115,8 @@ class LocalVLLMServer:
             str(max_model_len),
             "--guided_decoding_backend",
             "outlines",
+            "--device",
+            device_name,
         ]
         if enforce_eager:
             command_parts.append("--enforce-eager")

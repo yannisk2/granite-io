@@ -5,6 +5,7 @@ import collections.abc
 
 # Third Party
 import pytest
+import torch
 
 # Local
 from granite_io import make_backend
@@ -59,6 +60,9 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
     """
     :returns: vLLM server with all the LoRAs for which we currently have IO processors
     """
+    if not torch.backends.cuda.is_available():
+        pytest.xfail("GPU required to run vLLM. vLLM required to run model.")
+
     # Currently all adapters are trained on Granite 3.2 8B
     base_model = "ibm-granite/granite-3.2-8b-instruct"
     lora_adapters = [
