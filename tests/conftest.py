@@ -60,7 +60,7 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
     """
     :returns: vLLM server with all the LoRAs for which we currently have IO processors
     """
-    if not torch.backends.cuda.is_available():
+    if not torch.cuda.is_available():
         pytest.xfail("GPU required to run vLLM. vLLM required to run model.")
 
     # Currently all adapters are trained on Granite 3.2 8B
