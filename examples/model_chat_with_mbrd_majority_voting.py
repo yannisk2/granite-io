@@ -4,12 +4,13 @@
 This example show how to infer or call a model using the framework and an Ollama
 backend to serve the model.
 
-It uses majority voting to decide on best answer to use from number of model sample
-outputs.
+It uses MBRD and ROUGE scoring for majority voting to decide on best answer to use
+from number of model sample outputs.
 """
 
 # Local
 from granite_io import make_backend, make_io_processor
+from granite_io.io.voting import MBRDMajorityVotingProcessor
 from granite_io.types import ChatCompletionInputs, UserMessage
 
 # By default the backend is an Ollama server running locally using default url. Ollama
@@ -20,7 +21,7 @@ from granite_io.types import ChatCompletionInputs, UserMessage
 model_name = "granite3.2:8b"
 # openai_base_url = ""
 # openai_api_key = ""
-io_processor = make_io_processor(
+base_processor = make_io_processor(
     model_name,
     backend=make_backend(
         "openai",
@@ -33,14 +34,17 @@ io_processor = make_io_processor(
 )
 question = "What is 234651 + 13425?\nAnswer with just a number please."
 messages = [UserMessage(content=question)]
-outputs = io_processor.create_chat_completion(
-    ChatCompletionInputs(
-        messages=messages,
-        majority_voting=True,
-        generate_inputs={"n": 20, "temperature": 0.6, "max_tokens": 1024},
-    )
+completion_inputs = ChatCompletionInputs(
+    messages=messages,
+    thinking=True,
+    generate_inputs={"n": 20, "temperature": 0.6, "max_tokens": 1024},
 )
-print("------ WITH MAJORITY VOTING ------")
-# There will be only 1 output because majority voting is performed
-# on all completions results
-print(outputs.results[0].next_message.content)
+voting_processor = MBRDMajorityVotingProcessor(base_processor)
+results = voting_processor.create_chat_completion(completion_inputs)
+print("Output from base model augmented with MBRD majority voting:")
+# This should be only one output, the majority voted answer
+for result_num, r in enumerate(results.results):
+    print(f"{result_num + 1}: {r.next_message.content}")
+
+# What's the actual answer?
+print(f"---------\nThe actual answer is: {234651 + 13425}")

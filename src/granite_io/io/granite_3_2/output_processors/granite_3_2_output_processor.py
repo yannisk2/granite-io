@@ -11,7 +11,6 @@ import pydantic
 # Local
 from granite_io.io.base import OutputProcessor
 from granite_io.io.consts import (
-    _FINAL_ANSWER,
     _GRANITE_3_2_2B_HF,
     _GRANITE_3_2_2B_OLLAMA,
     _GRANITE_3_2_COT_END,
@@ -33,7 +32,6 @@ from granite_io.types import (
     FunctionCall,
     GenerateResults,
 )
-from granite_io.utils.mbrd import minimum_bayesian_risk_decoding, rouge_similarity
 
 # Some versions of the model are known to shorten "Here is" to "Here's", so we
 # provide alternate forms of these strings for those versions.
@@ -79,16 +77,6 @@ class Granite3Point2OutputProcessor(OutputProcessor):
         # Downcast to a Granite-specific request type with possible additional fields.
         # This operation also performs additional validation.
         inputs = _Granite3Point2Inputs.model_validate(inputs.model_dump())
-
-        # Perform majority voting on sampled output
-        majority_response = None
-        if inputs.majority_voting:
-            normalized_responses = extract_normalized_responses(
-                output.results, _FINAL_ANSWER
-            )
-            majority_response, _ = minimum_bayesian_risk_decoding(
-                normalized_responses, rouge_similarity
-            )
 
         results = []
         for result in output.results:
@@ -158,11 +146,7 @@ class Granite3Point2OutputProcessor(OutputProcessor):
                 ChatCompletionResult(
                     next_message=AssistantMessage(
                         citations=parsed_output["citations"],
-                        content=(
-                            majority_response
-                            if majority_response
-                            else parsed_output["response"]
-                        ),
+                        content=(parsed_output["response"]),
                         documents=parsed_output["docs"],
                         hallucinations=parsed_output["hallucinations"],
                         reasoning_content=cot,
@@ -172,10 +156,6 @@ class Granite3Point2OutputProcessor(OutputProcessor):
                     )
                 )
             )
-            # With majority voting, you are taking one majority response
-            # and just return that
-            if inputs.majority_voting:
-                break
 
         return ChatCompletionResults(results=results)
 
