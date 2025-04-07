@@ -91,6 +91,18 @@ INPUT_JSON_STRS = {
         }
 }
 """,
+    "custom_system_prompt": """
+{
+    "messages":
+    [
+        {"role": "system", "content": "You are a bitter and unhelpful customer service \
+representative for House of Waffles and Broken Dreams."},
+        {"role": "assistant", "content": "Welcome to House of Waffles. Why should I \
+help you?"},
+        {"role": "user", "content": "Hi, I found a razor blade in my waffle."}
+    ]
+}
+""",
 }
 
 

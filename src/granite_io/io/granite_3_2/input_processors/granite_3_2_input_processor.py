@@ -170,6 +170,9 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
     @pydantic.field_validator("messages")
     @classmethod
     def _validate_inputs_messages(cls, messages: list) -> list:
+        # Save a copy so the validation code below can mutate the original
+        original_messages = messages.copy()
+
         # There is no supervised fine tuning data for the case of zero messages.
         # Models are not guaranteed to produce a valid response if there are zero
         # messages.
@@ -208,7 +211,10 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
         # after an assistant turn and before the next user turn.
         # TODO: Validate this invariant.
 
-        return messages
+        # Pydantic will use the value that this validator returns as the value of the
+        # messages field. Undo any changes that we made during validation and return
+        # the original value.
+        return original_messages
 
 
 @input_processor(
@@ -468,9 +474,9 @@ class Granite3Point2InputProcessor(InputProcessor):
         inputs = _Granite3Point2Inputs.model_validate(inputs.model_dump())
 
         # Check for a caller-provided system message
-        system_message, loop_messages = self._split_messages(inputs)
+        system_message_json, loop_messages = self._split_messages(inputs)
 
-        if system_message is not None:
+        if system_message_json is not None:
             if inputs.thinking:
                 raise ValueError(
                     f"'thinking' flag is set, but the model input includes a custom "
@@ -483,20 +489,24 @@ class Granite3Point2InputProcessor(InputProcessor):
                     f"{_GRANITE_3_2_MODEL_NAME} only supports the documents list when "
                     f"the default system message is used."
                 )
-            if inputs.controls.citations:
+            if inputs.controls and inputs.controls.citations:
                 raise ValueError(
                     f"'citations' flag is set, but the model input includes a custom "
                     f"system message. {_GRANITE_3_2_MODEL_NAME} only supports the "
                     f"'citations' flag when the default system message is used."
                 )
-            if inputs.controls.hallucinations:
+            if inputs.controls and inputs.controls.hallucinations:
                 raise ValueError(
                     f"'hallucinations' flag is set, but the model input includes a "
                     f"custom system message. {_GRANITE_3_2_MODEL_NAME} only supports "
                     f"the 'hallucinations' flag when the default system message is "
                     f"used."
                 )
-        else:  # if system_message is None:
+            system_message = (
+                f"<|start_of_role|>system<|end_of_role|>"
+                f"{system_message_json.content}<|end_of_text|>\n"
+            )
+        else:  # if system_message_json is None:
             # No caller-provided system message.
             # Create a default system message according to the rules implied by the
             # tokenizer's Jinja template.
