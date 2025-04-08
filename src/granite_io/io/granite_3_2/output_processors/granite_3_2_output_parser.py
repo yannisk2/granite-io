@@ -463,6 +463,12 @@ def _get_docs_from_citations(docs: str) -> list[dict]:
     """
     Given a multi-line string with document information per line, extract
     and add to dictionary list with "doc_id" and "text" fields
+
+    Document line format:
+    <co>"<citation_id>"</co> Document "<document_id>": "<text>"
+
+    For example:
+    <co>1</co> Document 2: "RAG, retrieval-augmented generation..."
     """
     doc_dicts = []
     start_citation = "<co>"
