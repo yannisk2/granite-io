@@ -170,8 +170,10 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
     @pydantic.field_validator("messages")
     @classmethod
     def _validate_inputs_messages(cls, messages: list) -> list:
-        # Save a copy so the validation code below can mutate the original
-        original_messages = messages.copy()
+        # Make a copy so the validation code below can mutate the messages list but pass
+        # through the original value. The caller also might have a pointer to the list.
+        original_messages = messages
+        messages = messages.copy()
 
         # There is no supervised fine tuning data for the case of zero messages.
         # Models are not guaranteed to produce a valid response if there are zero
