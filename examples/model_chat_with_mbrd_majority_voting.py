@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-This example show how to infer or call a model using the framework and an Ollama
+This example shows how to infer or call a model using the framework and an OpenAI
 backend to serve the model.
 
 It uses MBRD and ROUGE scoring for majority voting to decide on best answer to use
@@ -13,11 +13,12 @@ from granite_io import make_backend, make_io_processor
 from granite_io.io.voting import MBRDMajorityVotingProcessor
 from granite_io.types import ChatCompletionInputs, UserMessage
 
-# By default the backend is an Ollama server running locally using default url. Ollama
-# howevere does not support multiple completions per prompt i.e. "n" param below.
-# You will need to use a backend that supports multiple completions to fully see
-# majority voting happening. Backends like vLLM support multiple completions. You will
-# need to update url and key when connecting to another backend.
+# By default the OpenAI backend is configured for Ollama server running locally using
+# default url. Ollama howevere does not support multiple completions per
+# prompt i.e. "n" param below. You will need to use a backend that supports multiple
+# completions to fully see majority voting happening. Backends like vLLM support
+# multiple completions. You will need to update url and key when connecting to another
+# backend.
 model_name = "granite3.2:8b"
 # openai_base_url = ""
 # openai_api_key = ""
