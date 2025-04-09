@@ -238,7 +238,7 @@ class LocalVLLMServer:
 
     def make_backend(self) -> OpenAIBackend:
         """
-        :returns: A backend instance pointed at the primary model that our subprcess
+        :returns: A backend instance pointed at the primary model that our subprocess
          is serving.
         """
         return OpenAIBackend(
