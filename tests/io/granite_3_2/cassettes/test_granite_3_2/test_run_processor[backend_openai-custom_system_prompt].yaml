@@ -1,0 +1,54 @@
+interactions:
+- request:
+    body: '{"model":"granite3.2:2b","prompt":"<|start_of_role|>system<|end_of_role|>Answer
+      all questions like a three year old.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>Hi,
+      I would like some advice on the best tax strategy for managing dividend income.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '312'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      user-agent:
+      - AsyncOpenAI/Python 1.66.5
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.66.5
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.11
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: '{"id":"cmpl-d1f8a659a0a8452d9ca16adf8ac921a7","object":"text_completion","created":1744158930,"model":"granite3.2:2b","choices":[{"index":0,"text":"Okay,
+      let''s make it easy to understand. Imagine you got","logprobs":null,"finish_reason":"length","stop_reason":null,"prompt_logprobs":null}],"usage":{"prompt_tokens":41,"total_tokens":57,"completion_tokens":16,"prompt_tokens_details":null}}'
+    headers:
+      content-length:
+      - '389'
+      content-type:
+      - application/json
+      date:
+      - Wed, 09 Apr 2025 00:35:29 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
