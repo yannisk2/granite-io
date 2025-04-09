@@ -111,7 +111,7 @@ def test_canned_output():
     assert multi_output_strs == multi_expected
 
 
-@pytest.mark.vcr(record_mode="new_episodes")
+@pytest.mark.vcr
 def test_run_model(lora_server: LocalVLLMServer):
     """
     Run a chat completion through the LoRA adapter using the I/O processor.
