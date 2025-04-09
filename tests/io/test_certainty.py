@@ -12,7 +12,6 @@ import textwrap
 import pytest
 
 # Local
-from granite_io.backend.vllm_server import LocalVLLMServer
 from granite_io.io.certainty import CertaintyIOProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     _Granite3Point2Inputs,
@@ -112,7 +111,7 @@ def test_canned_output():
 
 
 @pytest.mark.vcr
-def test_run_model(lora_server: LocalVLLMServer):
+def test_run_model(lora_server):
     """
     Run a chat completion through the LoRA adapter using the I/O processor.
     """
