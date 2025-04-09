@@ -8,8 +8,8 @@ See model card at https://huggingface.co/ibm-granite/granite-uncertainty-3.2-8b-
 
 # Local
 from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
-from granite_io.io.granite_3_2.granite_3_2 import Granite3Point2InputOutputProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    Granite3Point2InputProcessor,
     _Granite3Point2Inputs,
 )
 from granite_io.types import (
@@ -97,7 +97,7 @@ class CertaintyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         super().__init__(backend=backend)
 
         # I/O processor for the base model, which does most of the input formatting.
-        self.base_processor = Granite3Point2InputOutputProcessor()
+        self.base_input_processor = Granite3Point2InputProcessor()
 
     def inputs_to_generate_inputs(self, inputs: ChatCompletionInputs) -> GenerateInputs:
         # Validate the input and convert to Granite input
@@ -108,7 +108,7 @@ class CertaintyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             raise ValueError("Last message is not a user or assistant message")
 
         # The beginning of the prompt doesn't change relative to base Granite 3.2
-        prompt_prefix = self.base_processor.inputs_to_string(inputs, False)
+        prompt_prefix = self.base_input_processor.transform(inputs, False)
 
         # Only the generation prompt portion changes
         prompt = prompt_prefix + "<|start_of_role|>certainty<|end_of_role|>"
