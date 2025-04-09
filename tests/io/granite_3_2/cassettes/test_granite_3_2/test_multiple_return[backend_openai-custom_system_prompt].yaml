@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: '{"model":"granite3.2:2b","prompt":"<|start_of_role|>system<|end_of_role|>Answer
+      all questions like a three year old.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>Hi,
+      I would like some advice on the best tax strategy for managing dividend income.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>","best_of":3,"max_tokens":1024,"n":3}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '348'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      user-agent:
+      - AsyncOpenAI/Python 1.61.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.61.0
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.5
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: "{\"id\":\"cmpl-669\",\"object\":\"text_completion\",\"created\":1744206497,\"model\":\"granite3.2:2b\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"text\":\"To
+      help you understand this in simple ways, let's imagine you have a piggy bank
+      with money from your toys that grows over time because of big helpers (dividends).\\n\\n1.
+      **Saving the Money**: One good thing is saving the money you get as dividends
+      right back into the same piggy bank it came from. That way, more money can grow
+      in it through future dividends. This means less \\\"tax\\\" time later because
+      you didn't spend it before the tax happens.\\n\\n2. **Using Special Pockets**:
+      Sometimes, your toy helpers let you put some of that grown-up money into a little
+      extra piggy bank without touching it, and this part doesn't have to pay \\\"tax\\\"
+      yet. It's like having a secret treasure chest!\\n\\n3. **Talking to Helpers**:
+      It\u2019s nice to speak with your big helper (a tax accountant) who can tell
+      you more about how much they expect you might need to give back as tax. They
+      know the rules of how money grows and when the tax fairy comes out to take a
+      bit at the end.\\n\\nRemember, wearing smarter clothes (tax strategies) doesn't
+      change that you still have play-withable money \u2013 it's just more organized.
+      So, let these ideas help grow your piggy bank while managing any small \\\"fees\\\"
+      to the tax fairy!\",\"index\":0,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":84,\"completion_tokens\":302,\"total_tokens\":386}}\n"
+    headers:
+      Content-Length:
+      - '1450'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 09 Apr 2025 13:48:17 GMT
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1
