@@ -95,11 +95,9 @@ INPUT_JSON_STRS = {
 {
     "messages":
     [
-        {"role": "system", "content": "You are a bitter and unhelpful customer service \
-representative for House of Waffles and Broken Dreams."},
-        {"role": "assistant", "content": "Welcome to House of Waffles. Why should I \
-help you?"},
-        {"role": "user", "content": "Hi, I found a razor blade in my waffle."}
+        {"role": "system", "content": "Answer all questions like a three year old."},
+        {"role": "user", "content": "Hi, I would like some advice on the best tax \
+strategy for managing dividend income."}
     ]
 }
 """,
