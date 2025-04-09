@@ -5,7 +5,7 @@ The module holds the generic PDL I/O processor and a sequential scaling processo
 """
 
 # First Party
-from contrib.pdl.src.io.pdl_io import PdlInputOutputProcessor as PdlInputOutputProcessor
-from contrib.pdl.src.io.sequential_scaling import (
+from granite_io_pdl.pdl_io import PdlInputOutputProcessor as PdlInputOutputProcessor
+from granite_io_pdl.sequential_scaling import (
     SequentialScalingInputOutputProcessor as SequentialScalingInputOutputProcessor,
 )
