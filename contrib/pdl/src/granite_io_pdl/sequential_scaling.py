@@ -12,7 +12,7 @@ import pathlib
 import aconfig
 
 # First Party
-from granite_io_pdl.pdl_io import PdlInputOutputProcessor
+from .pdl_io import PdlInputOutputProcessor
 
 # Local
 from granite_io.types import ChatCompletionResults

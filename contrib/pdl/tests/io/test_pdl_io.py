@@ -5,7 +5,7 @@ Simple placeholder for unit testing contrib
 """
 
 # Third Party
-from src.io.pdl_io import PdlInputOutputProcessor
+from granite_io_pdl.pdl_io import PdlInputOutputProcessor
 
 pdl_processor = """
 function:

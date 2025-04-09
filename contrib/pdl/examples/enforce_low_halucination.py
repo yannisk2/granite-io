@@ -6,7 +6,7 @@ to enforce the that model response has no hallucination.
 """
 
 # First Party
-from granite_io_pdl import SequentialScalingInputOutputProcessor
+from granite_io_pdl.sequential_scaling import SequentialScalingInputOutputProcessor
 
 # Local
 from granite_io.types import ChatCompletionInputs, ChatCompletionResults, UserMessage

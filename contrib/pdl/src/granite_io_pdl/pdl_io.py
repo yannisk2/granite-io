@@ -37,7 +37,7 @@ class PdlInputOutputProcessor(InputOutputProcessor):
     def __init__(
         self,
         config: aconfig.Config | None = None,
-        pdl: "FunctionBlock" | str | None = None,
+        pdl = None,
         pdl_file: str | None = None,
         pdl_scope: dict[str, Any] | None = None,
     ):
