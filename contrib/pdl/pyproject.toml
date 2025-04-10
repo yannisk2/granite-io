@@ -38,7 +38,7 @@ issues = "https://github.com/ibm-granite/granite-io/issues"
 package-dir = { "" = "src" }
 
 [tool.setuptools.package-data]
-granite_io = ["granite_io_pdl/sequential_scaling.pdl"]
+granite_io_pdl = ["sequential_scaling.pdl"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
