@@ -33,6 +33,7 @@ dependencies = [
     "jsonschema",
     "nltk",
     "pydantic >= 2.0.0",  # LiteLLM requires >= 2
+    "rouge_score",
 ]
 
 [project.optional-dependencies]
@@ -50,7 +51,7 @@ vllm = [
     "vllm"
 ]
 voting = [
-    "pandas"
+    "pandas",
 ]
 dev = [
     "isort==6.0.1",
@@ -69,7 +70,7 @@ dev = [
     "granite-io[transformers]",
     "granite-io[openai]",
     "granite-io[litellm]",
-    "granite-io[voting]"
+    "granite-io[voting]",
 ]
 notebook = [
     "notebook"
