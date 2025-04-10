@@ -11,10 +11,8 @@ import pathlib
 # Third Party
 import aconfig
 
-# First Party
-from .pdl_io import PdlInputOutputProcessor
-
 # Local
+from .pdl_io import PdlInputOutputProcessor
 from granite_io.types import ChatCompletionResults
 
 

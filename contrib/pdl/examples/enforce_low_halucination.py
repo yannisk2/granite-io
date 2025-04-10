@@ -5,15 +5,15 @@ This example show how to use sequential inference scaling
 to enforce the that model response has no hallucination.
 """
 
-# First Party
+# Third Party
 from granite_io_pdl.sequential_scaling import SequentialScalingInputOutputProcessor
 
 # Local
 from granite_io.types import ChatCompletionInputs, ChatCompletionResults, UserMessage
 
 
-def hallucination_validator(outputs: ChatCompletionResults):
-    return not outputs.results[0].next_message.hallucinations
+def hallucination_validator(processor_outputs: ChatCompletionResults):
+    return not processor_outputs.results[0].next_message.hallucinations
 
 
 model_name = "granite3.2:8b"
