@@ -10,7 +10,7 @@ See model card at https://huggingface.co/ibm-granite/granite-uncertainty-3.2-8b-
 from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Granite3Point2InputProcessor,
-    _Granite3Point2Inputs,
+    Granite3Point2Inputs,
 )
 from granite_io.types import (
     AssistantMessage,
@@ -101,7 +101,7 @@ class CertaintyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
     def inputs_to_generate_inputs(self, inputs: ChatCompletionInputs) -> GenerateInputs:
         # Validate the input and convert to Granite input
-        inputs = _Granite3Point2Inputs.model_validate(inputs.model_dump())
+        inputs = Granite3Point2Inputs.model_validate(inputs.model_dump())
 
         # Check for the invariants that the model expects its input to satisfy
         if inputs.messages[-1].role not in ("user", "assistant"):

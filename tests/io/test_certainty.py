@@ -14,14 +14,14 @@ import pytest
 # Local
 from granite_io.io.certainty import CertaintyIOProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
-    _Granite3Point2Inputs,
+    Granite3Point2Inputs,
 )
 from granite_io.types import (
     GenerateResult,
     GenerateResults,
 )
 
-_EXAMPLE_CHAT_INPUT = _Granite3Point2Inputs.model_validate(
+_EXAMPLE_CHAT_INPUT = Granite3Point2Inputs.model_validate(
     {
         "messages": [
             {"role": "assistant", "content": "Welcome to pet questions!"},
