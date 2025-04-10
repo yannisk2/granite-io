@@ -32,7 +32,7 @@ dependencies = [
     "alchemy-config",
     "jsonschema",
     "nltk",
-    "pydantic >= 2.0.0",  # LiteLLM requires >= 2
+    "pydantic >= 2.0.0, < 3.0",  # LiteLLM requires >= 2
     "rouge_score",
 ]
 
@@ -41,10 +41,10 @@ transformers = [
     "transformers[torch]",
 ]
 openai = [
-    "openai >= 1.0, <= 1.61.0",  # Later verions introduce LiteLLM logging bug
+    "openai >= 1.68.2, < 2.0",
 ]
 litellm = [
-    "litellm > 1.40.14, <= 1.63.2",  # Later versions introduce LiteLLM logging bug
+    "litellm >= 1.63.14, < 2.0",
     "python-dotenv==1.1.0",
 ]
 vllm = [
@@ -64,7 +64,7 @@ dev = [
     "pytest-html",
     "pytest-recording~=0.13.2",
     "pytest-retry~=1.7",
-    "ruff==0.11.3",
+    "ruff==0.11.4",
     "tox",
     "vcrpy==5.1.0",  # pin to avoid flakey newer
     "granite-io[transformers]",
