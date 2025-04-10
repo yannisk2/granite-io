@@ -2,7 +2,6 @@
 
 # Standard
 import json
-import re
 import uuid
 
 # Third Party
@@ -158,24 +157,3 @@ class Granite3Point2OutputProcessor(OutputProcessor):
             )
 
         return ChatCompletionResults(results=results)
-
-
-def extract_normalized_responses(results: GenerateResults, tag: str) -> list[str]:
-    """Extracts normalized responses which are output within tags.
-
-    :param results: Model output results
-
-    :returns: List of normalized responses
-    """
-    normalized_responses: list[str] = []
-
-    for result in results:
-        # regex to extract required strings
-        reg_str = "<" + tag + ">(.*?)</" + tag + ">"
-        normalized_response = re.findall(reg_str, result.completion_string)
-        if isinstance(normalized_response, list) and len(normalized_response) > 0:
-            normalized_responses.append(normalized_response[0])
-        else:
-            normalized_responses.append(result.completion_string)
-
-    return normalized_responses
