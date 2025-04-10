@@ -21,7 +21,6 @@ from granite_io.io.registry import input_processor
 from granite_io.types import (
     AssistantMessage,
     ChatCompletionInputs,
-    FunctionDefinition,
     SystemMessage,
     ToolResultMessage,
     UserMessage,
@@ -117,11 +116,11 @@ Finally, after the response is written, include a numbered list of sentences fro
 response that are potentially hallucinated and not based in the documents."""
 
 
-class _Document(pydantic.BaseModel):
+class Document(pydantic.BaseModel):
     text: str
 
 
-class _ControlsRecord(pydantic.BaseModel):
+class ControlsRecord(pydantic.BaseModel):
     citations: bool | None = None
     hallucinations: bool | None = None
     length: str | None = None  # Length output control variable
@@ -150,7 +149,7 @@ class _ControlsRecord(pydantic.BaseModel):
         )
 
 
-class _Granite3Point2Inputs(ChatCompletionInputs):
+class Granite3Point2Inputs(ChatCompletionInputs):
     """
     Class that represents the inputs to a Granite 3.2 model generation call.
 
@@ -160,10 +159,8 @@ class _Granite3Point2Inputs(ChatCompletionInputs):
     This class will gain additional fields as new functionality is added to Granite.
     """
 
-    tools: list[FunctionDefinition] = []
-
-    documents: list[_Document] = []
-    controls: _ControlsRecord | None = None
+    documents: list[Document] = []
+    controls: ControlsRecord | None = None
 
     thinking: bool = False
 
@@ -331,7 +328,7 @@ class Granite3Point2InputProcessor(InputProcessor):
     """
 
     def _split_messages(
-        self, inputs: _Granite3Point2Inputs
+        self, inputs: Granite3Point2Inputs
     ) -> tuple[SystemMessage | None, list[UserMessage]]:
         """
         Separate the system message from other messages.
@@ -348,7 +345,7 @@ class Granite3Point2InputProcessor(InputProcessor):
             return messages[0], messages[1:]
         return None, messages
 
-    def _build_default_system_message(self, inputs: _Granite3Point2Inputs) -> str:
+    def _build_default_system_message(self, inputs: Granite3Point2Inputs) -> str:
         """
         :param inputs: All inputs to a completion request that does not include a custom
             system message.
@@ -441,7 +438,7 @@ class Granite3Point2InputProcessor(InputProcessor):
             )
         raise TypeError(f"Unexpected message type {type(message)}")
 
-    def _build_controls_record(self, inputs: _Granite3Point2Inputs) -> dict | None:
+    def _build_controls_record(self, inputs: Granite3Point2Inputs) -> dict | None:
         """
         Use the output control flags in ``inputs`` to build a version of the
         undocumented arbitrary JSON data regarding output controls that the Jinja
@@ -473,7 +470,7 @@ class Granite3Point2InputProcessor(InputProcessor):
     ) -> str:
         # Downcast to a Granite-specific request type with possible additional fields.
         # This operation also performs additional validation.
-        inputs = _Granite3Point2Inputs.model_validate(inputs.model_dump())
+        inputs = Granite3Point2Inputs.model_validate(inputs.model_dump())
 
         # Check for a caller-provided system message
         system_message_json, loop_messages = self._split_messages(inputs)
