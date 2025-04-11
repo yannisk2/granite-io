@@ -92,7 +92,17 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
     base_model = "ibm-granite/granite-3.2-8b-instruct"
     lora_adapters = [
         # Format is server name, model name
+        (
+            "answerability",
+            "ibm-granite/granite-3.2-8b-lora-rag-answerability-prediction",
+        ),
         ("certainty", "ibm-granite/granite-uncertainty-3.2-8b-lora"),
+        ("citations", "ibm-granite/granite-3.2-8b-lora-rag-citation-generation"),
+        (
+            "hallucinations",
+            "ibm-granite/granite-3.2-8b-lora-rag-hallucination-detection",
+        ),
+        ("rewrite", "ibm-granite/granite-3.2-8b-lora-rag-query-rewrite"),
     ]
 
     server = LocalVLLMServer(base_model, lora_adapters=lora_adapters, port=35782)
