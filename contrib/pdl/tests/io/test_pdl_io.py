@@ -5,7 +5,9 @@ Simple placeholder for unit testing contrib
 """
 
 # Third Party
-from src.granite_io_pdl.pdl_io import PdlInputOutputProcessor
+from src.granite_io_pdl.pdl_io import (  # pylint: disable=import-error
+    PdlInputOutputProcessor,
+)
 
 pdl_processor = """
 function:
