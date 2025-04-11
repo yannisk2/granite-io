@@ -8,9 +8,6 @@ Tests for the Granite certainty intrinsic's I/O processor
 import datetime
 import textwrap
 
-# Third Party
-import pytest
-
 # Local
 from granite_io import make_io_processor
 from granite_io.io.certainty import CertaintyCompositeIOProcessor, CertaintyIOProcessor
@@ -111,7 +108,6 @@ def test_canned_output():
     assert multi_output_strs == multi_expected
 
 
-@pytest.mark.vcr
 def test_run_model(lora_server):
     """
     Run a chat completion through the LoRA adapter using the I/O processor.
@@ -126,13 +122,13 @@ def test_run_model(lora_server):
     assert float(chat_result.results[0].next_message.content) == 0.8
 
 
-def test_run_composite(vllm_server):
+def test_run_composite(lora_server):
     """
     Generate chat completions and check certainty using a composite I/O processor to
     choreograph the flow.
     """
-    granite_backend = vllm_server.make_backend()
-    lora_backend = vllm_server.make_lora_backend("certainty")
+    granite_backend = lora_server.make_backend()
+    lora_backend = lora_server.make_lora_backend("certainty")
     granite_io_proc = make_io_processor("Granite 3.2", backend=granite_backend)
     io_proc = CertaintyCompositeIOProcessor(
         granite_io_proc, lora_backend, threshold=0.5
