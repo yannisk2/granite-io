@@ -12,7 +12,8 @@ import textwrap
 import pytest
 
 # Local
-from granite_io.io.certainty import CertaintyIOProcessor
+from granite_io import make_io_processor
+from granite_io.io.certainty import CertaintyCompositeIOProcessor, CertaintyIOProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     _Granite3Point2Inputs,
 )
@@ -123,3 +124,29 @@ def test_run_model(lora_server):
 
     # We run at temperature zero, so this result should be consistent
     assert float(chat_result.results[0].next_message.content) == 0.8
+
+
+def test_run_composite(vllm_server):
+    """
+    Generate chat completions and check certainty using a composite I/O processor to
+    choreograph the flow.
+    """
+    granite_backend = vllm_server.make_backend()
+    lora_backend = vllm_server.make_lora_backend("certainty")
+    granite_io_proc = make_io_processor("Granite 3.2", backend=granite_backend)
+    io_proc = CertaintyCompositeIOProcessor(
+        granite_io_proc, lora_backend, threshold=0.5
+    )
+
+    # Strip off last message and rerun
+    input_without_msg = _EXAMPLE_CHAT_INPUT.model_copy(
+        update={"messages": _EXAMPLE_CHAT_INPUT.messages[:-1]}
+    ).with_addl_generate_params({"temperature": 0.2, "n": 5})
+    results = io_proc.create_chat_completion(input_without_msg)
+    assert len(results.results) > 1
+
+    # High threshold ==> Nothing passes
+    io_proc.update_threshold(0.99)
+    results = io_proc.create_chat_completion(input_without_msg)
+    assert len(results.results) == 1
+    assert results.results[0].next_message.content == io_proc._canned_response
