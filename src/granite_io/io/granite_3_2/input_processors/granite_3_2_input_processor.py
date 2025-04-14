@@ -26,6 +26,23 @@ from granite_io.types import (
     UserMessage,
 )
 
+_TODAYS_DATE_STR = datetime.datetime.now().strftime("%B %d, %Y")
+
+
+def override_date_for_testing(todays_date_str: str | None):
+    """Override the date that methods in this file will use for today's date, in order
+    to make test outputs consistent.
+
+    :param todays_date_str: Date string to use for generating prompts until further
+     notice, or ``None`` to revert to using the real date.
+    """
+    global _TODAYS_DATE_STR  # pylint: disable=global-statement
+    if todays_date_str is None:
+        _TODAYS_DATE_STR = datetime.datetime.now().strftime("%B %d, %Y")
+    else:
+        _TODAYS_DATE_STR = todays_date_str
+
+
 # String that comes at the beginning of the system message that a Granite 3.2 model must
 # receive at the beginning of the prompt for any completion request that does not
 # provide a custom system message.
@@ -34,10 +51,15 @@ from granite_io.types import (
 # the "Today's date" part. Instead of replicating that behavior, we put today's actual
 # date in that section of the prompt. This difference probably doesn't matter, since
 # none of the supervised fine tuning data exercises knowledge cutoffs.
-_SYSTEM_MESSAGE_START = f"""\
+#
+# As an additional wrinkle, we need to use a consistent date when testing, so we use a
+# function to recreate this string every time we need it.
+def _make_system_message_start():
+    return f"""\
 Knowledge Cutoff Date: April 2024.
-Today's Date: {datetime.datetime.now().strftime("%B %d, %Y")}.
+Today's Date: {_TODAYS_DATE_STR}.
 You are Granite, developed by IBM."""
+
 
 # String that a Granite 3.2 model must receive immediately after _SYSTEM_MESSAGE_START
 # if there are both tools and RAG documents in the current request.
@@ -377,7 +399,7 @@ class Granite3Point2InputProcessor(InputProcessor):
         # The default system message starts with a header that includes the date and
         # knowledge cutoff.
         system_message = "<|start_of_role|>system<|end_of_role|>"
-        system_message += _SYSTEM_MESSAGE_START
+        system_message += _make_system_message_start()
 
         # Add a middle part that varies depending on tools, documents, and citations.
         if have_documents and have_tools:
