@@ -16,10 +16,10 @@ from granite_io.io.base import (
     InputOutputProcessor,
     ModelDirectInputOutputProcessorWithGenerate,
 )
-from granite_io.io.granite_3_2.granite_3_2 import Granite3Point2InputOutputProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     ControlsRecord,
     Document,
+    Granite3Point2InputProcessor,
     Granite3Point2Inputs,
 )
 from granite_io.types import (
@@ -259,8 +259,8 @@ projects are visible to anyone.",
     def __init__(self, backend):
         super().__init__(backend=backend)
 
-        # I/O processor for the base model, which does most of the input formatting.
-        self.base_processor = Granite3Point2InputOutputProcessor()
+        # Input processor for the base model, which does most of the input formatting.
+        self.base_input_processor = Granite3Point2InputProcessor()
 
         # Object that identifies sentence boundaries. Currently we assume an NLTK
         # sentence tokenizer is used here. This may change in the future.
@@ -312,7 +312,7 @@ projects are visible to anyone.",
         rewritten_inputs = inputs.model_copy(
             update={"documents": rewritten_docs, "messages": rewritten_messages}
         )
-        prompt = self.base_processor.inputs_to_string(
+        prompt = self.base_input_processor.transform(
             rewritten_inputs,
             # No <|start_of_role|>assistant<|end_of_role|> at end of prompt string.
             False,

@@ -9,8 +9,8 @@ import json
 
 # Local
 from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
-from granite_io.io.granite_3_2.granite_3_2 import Granite3Point2InputOutputProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    Granite3Point2InputProcessor,
     Granite3Point2Inputs,
 )
 from granite_io.types import (
@@ -63,8 +63,8 @@ Officer of Apple Inc.<|end_of_text|>
     def __init__(self, backend):
         super().__init__(backend=backend)
 
-        # I/O processor for the base model, which does most of the input formatting.
-        self.base_processor = Granite3Point2InputOutputProcessor()
+        # Input processor for the base model, which does most of the input formatting.
+        self.base_input_processor = Granite3Point2InputProcessor()
 
     def inputs_to_generate_inputs(
         self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
@@ -77,7 +77,7 @@ Officer of Apple Inc.<|end_of_text|>
             raise ValueError("Last message is not a user message")
 
         # The beginning of the prompt doesn't change relative to base Granite 3.2
-        prompt = self.base_processor.inputs_to_string(inputs, False)
+        prompt = self.base_input_processor.transform(inputs, False)
 
         # To invoke the model, we add the rewrite prompt to the prompt prefix:
         if add_generation_prompt:
