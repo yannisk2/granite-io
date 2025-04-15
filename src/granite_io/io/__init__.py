@@ -18,3 +18,4 @@ from granite_io.io.registry import (  # noqa: F401
     output_processor,
 )
 import granite_io.io.granite_3_2.granite_3_2  # noqa: F401
+import granite_io.io.granite_3_3.granite_3_3  # noqa: F401

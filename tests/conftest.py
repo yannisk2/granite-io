@@ -11,7 +11,7 @@ import torch
 from granite_io import make_backend
 from granite_io.backend import Backend
 from granite_io.backend.vllm_server import LocalVLLMServer
-from granite_io.io.consts import _GRANITE_3_2_2B_HF
+from granite_io.io.consts import _GRANITE_3_2_2B_HF, _GRANITE_3_3_2B_HF, _GRANITE_3_3_2B_OLLAMA
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     override_date_for_testing as g32_override_date_for_testing,
 )
@@ -51,6 +51,35 @@ def backend_transformers() -> Backend:
     )
 
 
+def backend_3_3_openai() -> Backend:
+    return make_backend(
+        "openai",
+        {
+            "model_name": _GRANITE_3_3_2B_OLLAMA,
+            "openai_api_key": "ollama",
+            "openai_base_url": "http://localhost:11434/v1",
+        },
+    )
+
+
+def backend_3_3_litellm() -> Backend:
+    return make_backend(
+        "litellm",
+        {
+            "model_name": "ollama/" + _GRANITE_3_3_2B_OLLAMA,
+        },
+    )
+
+
+def backend_3_3_transformers() -> Backend:
+    return make_backend(
+        "transformers",
+        {
+            "model_name": _GRANITE_3_3_2B_HF,
+        },
+    )
+
+
 @pytest.fixture(scope="function")
 def fake_date():
     """
@@ -73,6 +102,13 @@ def fake_date():
     scope="session", params=[backend_openai, backend_litellm, backend_transformers]
 )
 def backend_x(request) -> Backend:
+    return request.param()
+
+
+@pytest.fixture(
+    scope="session", params=[backend_3_3_openai, backend_3_3_litellm, backend_3_3_transformers]
+)
+def backend_3_3(request) -> Backend:
     return request.param()
 
 

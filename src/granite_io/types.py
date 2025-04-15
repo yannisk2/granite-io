@@ -171,6 +171,7 @@ class GenerateInputs(pydantic.BaseModel):
     top_p: Optional[float] = None
     user: Optional[str] = None
     extra_headers: Optional[Mapping[str, str]] = None
+    extra_body: Optional[Mapping[str, Any]] = None
 
     model_config = pydantic.ConfigDict(
         # Pass through arbitrary additional keyword arguments for handling by model- or
