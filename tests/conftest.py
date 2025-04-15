@@ -102,7 +102,7 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
             "hallucinations",
             "ibm-granite/granite-3.2-8b-lora-rag-hallucination-detection",
         ),
-        ("rewrite", "ibm-granite/granite-3.2-8b-lora-rag-query-rewrite"),
+        ("query_rewrite", "ibm-granite/granite-3.2-8b-lora-rag-query-rewrite"),
     ]
 
     server = LocalVLLMServer(base_model, lora_adapters=lora_adapters, port=35782)
