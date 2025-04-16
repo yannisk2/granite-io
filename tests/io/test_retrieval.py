@@ -82,7 +82,7 @@ def govt_docs_file():
     return target_file
 
 
-def test_make_embeddings(govt_docs_file):
+def test_make_embeddings(govt_docs_file):  # pylint: disable=redefined-outer-name
     """
     Verify that embedding creation is working by creating embeddings for the first
     10 documents in the "govt" corpus from the MTRAG benchmark.
@@ -115,7 +115,7 @@ def test_make_embeddings(govt_docs_file):
         )
 
 
-def test_in_memory_retriever(govt_embeddings_file):
+def test_in_memory_retriever(govt_embeddings_file):  # pylint: disable=redefined-outer-name
     """Verify basic functionality of the InMemoryRetriever class"""
     retriever = InMemoryRetriever(govt_embeddings_file, _EMBEDDING_MODEL_NAME)
     result = retriever.retrieve(_EXAMPLE_CHAT_INPUT.messages[-1].content)
@@ -128,7 +128,7 @@ def test_in_memory_retriever(govt_embeddings_file):
     ]
 
 
-def test_retrieval_request_processor(govt_embeddings_file):
+def test_retrieval_request_processor(govt_embeddings_file):  # pylint: disable=redefined-outer-name
     """Basic test of the RequestProcessor that performs RAG retrieval"""
     retriever = InMemoryRetriever(govt_embeddings_file, _EMBEDDING_MODEL_NAME)
     request_processor = RetrievalRequestProcessor(retriever, top_k=3)

@@ -185,7 +185,7 @@ def compute_embeddings(
         }
     )
     embeddings = embedding_model.encode(result.column("text").to_pylist())
-    embeddings_list = [a for a in embeddings]  # Retain dtype
+    embeddings_list = list(embeddings)  # Retain dtype
     result = result.append_column(
         "embedding",
         pa.array(embeddings_list, type=pa.list_(pa.from_numpy_dtype(embeddings.dtype))),
