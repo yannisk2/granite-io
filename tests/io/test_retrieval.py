@@ -5,7 +5,6 @@ Test cases for the retrieval intrinsic.
 """
 
 # Standard
-import os
 import pathlib
 import tempfile
 
@@ -24,8 +23,6 @@ from granite_io.io.retrieval import (
     write_embeddings,
 )
 from granite_io.io.retrieval.util import (
-    download_mtrag_corpus,
-    download_mtrag_embeddings,
     read_mtrag_corpus,
 )
 
@@ -49,36 +46,26 @@ _EXAMPLE_CHAT_INPUT = Granite3Point2Inputs.model_validate(
     }
 )
 
-_DATA_DIR = pathlib.Path("data/test_retrieval_temp")
+_DATA_DIR = pathlib.Path("data/test_retrieval")
 _EMBEDDING_MODEL_NAME = "multi-qa-mpnet-base-dot-v1"
 
 
 @pytest.fixture
 def govt_embeddings_file():
     """
-    :returns: a pre-indexed copy of the MTRAG benchmark's "govt" data set.
-     Uses cached data if available.
+    :returns: a pre-indexed copy of a tiny slice of the MTRAG benchmark's "govt" data
+     set.
     """
-    if not os.path.exists(_DATA_DIR):
-        os.makedirs(_DATA_DIR)
-    target_file = _DATA_DIR / "govt_embeds.parquet"
-    if not os.path.exists(target_file):
-        download_mtrag_embeddings(_EMBEDDING_MODEL_NAME, "govt", target_file)
+    target_file = _DATA_DIR / "govt10_embeds.parquet"
     return target_file
 
 
 @pytest.fixture
 def govt_docs_file():
     """
-    :returns: a copy of the MTRAG benchmark's "govt" data set.
-       Uses cached data if available.
+    :returns: a copy of a tiny slice of the MTRAG benchmark's "govt" data set.
     """
-    if not os.path.exists(_DATA_DIR):
-        os.makedirs(_DATA_DIR)
-    target_file = _DATA_DIR / "govt.jsonl.zip"
-    if not os.path.exists(target_file):
-        downloaded_file = download_mtrag_corpus(_DATA_DIR, "govt")
-        assert downloaded_file == target_file
+    target_file = _DATA_DIR / "govt10.jsonl.zip"
     return target_file
 
 
@@ -120,11 +107,11 @@ def test_in_memory_retriever(govt_embeddings_file):  # pylint: disable=redefined
     retriever = InMemoryRetriever(govt_embeddings_file, _EMBEDDING_MODEL_NAME)
     result = retriever.retrieve(_EXAMPLE_CHAT_INPUT.messages[-1].content)
     assert result.column("id").to_pylist() == [
-        "730a96e7b2c4ce22",
-        "6738a5f779365684",
-        "c7030403177d9dfc",
-        "97867ac98aa24313",
-        "6738a5f779365684",
+        "775449d1aa187ec5",
+        "775449d1aa187ec5",
+        "775449d1aa187ec5",
+        "775449d1aa187ec5",
+        "775449d1aa187ec5",
     ]
 
 
@@ -136,7 +123,7 @@ def test_retrieval_request_processor(govt_embeddings_file):  # pylint: disable=r
     assert len(results) == 1
     # print(results[0].documents)
     assert [d.doc_id for d in results[0].documents] == [
-        "730a96e7b2c4ce22",
-        "6738a5f779365684",
-        "c7030403177d9dfc",
+        "775449d1aa187ec5",
+        "775449d1aa187ec5",
+        "775449d1aa187ec5",
     ]
