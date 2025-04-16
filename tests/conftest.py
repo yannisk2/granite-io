@@ -11,7 +11,11 @@ import torch
 from granite_io import make_backend
 from granite_io.backend import Backend
 from granite_io.backend.vllm_server import LocalVLLMServer
-from granite_io.io.consts import _GRANITE_3_2_2B_HF, _GRANITE_3_3_2B_HF, _GRANITE_3_3_2B_OLLAMA
+from granite_io.io.consts import (
+    _GRANITE_3_2_2B_HF,
+    _GRANITE_3_3_2B_HF,
+    _GRANITE_3_3_2B_OLLAMA,
+)
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     override_date_for_testing as g32_override_date_for_testing,
 )
@@ -106,7 +110,8 @@ def backend_x(request) -> Backend:
 
 
 @pytest.fixture(
-    scope="session", params=[backend_3_3_openai, backend_3_3_litellm, backend_3_3_transformers]
+    scope="session",
+    params=[backend_3_3_openai, backend_3_3_litellm, backend_3_3_transformers],
 )
 def backend_3_3(request) -> Backend:
     return request.param()

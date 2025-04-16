@@ -145,13 +145,9 @@ cot_pre_output = f"{pre_thought} {_GRANITE_3_3_COT_START} {thought} {_COT_END_AL
 
 no_constituent_output = "Mad about dog!"
 citation_example = '1: "Dog info"'
-citation_output = (
-    f'{no_constituent_output}<|start_of_cite|>{{"document_id": "1"}}<|end_of_cite|>\n\n{_GRANITE_3_3_CITATIONS_START}\n\n{citation_example}\n\n'
-)
+citation_output = f'{no_constituent_output}<|start_of_cite|>{{"document_id": "1"}}<|end_of_cite|>\n\n{_GRANITE_3_3_CITATIONS_START}\n\n{citation_example}\n\n'
 hallucination_example = "1. Risk low: Mad about dog"
-citation_hallucination_output = (
-    f"{citation_output}{_GRANITE_3_3_HALLUCINATIONS_START}\n\n{hallucination_example}\n\n"
-)
+citation_hallucination_output = f"{citation_output}{_GRANITE_3_3_HALLUCINATIONS_START}\n\n{hallucination_example}\n\n"
 expected_citation = Citation(
     citation_id="0",
     doc_id="1",

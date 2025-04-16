@@ -11,14 +11,14 @@ import pydantic
 from granite_io.io.base import OutputProcessor
 from granite_io.io.consts import (
     _GRANITE_3_3_2B_HF,
-    _GRANITE_3_3_8B_HF,
     _GRANITE_3_3_2B_OLLAMA,
+    _GRANITE_3_3_8B_HF,
     _GRANITE_3_3_8B_OLLAMA,
     _GRANITE_3_3_COT_END,
     _GRANITE_3_3_COT_START,
+    _GRANITE_3_3_MODEL_NAME,
     _GRANITE_3_3_RESP_END,
     _GRANITE_3_3_RESP_START,
-    _GRANITE_3_3_MODEL_NAME,
 )
 from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
     Granite3Point3Inputs,
@@ -119,16 +119,17 @@ class Granite3Point3OutputProcessor(OutputProcessor):
                             break
                     for resp_end_str in [_GRANITE_3_3_RESP_END]:
                         if (resp_end_pos := output.find(resp_end_str)) != -1:
-                            resp_end_span = (resp_end_pos, resp_end_pos + len(resp_end_str))
+                            resp_end_span = (
+                                resp_end_pos,
+                                resp_end_pos + len(resp_end_str),
+                            )
                             break
                     if (
-                            resp_start_span
-                            and resp_end_span
-                            and resp_end_span[0] > resp_start_span[1]
+                        resp_start_span
+                        and resp_end_span
+                        and resp_end_span[0] > resp_start_span[1]
                     ):
-                        output = (
-                            output[resp_start_span[1]:resp_end_span[0]].strip()
-                        )
+                        output = output[resp_start_span[1] : resp_end_span[0]].strip()
 
             # Parse out tool calls
             tool_calls = []

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# ruff: noqa: E501
 
 """
 Parser which receives Granite model output and returns the constituents of the output.
@@ -30,10 +31,11 @@ import re
 # Third Party
 from nltk import sent_tokenize  # pylint: disable=import-error
 
+# Local
 from granite_io.io.consts import (
+    _GRANITE_3_3_CITATIONS_START,
     _GRANITE_3_3_CITE_END,
     _GRANITE_3_3_CITE_START,
-    _GRANITE_3_3_CITATIONS_START,
     _GRANITE_3_3_HALLUCINATIONS_START,
 )
 
@@ -247,9 +249,13 @@ def _parse_citations_text(citations_text: str) -> list[dict]:
             idx += 1
 
         if idx == 0:
-            logging.error("Error in finding components of citation: Expected single RegEx match but found none.")
+            logging.error(
+                "Error in finding components of citation: Expected single RegEx match but found none."
+            )
         if idx > 1:
-            logging.error("Error in finding components of citation: Expected single RegEx match but found several.")
+            logging.error(
+                "Error in finding components of citation: Expected single RegEx match but found several."
+            )
 
     return citations
 
@@ -368,7 +374,9 @@ def _add_citation_response_spans(
                             response_sentences[sent_idx - 1]
                         )
                     else:
-                        logging.error("Error in extracting the response sentence of a citation: Found empty sentence")
+                        logging.error(
+                            "Error in extracting the response sentence of a citation: Found empty sentence"
+                        )
                         response_sents_by_citation_id[citation_id] = ""
                         continue
                 response_sents_by_citation_id[citation_id] = sent_without_citations
@@ -384,7 +392,9 @@ def _add_citation_response_spans(
         response_text = response_sents_by_citation_id.get(str(i), "")
         index = response_text_without_citations.find(response_text)
         if index < 0:
-            logging.warning("Error in extracting the response sentence of a citation: Unexpected error.")
+            logging.warning(
+                "Error in extracting the response sentence of a citation: Unexpected error."
+            )
             continue
 
         citation["response_text"] = response_text
@@ -473,19 +483,21 @@ def _validate_response(response_text: str, citation_info: object):
     start = re.escape(_GRANITE_3_3_CITE_START)
     end = re.escape(_GRANITE_3_3_CITE_END)
     pattern = f"{start}(?:(?!({start}|{end})).)*{start}(?:(?!({start}|{end})).)*{end}"
-    if re.search(
-        pattern, response_text
-    ):
+    if re.search(pattern, response_text):
         logging.warning(f"Response contains nested citations: {response_text}")
 
     opening_tag_count = response_text.count(_GRANITE_3_3_CITE_START)
     closing_tag_count = response_text.count(_GRANITE_3_3_CITE_END)
 
     if opening_tag_count != closing_tag_count:
-        logging.warning(f"""Response contains different number of cite start and end symbols: {response_text}""")
+        logging.warning(
+            f"""Response contains different number of cite start and end symbols: {response_text}"""
+        )
 
     if opening_tag_count != len(citation_info):
-        logging.warning(f"Response contains different number of citations than those listed': {response_text}")
+        logging.warning(
+            f"Response contains different number of citations than those listed': {response_text}"
+        )
 
 
 def _split_model_output_into_parts(model_output: str) -> tuple[str, str, str]:
@@ -512,12 +524,25 @@ def _split_model_output_into_parts(model_output: str) -> tuple[str, str, str]:
     citations_text = ""
     hallucinations_text = ""
 
-    if _GRANITE_3_3_HALLUCINATIONS_START in model_output and _GRANITE_3_3_CITATIONS_START not in model_output:
-        response_text, hallucinations_text = model_output.split(_GRANITE_3_3_HALLUCINATIONS_START)
-    elif _GRANITE_3_3_CITATIONS_START in model_output and _GRANITE_3_3_HALLUCINATIONS_START not in model_output:
+    if (
+        _GRANITE_3_3_HALLUCINATIONS_START in model_output
+        and _GRANITE_3_3_CITATIONS_START not in model_output
+    ):
+        response_text, hallucinations_text = model_output.split(
+            _GRANITE_3_3_HALLUCINATIONS_START
+        )
+    elif (
+        _GRANITE_3_3_CITATIONS_START in model_output
+        and _GRANITE_3_3_HALLUCINATIONS_START not in model_output
+    ):
         response_text, citations_text = model_output.split(_GRANITE_3_3_CITATIONS_START)
-    elif _GRANITE_3_3_CITATIONS_START in model_output and _GRANITE_3_3_HALLUCINATIONS_START in model_output:
-        pre_citation_split, post_citation_split = model_output.split(_GRANITE_3_3_CITATIONS_START)
+    elif (
+        _GRANITE_3_3_CITATIONS_START in model_output
+        and _GRANITE_3_3_HALLUCINATIONS_START in model_output
+    ):
+        pre_citation_split, post_citation_split = model_output.split(
+            _GRANITE_3_3_CITATIONS_START
+        )
         if _GRANITE_3_3_HALLUCINATIONS_START in pre_citation_split:
             response_text, hallucinations_text = pre_citation_split.split(
                 _GRANITE_3_3_HALLUCINATIONS_START

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# ruff: noqa: E501
 
 # Standard
 import datetime
@@ -12,14 +13,14 @@ import pydantic
 from granite_io.io.base import InputProcessor
 from granite_io.io.consts import (
     _GRANITE_3_3_2B_HF,
-    _GRANITE_3_3_8B_HF,
     _GRANITE_3_3_2B_OLLAMA,
+    _GRANITE_3_3_8B_HF,
     _GRANITE_3_3_8B_OLLAMA,
     _GRANITE_3_3_COT_END,
     _GRANITE_3_3_COT_START,
+    _GRANITE_3_3_MODEL_NAME,
     _GRANITE_3_3_RESP_END,
     _GRANITE_3_3_RESP_START,
-    _GRANITE_3_3_MODEL_NAME,
 )
 from granite_io.io.registry import input_processor
 from granite_io.types import (
@@ -63,6 +64,7 @@ def _make_system_message_start():
  Knowledge Cutoff Date: April 2024.
  Today's Date: {_TODAYS_DATE_STR}.\
  You are Granite, developed by IBM."""
+
 
 # String that a Granite 3.3 model must receive immediately after _SYSTEM_MESSAGE_START
 # if there are both tools and RAG documents in the current request.
@@ -459,7 +461,7 @@ class Granite3Point3InputProcessor(InputProcessor):
         else:
             documents_part = "\n".join(
                 [
-                    f'<|start_of_role|>document {{"document_id": "{i+1}"}}<|end_of_role|>\n{d.text}<|end_of_text|>'
+                    f'<|start_of_role|>document {{"document_id": "{i + 1}"}}<|end_of_role|>\n{d.text}<|end_of_text|>'
                     for i, d in enumerate(inputs.documents)
                 ]
             )

@@ -8,8 +8,8 @@ from granite_io.backend.base import Backend
 from granite_io.io.base import ModelDirectInputOutputProcessor
 from granite_io.io.consts import (
     _GRANITE_3_3_2B_HF,
-    _GRANITE_3_3_8B_HF,
     _GRANITE_3_3_2B_OLLAMA,
+    _GRANITE_3_3_8B_HF,
     _GRANITE_3_3_8B_OLLAMA,
     _GRANITE_3_3_MODEL_NAME,
 )
@@ -54,7 +54,7 @@ class Granite3Point3InputOutputProcessor(ModelDirectInputOutputProcessor):
         super().__init__(backend=backend)
 
     async def acreate_chat_completion(
-            self, inputs: ChatCompletionInputs
+        self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
         if self._backend is None:
             raise ValueError(
