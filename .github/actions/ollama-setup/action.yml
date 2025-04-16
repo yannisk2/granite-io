@@ -44,5 +44,7 @@ runs:
 
     - name: Download embedding model for tests
       shell: bash
-      run: echo -e "import sentence_transformers\nsentence_transformers.SentenceTransformer('multi-qa-mpnet-base-dot-v1')" | python
+      run: |
+        pip install sentence-transformers
+        echo -e "import sentence_transformers\nsentence_transformers.SentenceTransformer('multi-qa-mpnet-base-dot-v1')" | python
 
