@@ -55,8 +55,8 @@ def _sliding_windows(
     doc_len = len(token_offsets)
 
     # Create some lookup tables
-    sentence_begins = set([t[0] for t in sentence_offsets])
-    sentence_ends = set([t[1] for t in sentence_offsets])
+    sentence_begins = {t[0] for t in sentence_offsets}
+    sentence_ends = {t[1] for t in sentence_offsets}
 
     while len(result) == 0 or cur_start < doc_len - overlap:
         # Compute boundaries between the three regions of the window
@@ -110,6 +110,7 @@ def compute_embeddings(
     chunk_size: int = 512,
     overlap: int = 128,
 ):  # "-> pa.Table:"
+    # pylint: disable=too-many-locals
     """
     Split documents into windows and compute embeddings for each of the the windows.
 
@@ -130,7 +131,6 @@ def compute_embeddings(
     import pyarrow as pa
     import sentence_transformers
 
-    # pylint: disable=too-many-locals
     embedding_model = sentence_transformers.SentenceTransformer(embedding_model_name)
     sentence_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()
 
