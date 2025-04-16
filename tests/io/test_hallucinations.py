@@ -13,6 +13,7 @@ import pytest
 # Local
 from granite_io import make_io_processor
 from granite_io.backend.vllm_server import LocalVLLMServer
+from granite_io.io.base import RewriteRequestProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Granite3Point2Inputs,
     override_date_for_testing,
@@ -20,7 +21,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
 from granite_io.io.hallucinations import (
     HallucinationsCompositeIOProcessor,
     HallucinationsIOProcessor,
-    HallucinationsRequestProcessor,
 )
 from granite_io.types import (
     GenerateResult,
@@ -251,7 +251,7 @@ def test_run_processor(lora_server: LocalVLLMServer, fake_date: str):
     """
     lora_backend = lora_server.make_lora_backend("hallucinations")
     io_proc = HallucinationsIOProcessor(lora_backend)
-    request_proc = HallucinationsRequestProcessor(io_proc)
+    request_proc = RewriteRequestProcessor(io_proc)
     override_date_for_testing(fake_date)  # For consistent VCR output
 
     results = request_proc.process(_EXAMPLE_CHAT_INPUT)

@@ -2,9 +2,7 @@
 
 
 # Local
-from .answerability import AnswerabilityIOProcessor
+from .answerability import AnswerabilityCompositeIOProcessor, AnswerabilityIOProcessor
 
 # Expose public symbols at `granite_io.io.certainty` to save users from typing
-__all__ = [
-    "AnswerabilityIOProcessor",
-]
+__all__ = ["AnswerabilityIOProcessor", "AnswerabilityCompositeIOProcessor"]

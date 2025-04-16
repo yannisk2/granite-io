@@ -147,7 +147,7 @@ class CertaintyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                     next_message=AssistantMessage(
                         # Round to 1 digit so that we don't get 0.7 => 0.70000000001
                         content=f"{parsed_prob:0.1f}",
-                        _raw=raw_str,
+                        raw=raw_str,
                     )
                 )
             )

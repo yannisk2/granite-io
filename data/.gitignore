@@ -1,0 +1,3 @@
+
+# Ignore cached temp files for test cases.
+*_temp
