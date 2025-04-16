@@ -148,4 +148,95 @@ interactions:
       - uvicorn
     http_version: HTTP/1.1
     status_code: 200
+- request:
+    body: '{"model":"granite3.3:2b","prompt":"<|start_of_role|>system<|end_of_role|>
+      Knowledge Cutoff Date: April 2024.\n Today''s Date: April 16, 2025. You are
+      Granite, developed by IBM. You are a helpful AI assistant.\nRespond to every
+      user query in a comprehensive and detailed way. You can write down your thoughts
+      and reasoning process before responding. In the thought process, engage in a
+      comprehensive cycle of analysis, summarization, exploration, reassessment, reflection,
+      backtracing, and iteration to develop well-considered thinking process. In the
+      response section, based on various attempts, explorations, and reflections from
+      the thoughts section, systematically present the final solution that you deem
+      correct. The response should summarize the thought process. Write your thoughts
+      between <think></think> and write your response between <response></response>
+      for each user query.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>How
+      much wood could a wood chuck chuck?<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>","best_of":3,"max_tokens":1024,"n":3}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1074'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      user-agent:
+      - AsyncOpenAI/Python 1.72.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.72.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '1'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.6
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: "{\"id\":\"cmpl-367\",\"object\":\"text_completion\",\"created\":1744815881,\"model\":\"granite3.3:2b\",\"system_fingerprint\":\"fp_ollama\",\"choices\":[{\"text\":\"\\u003cthink\\u003eThe
+      phrase \\\"How much wood could a woodchuck chuck?\\\" is a playful tongue twister,
+      often used to explore the fable attributed to Abraham Lincoln. This story describes
+      how a \\\"woodchuck\\\", or groundhog, could supposedly chuck (move) more wood
+      than a man.\\n\\nThe actual answer isn't derived from scientific study but rather
+      it's a fun, rhetorical question in American folklore. The line often goes like
+      this:\\n\\n- According to the myth, a single woodchuck (groundhog) can dig up
+      and move approximately 700 pounds of dirt when preparing for hibernation.\\n-
+      While this might suggest a lot of movement in a literal sense (dirt), it's important
+      to note that the term \\\"wood\\\" was likely meant metaphorically, as woodchucks
+      don\u2019t actually chuck or transport wood. They are burrowing animals primarily
+      digging for roots and insects.\\n- If interpreted literally, moving 700 pounds
+      of dirt implies moving roughly a ton of soil over a short distance in a groundhog
+      habitat.\\n\\nGiven this context, the figure \\\"How much wood could a woodchuck
+      chuck?\\\" is more about humor and tongue-twisting than a factual biological
+      or ecological query.\\u003c/think\\u003e\\n\\n\\u003cresponse\\u003e### Explanation:\\n\\nThe
+      phrase \\\"How much wood could a woodchuck chuck?\\\" is fundamentally a whimsical,
+      repetitive question with no concrete scientific basis. Despite numerous attempts
+      at both scientific analysis and estimation, no definitive answer exists beyond
+      the tongue-twisting and metaphorical interpretation.\\n\\nThe misconception
+      originates from an old folk tale or fable often attributed to Abraham Lincoln
+      but most likely predates him:\\n\\n- The story asserts that a woodchuck (groundhog)
+      could dig up and move 700 pounds of dirt, which was interpreted as a hyperbole
+      indicating the animal's immense burrowing capacity.\\n- In reality, groundhogs
+      do not engage in carrying substantial amounts of wood or material; they are
+      primarily root foragers, moving soil for hibernation preparation and burrow
+      habitats for themselves.\\n- The 700 pounds figure is seen more as a playful
+      exaggeration intended to evoke amusement through rhythmic repetition rather
+      than an accurate measure of the creature's capabilities.\\n\\nThus, there isn't
+      a definitive numerical answer to \\\"How much wood could a woodchuck chuck?\\\"
+      - it\u2019s more of a light-hearted curiosity with no objective measurement
+      in science.\\u003c/response\\u003e\",\"index\":0,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":242,\"completion_tokens\":608,\"total_tokens\":850}}\n"
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 16 Apr 2025 15:04:41 GMT
+      Transfer-Encoding:
+      - chunked
+    http_version: HTTP/1.1
+    status_code: 200
 version: 1
