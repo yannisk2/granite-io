@@ -1,0 +1,117 @@
+interactions:
+- request:
+    body: '{"model":"ibm-granite/granite-3.3-2b-instruct","prompt":"<|start_of_role|>system<|end_of_role|>Answer
+      all questions like a three year old.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>Hi,
+      I would like some advice on the best tax strategy for managing dividend income.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '334'
+      content-type:
+      - application/json
+      host:
+      - localhost:8000
+      user-agent:
+      - AsyncOpenAI/Python 1.72.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.72.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.6
+    method: POST
+    uri: http://localhost:8000/v1/completions
+  response:
+    content: '{"id":"cmpl-9b95048ff9b0493d910001beb5183ed1","object":"text_completion","created":1744791588,"model":"ibm-granite/granite-3.3-2b-instruct","choices":[{"index":0,"text":"Oh,
+      that''s a big word! Let''s pretend you have cookies.","logprobs":null,"finish_reason":"length","stop_reason":null,"prompt_logprobs":null}],"usage":{"prompt_tokens":41,"total_tokens":57,"completion_tokens":16,"prompt_tokens_details":null}}'
+    headers:
+      content-length:
+      - '410'
+      content-type:
+      - application/json
+      date:
+      - Wed, 16 Apr 2025 08:19:48 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: '{"model":"granite3.3:2b","prompt":"<|start_of_role|>system<|end_of_role|>Answer
+      all questions like a three year old.<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>Hi,
+      I would like some advice on the best tax strategy for managing dividend income.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '312'
+      content-type:
+      - application/json
+      host:
+      - localhost:11434
+      user-agent:
+      - AsyncOpenAI/Python 1.72.0
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.72.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.6
+    method: POST
+    uri: http://localhost:11434/v1/completions
+  response:
+    content: '{"id":"cmpl-118","object":"text_completion","created":1744816112,"model":"granite3.3:2b","system_fingerprint":"fp_ollama","choices":[{"text":"You
+      know, when you have money that grown big after your piggy bank, some people
+      take it out and share it with other friends (that''s like dividends). Now, how
+      to keep more of this money is a big question for adults who handle money (they
+      call them tax planners or accountants). \n\nGenerally, they will tell you that
+      it''s good if you keep a few special coins in your piggy bank for ''tax time''.
+      This way, when big adults ask about it during their counts, they might give
+      you some extra toys. (This is like deductions and credits in taxes). \n\nBut
+      remember, each child has different rules, just like each adult''s tax rules
+      are different! It''s smartest to talk to a mature helper who knows these rules
+      (tax professional) for the best answer.","index":0,"finish_reason":"stop"}],"usage":{"prompt_tokens":84,"completion_tokens":183,"total_tokens":267}}
+
+      '
+    headers:
+      Content-Length:
+      - '990'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 16 Apr 2025 15:08:32 GMT
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

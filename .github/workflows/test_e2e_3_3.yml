@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: e2e Testing transformers (not 3_3)
+name: e2e Testing transformers (only 3_3)
 on:
   push:
     branches:
@@ -72,6 +72,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install tox tox-gh>=1.2
 
-      - name: "Run e2e transformers (not 3_3)"
+      - name: "Run e2e tests transformers (only 3_3)"
         run: |
-          tox -- -k "transformers and not 3_3" tests
+          tox -- -k "transformers and 3_3" tests
