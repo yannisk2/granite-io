@@ -234,7 +234,6 @@ class InMemoryRetriever:
         self,
         data_file_or_table,  #: pathlib.Path | str | pa.Table,
         embedding_model_name: str,
-        use_gpu: bool = True,
     ):
         """
         :param data_file_or_table: Parquet file of document snippets and embeddings,
@@ -243,7 +242,6 @@ class InMemoryRetriever:
         :param embedding_model_name: Name of Sentence Transformers model to use for
          embeddings. Must be the same model that was used to compute embeddings in the
          data file.
-        :param use_gpu: If true, position data for GPU acceleration
         """
         # Third Party
         import pyarrow as pa
@@ -254,7 +252,6 @@ class InMemoryRetriever:
             self._data_table = data_file_or_table
         else:
             self._data_table = pq.read_table(data_file_or_table)
-        self._use_gpu = use_gpu
         self._is_float16 = pa.types.is_float16(
             self._data_table.schema.field("embedding").type.value_type
         )
@@ -262,8 +259,6 @@ class InMemoryRetriever:
             embedding_model_name,
             model_kwargs={"torch_dtype": "float16" if self._is_float16 else "float32"},
         )
-        if self._use_gpu:
-            self._embedding_model.cuda()
         embeddings_array = np.array(
             list(self._data_table.column("embedding").to_numpy())
         )

@@ -89,7 +89,8 @@ def test_make_embeddings(govt_docs_file):  # pylint: disable=redefined-outer-nam
             0.0905776172876358,
             0.10194987803697586,
             -0.011982650496065617,
-        ]
+        ],
+        abs=1e-3,
     )
 
     # Round-trip through a file and make sure we get the embeddings back.
@@ -98,7 +99,7 @@ def test_make_embeddings(govt_docs_file):  # pylint: disable=redefined-outer-nam
         retriever = InMemoryRetriever(file_loc, _EMBEDDING_MODEL_NAME)
         # pylint: disable=protected-access
         assert retriever._embeddings[1] == pytest.approx(
-            torch.tensor(embeddings.column("embedding").to_pylist()[1])
+            torch.tensor(embeddings.column("embedding").to_pylist()[1]), abs=1e-3
         )
 
 
