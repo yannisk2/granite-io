@@ -41,10 +41,3 @@ runs:
         do
           sleep 5
         done
-
-    - name: Download embedding model for tests
-      shell: bash
-      run: |
-        pip install sentence-transformers
-        echo -e "import sentence_transformers\nsentence_transformers.SentenceTransformer('multi-qa-mpnet-base-dot-v1')" | python
-

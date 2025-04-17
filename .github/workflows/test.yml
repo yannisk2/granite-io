@@ -72,6 +72,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install tox tox-gh>=1.2
 
+      - name: Download embedding model for tests
+        shell: bash
+        run: |
+          pip install -U "huggingface_hub[cli]" 
+          pip install hf_xet
+          huggingface-cli download sentence-transformers/multi-qa-mpnet-base-dot-v1
+          ls /home/runner/.cache/huggingface/hub/models--sentence-transformers--multi-qa-mpnet-base-dot-v1/
+
       - name: "Run unit tests (skipping e2e transformers)"
         run: |
           tox -- -k "not transformers" tests
