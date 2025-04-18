@@ -60,7 +60,7 @@ _CITATIONS_SYSTEM_PROMPT = (
 # }
 
 # Instead of JSON schema, we use a regex to constrain the output.
-_LIST_ELEMENT_REGEX = r'"<r\d+>": \[(("<c\d+>", )*"<c\d+>")?\]'
+_LIST_ELEMENT_REGEX = r'"<r\d+>": \[(("<c\d+>", ){0,10}"<c\d+>")?\]'
 _MODEL_OUTPUT_REGEX = (
     r"\{(" + _LIST_ELEMENT_REGEX + r", )*" + _LIST_ELEMENT_REGEX + r"\}"
 )
@@ -433,8 +433,23 @@ projects are visible to anyone.",
                 content = f"ERROR: {e} (raw output: {raw_result})"
                 citations = []
 
-                # TEMPORARY: Pass through errors for now
-                raise e
+                # TEMPORARY: Raise errors for now; guided decoding should prevent this
+                raise ValueError(
+                    f"Error processing output '{raw_result.completion_string}'"
+                ) from e
+
+            # The model may produce duplicates. Filter them out
+            unique_citations = {
+                (
+                    c.doc_id,
+                    c.context_begin,
+                    c.context_end,
+                    c.response_begin,
+                    c.response_end,
+                ): c
+                for c in citations
+            }
+            citations = list(unique_citations.values())
 
             # print(f"Adding {raw_result.completion_string} as raw result")
             results.append(

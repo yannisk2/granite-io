@@ -13,6 +13,7 @@ import pytest
 
 # Local
 from granite_io.backend.vllm_server import LocalVLLMServer
+from granite_io.io.base import RewriteRequestProcessor
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Granite3Point2Inputs,
     override_date_for_testing,
@@ -157,5 +158,27 @@ def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     print(f"\n{chat_result.results[0].next_message.content}\n")
     assert (
         chat_result.results[0].next_message.content
+        == "Is Rex more likely to get fleas because he spends a lot of time outdoors?"
+    )
+
+
+@pytest.mark.vcr(record_mode="new_episodes")
+def test_request_processor(lora_server: LocalVLLMServer, fake_date: str):
+    """
+    Run a chat completion through the LoRA adapter using a RequestProcessor
+    """
+    backend = lora_server.make_lora_backend("query_rewrite")
+    io_proc = QueryRewriteIOProcessor(backend)
+    request_proc = RewriteRequestProcessor(io_proc)
+    override_date_for_testing(fake_date)  # For consistent VCR output
+
+    # Pass our example input through the rewrite and retrieve the result
+    rewrites = request_proc.process(_EXAMPLE_CHAT_INPUT)
+    assert len(rewrites) == 1
+    rewritten_input = rewrites[0]
+
+    assert len(rewritten_input.messages) == len(_EXAMPLE_CHAT_INPUT.messages)
+    assert (
+        rewritten_input.messages[-1].content
         == "Is Rex more likely to get fleas because he spends a lot of time outdoors?"
     )

@@ -441,3 +441,32 @@ class RequestProcessor(abc.ABC):
             # thrown from the coroutine will be chained off the current RuntimeError.
             pass
         return asyncio.run(coroutine_to_run)
+
+
+class RewriteRequestProcessor(RequestProcessor):
+    """
+    Request processor that rewrites the last message of a chat completion request by
+    passing that message through an IO processor that rewrites or augments messages.
+    """
+
+    def __init__(self, io_proc: InputOutputProcessor, top_k: int = 1):
+        """
+        :param io_proc: IO processor for a model that rewrites the last message in its
+         input. Can be a composite IO processor.
+        :param top_k: Number of different rewrites to generate
+        """
+        self._io_proc = io_proc
+        self._top_k = top_k
+
+    async def aprocess(
+        self, inputs: ChatCompletionInputs
+    ) -> list[ChatCompletionInputs]:
+        # Generate one or more versions of the last turn.
+        new_last_turns = await self._io_proc.acreate_chat_completion(inputs)
+
+        final_results = []
+        for result in new_last_turns.results:
+            new_messages = inputs.messages.copy()
+            new_messages[-1] = result.next_message.model_copy()
+            final_results.append(inputs.model_copy(update={"messages": new_messages}))
+        return final_results

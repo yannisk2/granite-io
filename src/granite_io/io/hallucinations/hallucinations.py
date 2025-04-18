@@ -15,7 +15,6 @@ from granite_io.backend.base import Backend
 from granite_io.io.base import (
     InputOutputProcessor,
     ModelDirectInputOutputProcessorWithGenerate,
-    RequestProcessor,
 )
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     ControlsRecord,
@@ -450,29 +449,3 @@ class HallucinationsCompositeIOProcessor(InputOutputProcessor):
             hallucinations_output = await future
             processed_results.append(hallucinations_output.results[0])
         return ChatCompletionResults(results=processed_results)
-
-
-class HallucinationsRequestProcessor(RequestProcessor):
-    """
-    Request processor that augments a the last message of a chat completion request with
-    hallucinations info from the hallucinations intrinsic.
-    """
-
-    def __init__(self, io_proc: HallucinationsIOProcessor):
-        """
-        :param io_proc: IO processor for generating hallucinations.
-        """
-        self._io_proc = io_proc
-
-    async def aprocess(
-        self, inputs: ChatCompletionInputs
-    ) -> list[ChatCompletionInputs]:
-        # Generate one or more versions of the last turn.
-        new_last_turns = await self._io_proc.acreate_chat_completion(inputs)
-
-        final_results = []
-        for result in new_last_turns.results:
-            new_messages = inputs.messages.copy()
-            new_messages[-1] = result.next_message
-            final_results.append(inputs.model_copy(update={"messages": new_messages}))
-        return final_results

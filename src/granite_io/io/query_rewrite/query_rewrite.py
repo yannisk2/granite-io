@@ -8,7 +8,9 @@ I/O processor for the Granite query rewrite intrinsic.
 import json
 
 # Local
-from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
+from granite_io.io.base import (
+    ModelDirectInputOutputProcessorWithGenerate,
+)
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Granite3Point2InputProcessor,
     Granite3Point2Inputs,
