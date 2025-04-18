@@ -479,7 +479,7 @@ class CitationsCompositeIOProcessor(InputOutputProcessor):
     ):
         """
         :param generator: I/O processor that generates the results that this I/O
-         processor shoid validate.
+         processor should validate.
         :param lora_backend: Backend for running the citations intrinsic.
         :param request_citations_from_generator: if ``True``, invoke ``generator``
          with the Granite ``citations`` control turned on. If ``False``, the value of
