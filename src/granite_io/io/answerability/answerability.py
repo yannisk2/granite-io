@@ -6,7 +6,10 @@ I/O processor for the Granite answerability intrinsic.
 """
 
 # Local
-from granite_io.io.base import InputOutputProcessor, ModelDirectInputOutputProcessorWithGenerate
+from granite_io.io.base import (
+    InputOutputProcessor,
+    ModelDirectInputOutputProcessorWithGenerate,
+)
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Granite3Point2InputProcessor,
     Granite3Point2Inputs,
@@ -16,8 +19,8 @@ from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
+    GenerateInputs,
     GenerateResults,
-    GenerateInputs
 )
 
 
