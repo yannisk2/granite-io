@@ -467,6 +467,8 @@ class RewriteRequestProcessor(RequestProcessor):
         final_results = []
         for result in new_last_turns.results:
             new_messages = inputs.messages.copy()
-            new_messages[-1] = result.next_message.model_copy()
+            new_messages[-1] = inputs.messages[-1].model_copy(
+                update={"content": result.next_message.content}
+            )
             final_results.append(inputs.model_copy(update={"messages": new_messages}))
         return final_results
