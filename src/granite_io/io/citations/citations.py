@@ -23,7 +23,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
     Granite3Point2Inputs,
 )
 from granite_io.types import (
-    AssistantMessage,
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
@@ -451,17 +450,17 @@ projects are visible to anyone.",
             }
             citations = list(unique_citations.values())
 
-            # print(f"Adding {raw_result.completion_string} as raw result")
-            results.append(
-                ChatCompletionResult(
-                    next_message=AssistantMessage(
-                        content=content,
-                        citations=citations,
-                        # TEMPORARY -- should be original message's raw result
-                        raw=raw_result.completion_string,
-                    )
-                )
+            next_message = inputs.messages[-1].model_copy(
+                update={
+                    "content": content,
+                    "citations": citations,
+                    # TEMPORARY -- should be original message's raw result
+                    "raw": raw_result.completion_string,
+                }
             )
+
+            # print(f"Adding {raw_result.completion_string} as raw result")
+            results.append(ChatCompletionResult(next_message=next_message))
 
         return ChatCompletionResults(results=results)
 
