@@ -296,7 +296,7 @@ are visible to anyone.",
                 "prompt": prompt,
                 # Single completion for hallucinations intrinsic
                 "n": 1,
-                # Always generate citatations at temperature 0
+                # Always generate hallucinations at temperature 0
                 "temperature": 0.0,
                 # Ensure we have enough of a token budget to reliably produce the
                 # full output.
