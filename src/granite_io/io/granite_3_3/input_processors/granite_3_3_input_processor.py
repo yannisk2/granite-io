@@ -61,9 +61,9 @@ def override_date_for_testing(todays_date_str: str | None):
 # function to recreate this string every time we need it.
 def _make_system_message_start():
     return f"""\
- Knowledge Cutoff Date: April 2024.
- Today's Date: {_TODAYS_DATE_STR}.\
- You are Granite, developed by IBM."""
+Knowledge Cutoff Date: April 2024.
+Today's Date: {_TODAYS_DATE_STR}.
+You are Granite, developed by IBM."""
 
 
 # String that a Granite 3.3 model must receive immediately after _SYSTEM_MESSAGE_START
