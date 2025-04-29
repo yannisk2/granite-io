@@ -273,7 +273,7 @@ def test_basic_inputs_to_string():
         add_generation_prompt=False,
     )
 
-    chatReqStart = "<|start_of_role|>system<|end_of_role|> Knowledge Cutoff Date:"
+    chatReqStart = "<|start_of_role|>system<|end_of_role|>Knowledge Cutoff Date:"
     assert chatRequest.startswith(chatReqStart)
 
     chatReqModelMsg = "You are Granite, developed by IBM. You are a helpful AI assistant.<|end_of_text|>"
@@ -350,7 +350,7 @@ def test_completion_presence_param(backend_3_3: Backend):
     assert isinstance(outputs, ChatCompletionResults)
 
 
-@pytest.mark.vcr(record_mode="new_episodes")
+@pytest.mark.vcr
 @pytest.mark.vcr
 def test_run_processor(backend_3_3: Backend, input_json_str: str):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
