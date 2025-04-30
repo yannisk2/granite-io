@@ -6,7 +6,10 @@ I/O processor for the Granite answerability intrinsic.
 """
 
 # Local
-from granite_io.io.base import InputOutputProcessor, ModelDirectInputOutputProcessor
+from granite_io.io.base import (
+    InputOutputProcessor,
+    ModelDirectInputOutputProcessorWithGenerate,
+)
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Granite3Point2InputProcessor,
     Granite3Point2Inputs,
@@ -16,11 +19,12 @@ from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
+    GenerateInputs,
     GenerateResults,
 )
 
 
-class AnswerabilityIOProcessor(ModelDirectInputOutputProcessor):
+class AnswerabilityIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for the answerability intrinsic, also known as the LoRA Adapter for
     Answerability Classification
@@ -48,9 +52,9 @@ class AnswerabilityIOProcessor(ModelDirectInputOutputProcessor):
         # Input processor for the base model, which does most of the input formatting.
         self.base_input_processor = Granite3Point2InputProcessor()
 
-    def inputs_to_string(
+    def inputs_to_generate_inputs(
         self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
-    ) -> str:
+    ) -> GenerateInputs:
         # Validate the input and convert to Granite input
         inputs = Granite3Point2Inputs.model_validate(inputs.model_dump())
 
@@ -61,12 +65,25 @@ class AnswerabilityIOProcessor(ModelDirectInputOutputProcessor):
             raise ValueError("Last message is not a user message")
 
         # The beginning of the prompt doesn't change relative to base Granite 3.2
-        prompt_prefix = self.base_input_processor.transform(inputs, False)
+        prompt = self.base_input_processor.transform(inputs, False)
 
         # Only the generation prompt portion changes
         if add_generation_prompt:
-            return prompt_prefix + "<|start_of_role|>answerability<|end_of_role|>"
-        return prompt_prefix
+            prompt = prompt + "<|start_of_role|>answerability<|end_of_role|>"
+
+        generate_inputs_before = (
+            inputs.generate_inputs if inputs.generate_inputs else GenerateInputs()
+        )
+        result = generate_inputs_before.model_copy(
+            update={
+                "prompt": prompt,
+                # Ensure enough tokens to produce "unanswerable"
+                "max_tokens": 16,
+                # Enable constrained decoding on vLLM backends
+                "extra_body": {"guided_choice": ["answerable", "unanswerable"]},
+            }
+        )
+        return result
 
     def output_to_result(
         self, output: GenerateResults, inputs: ChatCompletionInputs | None = None

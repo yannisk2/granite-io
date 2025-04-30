@@ -53,7 +53,7 @@ def test_canned_input():
     expected way.
     """
     io_processor = AnswerabilityIOProcessor(None)
-    output = io_processor.inputs_to_string(_EXAMPLE_CHAT_INPUT)
+    output = io_processor.inputs_to_generate_inputs(_EXAMPLE_CHAT_INPUT).prompt
     print("*****")
     print(output)
     print("*****")
