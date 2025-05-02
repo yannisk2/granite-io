@@ -27,6 +27,7 @@ The output from the parser returns a dictionary as follows:
 import copy
 import logging
 import re
+import sys
 
 # Third Party
 from nltk import sent_tokenize  # pylint: disable=import-error
@@ -38,6 +39,15 @@ from granite_io.io.consts import (
     _GRANITE_3_3_CITE_START,
     _GRANITE_3_3_HALLUCINATIONS_START,
 )
+
+# Setup logger
+logger = logging.getLogger("granite_io.io.granite_3_3.output_parser")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(stream=sys.stdout)
+handler.setFormatter(
+    logging.Formatter("%(levelname)s %(asctime)s %(message)s", datefmt="%H:%M:%S")
+)
+logger.addHandler(handler)
 
 
 def _find_substring_in_text(substring: str, text: str) -> list[dict[str, int]]:
@@ -82,7 +92,7 @@ def _parse_hallucinations_text(hallucinations_text: str) -> list[dict]:
         matches.append({"match_begin": match.start()})
 
     if len(matches) == 0:
-        logging.error(
+        logger.warning(
             "Failed to extract hallucination info."
             "Expected hallucination info but none found."
         )
@@ -122,11 +132,15 @@ def _parse_hallucinations_text(hallucinations_text: str) -> list[dict]:
             idx += 1
 
         if idx == 0:
-            logging.error("""Error in finding components of hallucination: \
-                         Expected single RegEx match but found none.""")
+            logger.warning(
+                "Error in finding components of hallucination: "
+                "Expected single RegEx match but found none."
+            )
         if idx > 1:
-            logging.error("""Error in finding components of hallucination: \
-                          Expected single RegEx match but found several.""")
+            logger.warning(
+                "Error in finding components of hallucination: "
+                "Expected single RegEx match but found several."
+            )
 
     return hallucinations
 
@@ -170,13 +184,17 @@ def _add_hallucination_response_spans(
             response_text_without_citations,
         )
         if len(matches) == 0:
-            logging.error("""Error in adding the response spans to hallucination: \
-                          Hallucination text not found in response""")
+            logger.warning(
+                "Error in adding the response spans to hallucination: "
+                "Hallucination text not found in response"
+            )
             continue
 
         if len(matches) > 1:
-            logging.warning("""Hallucination text found multiple times in \
-                            response: Selecting first match""")
+            logger.warning(
+                "Hallucination text found multiple times in "
+                "response: Selecting first match"
+            )
         hallucination["response_text"] = hallucination_response_text_without_citations
         hallucination["response_begin"] = matches[0]["begin_idx"]
         hallucination["response_end"] = matches[0]["end_idx"]
@@ -209,7 +227,7 @@ def _parse_citations_text(citations_text: str) -> list[dict]:
         matches.append({"match_begin": match.start()})
 
     if len(matches) == 0:
-        logging.error(
+        logger.warning(
             "Error in extracting citation info. Expected citations but found none."
         )
         return citations
@@ -249,11 +267,11 @@ def _parse_citations_text(citations_text: str) -> list[dict]:
             idx += 1
 
         if idx == 0:
-            logging.error(
+            logger.warning(
                 "Error in finding components of citation: Expected single RegEx match but found none."
             )
         if idx > 1:
-            logging.error(
+            logger.warning(
                 "Error in finding components of citation: Expected single RegEx match but found several."
             )
 
@@ -293,7 +311,7 @@ def _add_citation_context_spans(
             dict_id = str(citation["citation_id"]) + "-" + citation["doc_id"]
             doc = docs_by_cit_doc_id[dict_id]
         except KeyError:
-            logging.error(
+            logger.warning(
                 f"Document with id: {dict_id} not found "
                 f"when adding citation context spans."
             )
@@ -301,13 +319,17 @@ def _add_citation_context_spans(
 
         matches = _find_substring_in_text(citation["context_text"], doc["text"])
         if len(matches) == 0:
-            logging.error("""Error in adding the context spans to citation: \
-                            Cited text not found in corresponding document""")
+            logger.warning(
+                "Error in adding the context spans to citation: "
+                "Cited text not found in corresponding document"
+            )
             continue
 
         if len(matches) > 1:
-            logging.warning("""Cited text found multiple times in corresponding \
-                            document: Selecting first match""")
+            logger.warning(
+                "Cited text found multiple times in corresponding "
+                "document: Selecting first match"
+            )
         citation["context_begin"] = matches[0]["begin_idx"]
         citation["context_end"] = matches[0]["end_idx"]
 
@@ -374,16 +396,18 @@ def _add_citation_response_spans(
                             response_sentences[sent_idx - 1]
                         )
                     else:
-                        logging.error(
+                        logger.warning(
                             "Error in extracting the response sentence of a citation: Found empty sentence"
                         )
                         response_sents_by_citation_id[citation_id] = ""
                         continue
                 response_sents_by_citation_id[citation_id] = sent_without_citations
             else:
-                logging.error("""Error in extracting the response sentence of a \
-                                citation: Citation ID appears in more than one \
-                                response sentences""")
+                logger.warning(
+                    "Error in extracting the response sentence of a "
+                    "citation: Citation ID appears in more than one "
+                    "response sentences"
+                )
                 continue
 
     # For each citation bring the response sentence to which it refers and its
@@ -392,7 +416,7 @@ def _add_citation_response_spans(
         response_text = response_sents_by_citation_id.get(str(i), "")
         index = response_text_without_citations.find(response_text)
         if index < 0:
-            logging.warning(
+            logger.warning(
                 "Error in extracting the response sentence of a citation: Unexpected error."
             )
             continue
@@ -422,11 +446,11 @@ def _get_docs_from_citations(docs: str) -> list[dict]:
             continue
         line_split = line.split(":", maxsplit=1)
         if len(line_split) <= 1:
-            logging.debug(f"""Unable to retrieve doc text from: {line}""")
+            logger.debug(f"Unable to retrieve doc text from: '{line}'.")
             continue
         doc_id = line_split[0].strip()
         if not doc_id.isdigit():
-            logging.error(f"""Unable to retrieve doc id from: {line}""")
+            logger.warning(f"Unable to retrieve doc id from: '{line}'.")
             continue
         text = line_split[1].strip().strip('"')
 
@@ -454,7 +478,7 @@ def _create_dict(input_array: object, **key_attrib_names: str) -> dict:
                 new_dict_key_val += "-"
 
         if new_dict_key_val in new_dict:
-            logging.error(
+            logger.warning(
                 f"Found duplicate item while creating dictionary: "
                 f"{new_dict[new_dict_key_val]}"
             )
@@ -484,18 +508,18 @@ def _validate_response(response_text: str, citation_info: object):
     end = re.escape(_GRANITE_3_3_CITE_END)
     pattern = f"{start}(?:(?!({start}|{end})).)*{start}(?:(?!({start}|{end})).)*{end}"
     if re.search(pattern, response_text):
-        logging.warning(f"Response contains nested citations: {response_text}")
+        logger.warning(f"Response contains nested citations: '{response_text}'.")
 
     opening_tag_count = response_text.count(_GRANITE_3_3_CITE_START)
     closing_tag_count = response_text.count(_GRANITE_3_3_CITE_END)
 
     if opening_tag_count != closing_tag_count:
-        logging.warning(
-            f"""Response contains different number of cite start and end symbols: {response_text}"""
+        logger.warning(
+            f"Response contains different number of cite start and end symbols: '{response_text}'."
         )
 
     if opening_tag_count != len(citation_info):
-        logging.warning(
+        logger.warning(
             f"Response contains different number of citations than those listed': {response_text}"
         )
 
@@ -579,7 +603,9 @@ def _validate_spans_in_parser_output(parsed_task: object):
                 hallucination["response_begin"] : hallucination["response_end"]
             ]
         ):
-            logging.error("Unexpected error in generated hallucination response span")
+            logger.warning(
+                "Hallucination span does not correspond to the model response."
+            )
     for citation in parsed_task["citations"] if parsed_task["citations"] else []:
         docs_by_cit_doc_id = _create_dict(
             parsed_task["docs"], citation_attrib="citation_id", document_attrib="doc_id"
@@ -588,7 +614,7 @@ def _validate_spans_in_parser_output(parsed_task: object):
             dict_id = citation["citation_id"] + "-" + citation["doc_id"]
             doc = docs_by_cit_doc_id[dict_id]
         except KeyError:
-            logging.error(
+            logger.warning(
                 f"Document with id: {dict_id} not found "
                 f"when validation citation context spans."
             )
@@ -597,7 +623,7 @@ def _validate_spans_in_parser_output(parsed_task: object):
             citation["context_text"]
             != doc["text"][citation["context_begin"] : citation["context_end"]]
         ):
-            logging.error("Unexpected error in generated citation context span")
+            logger.warning("Citation span does not correspond to the model response.")
 
 
 def _update_docs_text_with_input_docs(
@@ -664,7 +690,7 @@ def parse_model_output(
         )
     else:
         augmented_hallucination_info = []
-    logging.info(f"Parsed hallucination info:\n\n{augmented_hallucination_info}\n")
+    logger.debug(f"Parsed hallucination info:\n{augmented_hallucination_info}\n")
 
     # Parse citations text
     if len(citations_text) > 0:
@@ -680,8 +706,9 @@ def parse_model_output(
         _validate_response(response_text, citation_info)
     else:
         citation_info_with_context_response_spans = []
-    logging.info(f"""Parsed citation info:\n\n\
-                 {citation_info_with_context_response_spans}\n""")
+    logger.debug(
+        f"Parsed citation info:\n{citation_info_with_context_response_spans}\n"
+    )
 
     # Join all objects into single output
     result = {
@@ -696,7 +723,7 @@ def parse_model_output(
             augmented_hallucination_info if augmented_hallucination_info else None
         ),
     }
-    logging.info(f"Combined parser output:\n\n{result}\n")
+    logger.debug(f"Combined parser output:\n{result}\n")
 
     # Validate spans in parser output by checking if the citation/response text
     # matches the begin/end spans
