@@ -5,12 +5,12 @@ import os
 
 # Local
 from granite_io import get_input_processor
+from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    override_date_for_testing,
+)
 from granite_io.types import (
     ChatCompletionInputs,
     UserMessage,
-)
-from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
-    override_date_for_testing,
 )
 from tests.test_utils import load_text_file
 
