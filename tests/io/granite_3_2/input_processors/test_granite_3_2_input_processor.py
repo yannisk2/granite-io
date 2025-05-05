@@ -9,6 +9,9 @@ from granite_io.types import (
     ChatCompletionInputs,
     UserMessage,
 )
+from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+    override_date_for_testing,
+)
 from tests.test_utils import load_text_file
 
 _GENERALE_MODEL_NAME = "Granite 3.2"
@@ -21,6 +24,7 @@ def test_run_processor_reasoning():
         "Find the fastest way for a seller to visit all the cities in their region"
     )
     messages = [UserMessage(content=question)]
+    override_date_for_testing("May 02, 2025")
     prompt = input_processor.transform(
         ChatCompletionInputs(messages=messages, thinking=True)
     )
@@ -29,7 +33,7 @@ def test_run_processor_reasoning():
         os.path.join(_TEST_DATA_DIR, "test_reasoning_prompt.txt")
     )
     assert isinstance(prompt, str)
-    assert len(prompt) == len(expected_prompt)
+    assert prompt == expected_prompt
 
     # Prompt contains dates in first two lines of the text which change.
     # Therefore need to extract and test them separately first.
