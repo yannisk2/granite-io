@@ -650,7 +650,7 @@ def _split_model_output_into_parts(model_output: str) -> tuple[str, str, str]:
 
 def _validate_spans_in_parser_output(parsed_task: object):
     """
-    Validate that the hallunication and citation spans correspond to
+    Validate that the hallucination and citation spans correspond to
     the model reponse
     """
     for hallucination in (
