@@ -19,7 +19,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
     Granite3Point2Inputs,
 )
 from granite_io.types import (
-    AssistantMessage,
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
