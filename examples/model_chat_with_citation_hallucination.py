@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-This example show how to infer or call a model using the framework
+This example shows how to infer or call a model using the framework
 and an Ollama backend to serve the model.
 In this scenario, it is a simple RAG use case where citations and
 hallucinations are enabled.

@@ -80,7 +80,7 @@ class AnswerabilityIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                 # Ensure enough tokens to produce "unanswerable"
                 "max_tokens": 16,
                 # Enable constrained decoding on vLLM backends
-                # "extra_body": {"guided_choice": ["answerable", "unanswerable"]},
+                "extra_body": {"guided_choice": ["answerable", "unanswerable"]},
             }
         )
         return result
