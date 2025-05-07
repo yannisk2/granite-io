@@ -390,6 +390,13 @@ projects are visible to anyone.",
                 for response_key, value in parsed_json.items():
                     # Example: <r0>
                     response_index = int(response_key[2:-1])
+                    if response_index >= len(message_sentence_offsets):
+                        # Hallucinated sentence offset
+                        print(
+                            f"Warning: Skipping out-of-range sentenc offset "
+                            f"{response_index}"
+                        )
+                        continue
                     response_begin, response_end = message_sentence_offsets[
                         response_index
                     ]
