@@ -107,6 +107,11 @@ To help you get up and running as quickly as possible with the Granite IO Proces
 
    - [Granite 3.2 chat request](./examples/model_chat.py)
    - [Granite 3.2 chat request with thinking](./examples/inference_with_thinking.py)
+   - [Granite 3.2 RAG](./examples/model_chat_with_citation.py)
+   - [Granite 3.2 RAG and hallucinations](./examples/model_chat_with_citation_hallucination.py)
+   - [Granite 3.2 MBRD majority voting](./examples/model_chat_with_mbrd_majority_voting.py)
+   - [Granite 3.2 custom IO processor](./examples/model_chat_with_thinking_custom_io_processor.py)
+   - [Granite 3.2 separate input and out processors](./examples/model_chat_with_thinking_separate_backend.py)
    - [Using watsonx.ai](./examples/watsonx_litellm.py)
 
 2. Jupyter notebook tutorials:
@@ -114,7 +119,16 @@ To help you get up and running as quickly as possible with the Granite IO Proces
 > [!IMPORTANT]
 > To get started with the examples, make sure you have followed the [Installation](#installation) steps first. You will also need additional packages to be able to run the Jupyter notebook. They can be installed by running `pip install -e "granite-io[transformers]"` and `pip install -e "granite-io[notebook]"`. Replace package name `granite-io` with `.` if installing from source. The notebooks can be then run with following command `jupyter notebook <path_to_notebook>`.
 
-   - [IO](./notebooks/io.ipynb)
+   - [Granite 3.2 answerability](./notebooks/answerability.ipynb)
+   - [Granite 3.2 certainity](./notebooks/certainty.ipynb)
+   - [Granite 3.2 citations](./notebooks/citations.ipynb)
+   - [Granite 3.2 hallucinations](./notebooks/hallucinations.ipynb)
+   - [Granite 3.2 IO APIs](./notebooks/io.ipynb)
+   - [Granite 3.2 query rewrite](./notebooks/query_rewrite.ipynb)
+   - [Granite 3.2 RAG](./notebooks/rag.ipynb)
+   - [Granite 3.2 retrieval](./notebooks/retrieval.ipynb)
+   - [Granite 3.2 simple majority voting](./notebooks/voting.ipynb)
+
 
 ## Architecture
 
