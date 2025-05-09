@@ -49,7 +49,8 @@ litellm = [
     "python-dotenv==1.1.0",
 ]
 vllm = [
-    "vllm"
+    "vllm",
+    "flashinfer-python",  # For top-k/top-p decoding
 ]
 voting = [
     "pandas",
@@ -71,6 +72,7 @@ dev = [
     "pytest-retry~=1.7",
     "ruff==0.11.8",
     "tox",
+    "ipywidgets",
     "vcrpy==5.1.0",  # pin to avoid flakey newer
     "granite-io[transformers]",
     "granite-io[openai]",

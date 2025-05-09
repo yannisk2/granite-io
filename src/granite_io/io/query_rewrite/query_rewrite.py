@@ -7,6 +7,9 @@ I/O processor for the Granite query rewrite intrinsic.
 # Standard
 import json
 
+# Third Party
+import pydantic
+
 # Local
 from granite_io.io.base import (
     ModelDirectInputOutputProcessorWithGenerate,
@@ -16,7 +19,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
     Granite3Point2Inputs,
 )
 from granite_io.types import (
-    AssistantMessage,
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
@@ -34,6 +36,13 @@ JSON = 'Your output format should be in JSON: { "rewritten_question": <REWRITE> 
 REWRITE_PROMPT = (
     "<|start_of_role|>rewrite: " + INSTRUCTION_TEXT + JSON + "<|end_of_role|>"
 )
+
+
+class QueryRewriteRawOutput(pydantic.BaseModel):
+    rewritten_question: str
+
+
+RAW_OUTPUT_JSON_SCHEMA = QueryRewriteRawOutput.model_json_schema()
 
 
 class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
@@ -87,11 +96,11 @@ Officer of Apple Inc.<|end_of_text|>
         result = inputs.generate_inputs.model_copy(
             update={
                 "prompt": prompt,
-                "max_tokens": 80,
+                "max_tokens": 256,
                 # TODO Enable constrained decoding on vLLM backends
-                # "extra_body": {
-                #     "guided_regex": r"\d{1,2}%",
-                # },
+                "extra_body": {
+                    "guided_json": RAW_OUTPUT_JSON_SCHEMA,
+                },
             }
         )
         return result
@@ -104,6 +113,7 @@ Officer of Apple Inc.<|end_of_text|>
         results = []
         for raw_result in output.results:
             json_result = raw_result.completion_string
+            # print(f"{json_result=}")
             try:
                 rewrite = json.loads(json_result)["rewritten_question"]
             except Exception as e:  # pylint: disable=broad-exception-caught
@@ -112,8 +122,10 @@ Officer of Apple Inc.<|end_of_text|>
                 print(f"\nException: {e}\n")
                 rewrite = json_result
 
-            results.append(
-                ChatCompletionResult(next_message=AssistantMessage(content=rewrite))
+            # Change content but retain other properties of the message.
+            rewritten_last_message = inputs.messages[-1].model_copy(
+                update={"content": rewrite}
             )
+            results.append(ChatCompletionResult(next_message=rewritten_last_message))
 
         return ChatCompletionResults(results=results)
