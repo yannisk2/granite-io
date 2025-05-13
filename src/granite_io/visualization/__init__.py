@@ -3,3 +3,5 @@
 
 # Local
 from .citations import CitationsWidget, CitationsWidgetInstance
+
+__all__ = ["CitationsWidget", "CitationsWidgetInstance"]
