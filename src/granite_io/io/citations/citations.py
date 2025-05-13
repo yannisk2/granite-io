@@ -23,7 +23,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
     Granite3Point2Inputs,
 )
 from granite_io.types import (
-    AssistantMessage,
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
@@ -391,6 +390,13 @@ projects are visible to anyone.",
                 for response_key, value in parsed_json.items():
                     # Example: <r0>
                     response_index = int(response_key[2:-1])
+                    if response_index >= len(message_sentence_offsets):
+                        # Hallucinated sentence offset
+                        print(
+                            f"Warning: Skipping out-of-range sentenc offset "
+                            f"{response_index}"
+                        )
+                        continue
                     response_begin, response_end = message_sentence_offsets[
                         response_index
                     ]
@@ -451,17 +457,17 @@ projects are visible to anyone.",
             }
             citations = list(unique_citations.values())
 
-            # print(f"Adding {raw_result.completion_string} as raw result")
-            results.append(
-                ChatCompletionResult(
-                    next_message=AssistantMessage(
-                        content=content,
-                        citations=citations,
-                        # TEMPORARY -- should be original message's raw result
-                        raw=raw_result.completion_string,
-                    )
-                )
+            next_message = inputs.messages[-1].model_copy(
+                update={
+                    "content": content,
+                    "citations": citations,
+                    # TEMPORARY -- should be original message's raw result
+                    "raw": raw_result.completion_string,
+                }
             )
+
+            # print(f"Adding {raw_result.completion_string} as raw result")
+            results.append(ChatCompletionResult(next_message=next_message))
 
         return ChatCompletionResults(results=results)
 
@@ -479,7 +485,7 @@ class CitationsCompositeIOProcessor(InputOutputProcessor):
     ):
         """
         :param generator: I/O processor that generates the results that this I/O
-         processor shoid validate.
+         processor should validate.
         :param lora_backend: Backend for running the citations intrinsic.
         :param request_citations_from_generator: if ``True``, invoke ``generator``
          with the Granite ``citations`` control turned on. If ``False``, the value of

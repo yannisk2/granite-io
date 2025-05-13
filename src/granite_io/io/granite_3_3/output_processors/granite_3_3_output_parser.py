@@ -375,6 +375,7 @@ def _add_citation_response_spans(
     response_sents_by_citation_id = {}
     citation_idx = 0
     for sent_idx, sent in enumerate(response_sentences):
+        # pylint: disable=anomalous-backslash-in-string
         pattern = f'{re.escape(_GRANITE_3_3_CITE_START)}{{"document_id": "(\d+)"}}{re.escape(_GRANITE_3_3_CITE_END)}'
         matches_iter = re.finditer(pattern, sent)
         for match in matches_iter:

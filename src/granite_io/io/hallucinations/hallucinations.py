@@ -22,7 +22,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
     Granite3Point2Inputs,
 )
 from granite_io.types import (
-    AssistantMessage,
     ChatCompletionInputs,
     ChatCompletionResult,
     ChatCompletionResults,
@@ -297,7 +296,7 @@ are visible to anyone.",
                 "prompt": prompt,
                 # Single completion for hallucinations intrinsic
                 "n": 1,
-                # Always generate citatations at temperature 0
+                # Always generate hallucinations at temperature 0
                 "temperature": 0.0,
                 # Ensure we have enough of a token budget to reliably produce the
                 # full output.
@@ -363,16 +362,16 @@ are visible to anyone.",
                 raise e
 
             # print(f"Adding {raw_result.completion_string} as raw result")
-            results.append(
-                ChatCompletionResult(
-                    next_message=AssistantMessage(
-                        content=content,
-                        hallucinations=hallucinations,
-                        # TEMPORARY -- should be original message's raw result
-                        raw=raw_result.completion_string,
-                    )
-                )
+            next_message = inputs.messages[-1].model_copy(
+                update={
+                    "content": content,
+                    "hallucinations": hallucinations,
+                    # TEMPORARY -- should be original message's raw result
+                    "raw": raw_result.completion_string,
+                }
             )
+
+            results.append(ChatCompletionResult(next_message=next_message))
 
         return ChatCompletionResults(results=results)
 
