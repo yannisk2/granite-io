@@ -16,9 +16,6 @@ from granite_io.types import (
 
 
 class CitationsWidget:
-    def __init__(self):
-        super().__init__()
-
     def show(self, inputs: ChatCompletionInputs, outputs: ChatCompletionResults):
         documents = [doc.model_dump(mode="json") for doc in inputs.documents]
         response = outputs.results[0].next_message.content

@@ -11,7 +11,7 @@ from granite_io.types import (
     GenerateResults,
     UserMessage,
 )
-from tests.test_utils import load_text_file
+from test_utils import load_text_file
 
 _GENERAL_MODEL_NAME = "Granite 3.3"
 _TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
