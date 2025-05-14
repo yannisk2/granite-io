@@ -4,9 +4,12 @@
 Widget for visualizing citations.
 """
 
+# Standard
+import pathlib
+
+# Third Party
 import anywidget
 import traitlets
-import pathlib
 
 # Local
 from granite_io.types import (
