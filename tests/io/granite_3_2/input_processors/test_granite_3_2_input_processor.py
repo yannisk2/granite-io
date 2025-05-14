@@ -3,13 +3,15 @@
 # Standard
 import os
 
+# Third Party
+from test_utils import fix_granite_date, load_text_file
+
 # Local
 from granite_io import get_input_processor
 from granite_io.types import (
     ChatCompletionInputs,
     UserMessage,
 )
-from tests.test_utils import fix_granite_date, load_text_file
 
 _GENERALE_MODEL_NAME = "Granite 3.2"
 _TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")

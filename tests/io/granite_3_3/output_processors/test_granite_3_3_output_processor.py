@@ -3,6 +3,9 @@
 # Standard
 import os
 
+# Third Party
+from test_utils import load_text_file
+
 # Local
 from granite_io import get_output_processor
 from granite_io.types import (
@@ -11,7 +14,6 @@ from granite_io.types import (
     GenerateResults,
     UserMessage,
 )
-from tests.test_utils import load_text_file
 
 _GENERAL_MODEL_NAME = "Granite 3.3"
 _TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
