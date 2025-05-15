@@ -4,7 +4,7 @@
         margin-top: 1rem;
         font-weight: normal;
         font-size: 1rem;
-        background-color: #eaeaea;
+        background-color: light-dark(#eaeaea, #222222);
         padding: 0.5rem 1rem;
         border: none;
         border-radius: 0.5rem;
@@ -19,9 +19,9 @@
     .citation-num {
         font-size: 0.85rem;
         margin-left: 0.25rem;
-        border: 1px solid #555555;
+        border: 1px solid light-dark(#555555, #aaaaaa);
         border-radius: 0.25rem;
-        background-color: white;
+        background-color: light-dark(#ffffff, #000000);
         padding-left: 0.25rem;
         padding-right: 0.25rem;
     }
@@ -31,11 +31,11 @@
     }
     
     .citation-highlighted {
-        background-color: #ffffc5;
+        background-color: light-dark(#ffffc5, #182a85);
     }
     
     .doc-highlight {
-        background-color: #ffffc5;
+        background-color: light-dark(#ffffc5, #182a85);
     }
     
     .citation-doc {
@@ -50,8 +50,8 @@
     .citation {
         padding-top: 0.25rem;
         padding-bottom: 0.25rem;
-        border-top: solid 1px #aaaaaa;
-        border-bottom: solid 1px #aaaaaa;
+        border-top: solid 1px light-dark(#aaaaaa, #5a5a5a);
+        border-bottom: solid 1px light-dark(#aaaaaa, #5a5a5a);
         margin-top: -1px;
         cursor: pointer;
     }
