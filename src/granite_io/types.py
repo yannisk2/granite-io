@@ -203,12 +203,12 @@ class ChatCompletionInputs(pydantic.BaseModel):
             return super().__getattr__(name)
         except AttributeError:
             return None
-        
+
     def with_messages(self, new_messages: list[ChatMessage]) -> "ChatCompletionInputs":
         """
         :param new_messages: Updated list of messages in the conversation
 
-        :returns: a copy of this object with the indicated messages list. Does not 
+        :returns: a copy of this object with the indicated messages list. Does not
         modify the original object.
         """
         return self.model_copy(update={"messages": new_messages})
