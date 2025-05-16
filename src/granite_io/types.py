@@ -135,7 +135,8 @@ class GenerateInputs(pydantic.BaseModel):
         OPTIONAL PARAMS
             prompt: The prompt(s) to generate completions for.
             model: Model name or ID.
-            best_of: Generates best_of completions server-side.
+            best_of: Generates best_of completions server-side. **Deprecated** on most
+            platforms.
             echo: Echo back the prompt in addition to the completion.
             frequency_penalty: Penalize new tokens based on their existing frequency.
             logit_bias: Modify the likelihood of specified tokens.
