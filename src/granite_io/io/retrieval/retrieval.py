@@ -7,12 +7,12 @@ import pathlib
 import shutil
 
 # Third Party
-import nltk
 import numpy as np
 import torch
 
 # Local
 from granite_io.io.base import ChatCompletionInputs, RequestProcessor
+from granite_io.optional import nltk_check
 from granite_io.types import Document
 
 
@@ -130,6 +130,10 @@ def compute_embeddings(
     # Third Party
     import pyarrow as pa
     import sentence_transformers
+
+    with nltk_check("generation of document embeddings"):
+        # Third Party
+        import nltk
 
     embedding_model = sentence_transformers.SentenceTransformer(embedding_model_name)
     sentence_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()

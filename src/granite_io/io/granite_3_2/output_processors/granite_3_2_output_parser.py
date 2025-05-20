@@ -28,8 +28,8 @@ import logging
 import re
 import sys
 
-# Third Party
-from nltk import sent_tokenize  # pylint: disable=import-error
+# Local
+from granite_io.optional import nltk_check
 
 _CITATION_START = "# Citations:"
 _HALLUCINATION_START = "# Hallucinations:"
@@ -375,11 +375,14 @@ def _add_citation_response_spans(
         "response_begin": "The begin index of "response_text" within the response text"
         "response_end": "The end index of "response_text" within the response text"
     """
+    with nltk_check("Granite 3.2 citation support"):
+        # Third Party
+        import nltk
 
     augmented_citation_info = copy.deepcopy(citation_info)
 
     # Split response into sentences
-    response_sentences = sent_tokenize(response_text_with_citations)
+    response_sentences = nltk.sent_tokenize(response_text_with_citations)
 
     # Create dictionary of the response sentence (cleaned from citations) corresponding
     # to each citation ID

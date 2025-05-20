@@ -7,9 +7,6 @@ I/O processor for the Granite citations intrinsic.
 # Standard
 import json
 
-# Third Party
-import nltk
-
 # Local
 from granite_io.backend.base import Backend
 from granite_io.io.base import (
@@ -22,6 +19,7 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
     Granite3Point2InputProcessor,
     Granite3Point2Inputs,
 )
+from granite_io.optional import nltk_check
 from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
@@ -257,6 +255,9 @@ projects are visible to anyone.",
 
     def __init__(self, backend):
         super().__init__(backend=backend)
+        with nltk_check("the IBM LoRA Adapter for Citation Generation"):
+            # Third Party
+            import nltk
 
         # Input processor for the base model, which does most of the input formatting.
         self.base_input_processor = Granite3Point2InputProcessor()
