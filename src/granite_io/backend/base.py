@@ -68,14 +68,14 @@ class Backend(FactoryConstructible):
 
         # n (a.k.a. num_return_sequences) validation
         n = inputs_copy.n
+        best_of = inputs_copy.best_of
         if n is not None:  # noqa SIM102
             if n < 1:
                 raise ValueError(f"Invalid value for n ({n})")
-            if n > 1:
-                # best_of must be >= n
-                best_of = inputs_copy.best_of
-                if best_of is None or best_of < n:
-                    inputs_copy.best_of = n
+            if n > 1 and best_of is not None and best_of < n:
+                raise ValueError(
+                    f"best_of generation parameter must be >= n ({best_of=} and {n=})"
+                )
 
         # Some backends prefer an array to a string
         if isinstance(inputs_copy.stop, str):

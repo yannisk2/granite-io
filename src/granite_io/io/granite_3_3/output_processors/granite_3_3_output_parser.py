@@ -29,9 +29,6 @@ import logging
 import re
 import sys
 
-# Third Party
-from nltk import sent_tokenize  # pylint: disable=import-error
-
 # Local
 from granite_io.io.consts import (
     _GRANITE_3_3_CITATIONS_START,
@@ -39,6 +36,7 @@ from granite_io.io.consts import (
     _GRANITE_3_3_CITE_START,
     _GRANITE_3_3_HALLUCINATIONS_START,
 )
+from granite_io.optional import nltk_check
 from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
     Granite3Point3Inputs,
 )
@@ -367,11 +365,14 @@ def _add_citation_response_spans(
         "response_begin": "The begin index of "response_text" within the response text"
         "response_end": "The end index of "response_text" within the response text"
     """
+    with nltk_check("Granite 3.3 citation support"):
+        # Third Party
+        import nltk
 
     augmented_citation_info = copy.deepcopy(citation_info)
 
     # Split response into sentences
-    response_sentences = sent_tokenize(response_text_with_citations)
+    response_sentences = nltk.sent_tokenize(response_text_with_citations)
 
     # Create dictionary of the response sentence (cleaned from citations) corresponding
     # to each citation ID

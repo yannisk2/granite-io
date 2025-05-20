@@ -8,6 +8,9 @@ Tests for the model output parser
 # Standard
 import os
 
+# Third Party
+from test_utils import load_text_file
+
 # Local
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     Document,
@@ -15,7 +18,6 @@ from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor impo
 from granite_io.io.granite_3_2.output_processors.granite_3_2_output_parser import (
     parse_model_output,
 )
-from tests.test_utils import load_text_file
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "testdata")
 
