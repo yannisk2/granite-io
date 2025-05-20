@@ -39,6 +39,9 @@ from granite_io.io.consts import (
     _GRANITE_3_3_CITE_START,
     _GRANITE_3_3_HALLUCINATIONS_START,
 )
+from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
+    Granite3Point3Inputs,
+)
 
 # Setup logger
 logger = logging.getLogger("granite_io.io.granite_3_3.output_parser")
@@ -504,6 +507,28 @@ def _remove_citations_from_response_text(response_text: str) -> str:
     return re.sub(pattern, "", ret).strip()
 
 
+def _remove_controls_output_from_response_text(response_text: str) -> str:
+    """
+    Issue #173, no controls were specified but sometimes appear in the output.
+    Clean the response text of any controls output and return it.
+    """
+    regex_citation_in_text = r" \{\"document_id\"(.*?)\}"
+    regex_control_responses_list = r"\{\"id\"(.*?)\}"
+
+    cleaned = response_text
+
+    # Remove all citations in the response
+    cleaned = re.sub(regex_citation_in_text, "", cleaned)
+
+    # Remove the list of outputs from controls
+    # E.g. "citations", "hallucinations"
+    match = re.search(regex_control_responses_list, cleaned, re.DOTALL)
+    if match:
+        cleaned = cleaned[:match.start()]
+    return cleaned.strip()
+
+
+
 def _validate_response(response_text: str, citation_info: object):
     start = re.escape(_GRANITE_3_3_CITE_START)
     end = re.escape(_GRANITE_3_3_CITE_END)
@@ -648,7 +673,7 @@ def _update_docs_text_with_input_docs(
 
 
 def parse_model_output(
-    model_output: str, docs_from_input: list[object]
+    model_output: str, inputs: Granite3Point3Inputs
 ) -> list[str | dict]:
     """
     Parse the constituents of the output (response) of a model into
@@ -664,6 +689,22 @@ def parse_model_output(
             "hallucinations": Hallucinations
     }
     """
+
+    docs_from_input = inputs.documents
+
+    # Issue #173, no controls were specified but old citations and hallications
+    # format sometimes appear in the output.
+    # Clean the response text of these old controls format.
+    if inputs.controls is None:
+        response_text_without_controls = _remove_controls_output_from_response_text(model_output)
+        result = {
+            "docs": None,
+            "response": response_text_without_controls,
+            "citations": None,
+            "hallucinations": None,
+        }
+        logger.debug(f"Response text without controls:\n{result}\n")
+        return result
 
     # Split model output into its parts: response, citation, and hallucination section
     response_text, citations_text, hallucinations_text = _split_model_output_into_parts(
