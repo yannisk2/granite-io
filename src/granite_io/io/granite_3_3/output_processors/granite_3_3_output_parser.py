@@ -514,8 +514,7 @@ def _remove_controls_output_from_response_text(response_text: str) -> str:
     Clean the response text of any controls output and return it.
     """
     regex_citation_in_text = r" \{\"document_id\": \"\d+\"\}"
-    regex_control_citation_list = r"\{\"id\": \"citation\"\}"
-    regex_control_hallucination_list = r"\{\"id\": \"hallucination\"\}"
+    regex_control_responses_list = r"\{\"id\": \"(citation|hallucination)\"\}"
 
     cleaned = response_text
 
@@ -523,10 +522,9 @@ def _remove_controls_output_from_response_text(response_text: str) -> str:
     cleaned = re.sub(regex_citation_in_text, "", cleaned)
 
     # Remove the specific list of outputs from controls based on their regex
-    for regex_fn in [regex_control_citation_list, regex_control_hallucination_list]:
-        match = re.search(regex_fn, cleaned, re.DOTALL)
-        if match:
-            cleaned = cleaned[: match.start()].strip()
+    match = re.search(regex_control_responses_list, cleaned, re.DOTALL)
+    if match:
+        cleaned = cleaned[: match.start()].strip()
     return cleaned
 
 
