@@ -513,21 +513,21 @@ def _remove_controls_output_from_response_text(response_text: str) -> str:
     Issue #173, no controls were specified but sometimes appear in the output.
     Clean the response text of any controls output and return it.
     """
-    regex_citation_in_text = r" \{\"document_id\"(.*?)\}"
-    regex_control_responses_list = r"\{\"id\"(.*?)\}"
+    regex_citation_in_text = r" \{\"document_id\": \"\d+\"\}"
+    regex_control_citation_list = r"\{\"id\": \"citation\"\}"
+    regex_control_hallucination_list = r"\{\"id\": \"hallucination\"\}"
 
     cleaned = response_text
 
     # Remove all citations in the response
     cleaned = re.sub(regex_citation_in_text, "", cleaned)
 
-    # Remove the list of outputs from controls
-    # E.g. "citations", "hallucinations"
-    match = re.search(regex_control_responses_list, cleaned, re.DOTALL)
-    if match:
-        cleaned = cleaned[:match.start()]
-    return cleaned.strip()
-
+    # Remove the specific list of outputs from controls based on their regex
+    for regex_fn in [regex_control_citation_list, regex_control_hallucination_list]:
+        match = re.search(regex_fn, cleaned, re.DOTALL)
+        if match:
+            cleaned = cleaned[: match.start()].strip()
+    return cleaned
 
 
 def _validate_response(response_text: str, citation_info: object):
@@ -682,6 +682,9 @@ def parse_model_output(
 
     Args:
         model_output: The response from model request
+        inputs: The full input given to the model, required to fix issue with
+                old controls format appearing and to access documents for the
+                new citations format in the model output
     Returns:
         Parsed part of the model output as follows:
             "docs": Document references
@@ -691,13 +694,13 @@ def parse_model_output(
     }
     """
 
-    docs_from_input = inputs.documents
-
     # Issue #173, no controls were specified but old citations and hallications
     # format sometimes appear in the output.
     # Clean the response text of these old controls format.
     if inputs.controls is None:
-        response_text_without_controls = _remove_controls_output_from_response_text(model_output)
+        response_text_without_controls = _remove_controls_output_from_response_text(
+            model_output
+        )
         result = {
             "docs": None,
             "response": response_text_without_controls,
@@ -706,6 +709,8 @@ def parse_model_output(
         }
         logger.debug(f"Response text without controls:\n{result}\n")
         return result
+
+    docs_from_input = inputs.documents
 
     # Split model output into its parts: response, citation, and hallucination section
     response_text, citations_text, hallucinations_text = _split_model_output_into_parts(
