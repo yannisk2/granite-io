@@ -19,9 +19,9 @@ INSTRUCTION_TEXT = """You are a smart and helpful AI assistant with in-depth kno
 about how people search for information using search engines. In this task, you are 
 given two passages, and a query, your job is to judge which passage is relatively more
 suitable to answer that query. The first passage will start with "passage A" and the 
-second passage with start with "passage B" output the preferred passage index, i.e. A 
-or B and followed by an explanation if none of the passage answer the query directly, 
-pick one that has more relevant information
+second passage with start with "passage B". Output the preferred passage index, i.e. A 
+or B and followed by an explanation, if none of the passage answer the query directly, 
+pick the one that has more relevant information.
 """
 
 
@@ -51,16 +51,20 @@ class RerankRequestProcessor(RequestProcessor):
         rerank_top_k: int = 8,
         return_top_k: int = 5,
         verbose: bool = False,
+        prompt: str = None
     ):
         """
         :param io_proc: IO processor for a model that rerank the retrieval output
         :param rerank_top_k: Number of retrieved passages to rerank
         :param return_top_k: Number of reranked passages to return
+        :param verbose: whether to generate explianation or not 
+        :param prompt: user defined prompt
         """
         self._io_proc = io_proc
         self._rerank_top_k = rerank_top_k
         self._return_top_k = return_top_k
         self._verbose = verbose
+        self._prompt = prompt if prompt else INSTRUCTION_TEXT
         self._generation_parameters = {
             "generate_inputs": {
                 "temperature": 0.0,
@@ -94,7 +98,7 @@ class RerankRequestProcessor(RequestProcessor):
                 content = [passage1, passage2]
                 batch_content.append(content)
             chat_input = format_prompts(
-                INSTRUCTION_TEXT, query, batch_content, self._generation_parameters
+                self._prompt, query, batch_content, self._generation_parameters
             )
             generations = await asyncio.gather(
                 *[self._io_proc.acreate_chat_completion(c) for c in chat_input]
@@ -131,7 +135,7 @@ class RerankRequestProcessor(RequestProcessor):
                 pair_index.append({"A": indx_a, "B": indx_b})
 
         chat_input = format_prompts(
-            INSTRUCTION_TEXT, query, batch_content, self._generation_parameters
+            self._prompt, query, batch_content, self._generation_parameters
         )
         generations = await asyncio.gather(
             *[self._io_proc.acreate_chat_completion(c) for c in chat_input]
