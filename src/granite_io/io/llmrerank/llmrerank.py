@@ -51,13 +51,13 @@ class RerankRequestProcessor(RequestProcessor):
         rerank_top_k: int = 8,
         return_top_k: int = 5,
         verbose: bool = False,
-        prompt: str = None
+        prompt: str = None,
     ):
         """
         :param io_proc: IO processor for a model that rerank the retrieval output
         :param rerank_top_k: Number of retrieved passages to rerank
         :param return_top_k: Number of reranked passages to return
-        :param verbose: whether to generate explianation or not 
+        :param verbose: whether to generate explanation or not
         :param prompt: user defined prompt
         """
         self._io_proc = io_proc
