@@ -4,9 +4,9 @@ import os
 # Local
 from granite_io import make_backend, make_io_processor
 from granite_io.backend.vllm_server import LocalVLLMServer
-from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
+from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
     ControlsRecord,
-    Granite3Point2Inputs,
+    Granite3Point3Inputs,
 )
 from granite_io.io.llmrerank import RerankRequestProcessor
 from granite_io.io.retrieval import InMemoryRetriever, RetrievalRequestProcessor
@@ -15,11 +15,11 @@ from granite_io.io.retrieval.util import download_mtrag_embeddings
 
 def main():
     # Constants go here
-    temp_data_dir = "../data/test_retrieval_temp"
+    temp_data_dir = "../data/test_retrieval"
     corpus_name = "govt"
     embedding_model_name = "multi-qa-mpnet-base-dot-v1"
     # embedding_model_name = "ibm-granite/granite-embedding-30m-english"
-    model_name = "ibm-granite/granite-3.2-8b-instruct"
+    model_name = "ibm-granite/granite-3.3-8b-instruct"
 
     run_server = True
 
@@ -56,7 +56,7 @@ def main():
     io_proc = make_io_processor(model_name, backend=backend)
 
     # Create an example chat completions request
-    chat_input = Granite3Point2Inputs.model_validate(
+    chat_input = Granite3Point3Inputs.model_validate(
         {
             "messages": [
                 {
@@ -86,24 +86,12 @@ def main():
 
     # rerank with llm
     rerank_processor = RerankRequestProcessor(
-        io_proc, rerank_top_k=16, return_top_k=16, verbose=True
+        io_proc, rerank_top_k=32, return_top_k=5, verbose=True
     )
     rerank_chat_input = rerank_processor.process(rag_chat_input)
 
-    # Repeat with the base Granite model's native citations support
-    citations_result = io_proc.create_chat_completion(
-        rerank_chat_input.model_copy(
-            update={"controls": ControlsRecord(citations=True)}
-        )
-    )
-
-    print("Citations:")
-    for c in citations_result.results[0].next_message.citations:
-        print(c.model_dump())
-
-    # pd.DataFrame.from_records(
-    #     [c.model_dump() for c in citations_result.results[0].next_message.citations]
-    # )
+    rag_output = io_proc.create_chat_completion(rerank_chat_input)
+    print(rag_output.results[0].next_message.content)
 
 
 if __name__ == "__main__":
