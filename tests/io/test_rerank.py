@@ -51,7 +51,6 @@ def test_rerank_request_processor():  # pylint: disable=redefined-outer-name
         download_mtrag_embeddings(
             _EMBEDDING_MODEL_NAME, corpus_name, embeddings_location
         )
-    """Basic test of the RequestProcessor that performs RAG retrieval"""
     model_name = "ibm-granite/granite-3.3-8b-instruct"
     server = LocalVLLMServer(model_name)
     server.wait_for_startup(200)
