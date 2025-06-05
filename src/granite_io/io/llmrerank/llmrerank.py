@@ -105,8 +105,10 @@ class RerankRequestProcessor(RequestProcessor):
             )
             for indx in range(0, total_tournament_passages // 2):
                 choice = generations[indx].results[0].next_message.content[0].upper()
-                long_choice = generations[indx].results[0].next_message.content[:9].lower()
-                if choice in ["B", "2"] or long_choice =="passage b":
+                long_choice = (
+                    generations[indx].results[0].next_message.content[:9].lower()
+                )
+                if choice in ["B", "2"] or long_choice == "passage b":
                     if self._verbose:
                         print("LLM prefers a lower ranked passage")
                         print(f"query: {query}")
@@ -145,7 +147,7 @@ class RerankRequestProcessor(RequestProcessor):
         for generation, pair in zip(generations, pair_index, strict=True):
             choice = generation.results[0].next_message.content[0].upper()
             long_choice = generation.results[0].next_message.content[:9].lower()
-            if choice in ["B", "2"] or long_choice =="passage b":
+            if choice in ["B", "2"] or long_choice == "passage b":
                 win_count[pair["B"]] += 1
                 if self._verbose:
                     print("LLM prefers a lower ranked passage")
@@ -155,7 +157,7 @@ class RerankRequestProcessor(RequestProcessor):
                     print(f"passage B: {documents[pair['B']].text}")
                     print(f"passage B position: {pair['B']}")
                     print(f"LLM output:{generation.results[0].next_message.content}")
-            elif choice in ["A", "1"] or long_choice =="passage a":
+            elif choice in ["A", "1"] or long_choice == "passage a":
                 win_count[pair["A"]] += 1
             else:
                 win_count[pair["A"]] += 0.5

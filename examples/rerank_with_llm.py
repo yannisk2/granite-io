@@ -5,7 +5,6 @@ import os
 from granite_io import make_backend, make_io_processor
 from granite_io.backend.vllm_server import LocalVLLMServer
 from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
-    ControlsRecord,
     Granite3Point3Inputs,
 )
 from granite_io.io.llmrerank import RerankRequestProcessor
