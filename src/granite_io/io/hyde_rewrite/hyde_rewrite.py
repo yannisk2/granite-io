@@ -81,10 +81,7 @@ Officer of Apple Inc.<|end_of_text|>
         else:
             prompt = self.base_input_processor.transform(inputs, False)
         result = inputs.generate_inputs.model_copy(
-            update={
-                "prompt": prompt,
-                "max_tokens": HYDE_MAX_TOKENS
-            }
+            update={"prompt": prompt, "max_tokens": HYDE_MAX_TOKENS}
         )
         return result
 
