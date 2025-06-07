@@ -29,10 +29,8 @@ HYDE_MAX_TOKENS = 256
 
 class HyDERewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
-    I/O processor for the query rewrite intrinsic, also known as the [LoRA Adapter for 
-    Query Rewrite](https://huggingface.co/ibm-granite/
-    granite-3.2-8b-lora-rag-query-rewrite)
-
+    I/O processor for Query rewrite using HyDE https://arxiv.org/abs/2212.10496
+    
     Takes as input a chat completion and returns a completion with a rewrite of the
     most recent user turn (last in the conversation).
 
