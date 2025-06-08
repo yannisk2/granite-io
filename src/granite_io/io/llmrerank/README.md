@@ -42,15 +42,40 @@ For similicity, it only compares even number of passages and drops the last pass
 # Evaluation results
 
 ## IBM internal benchmark 1
-![task1](images/task2.png)
+| Model      | M@1 | M@5 |
+| ------ | ------ | ------ |
+| granite-embedding-30M      | 33       | 57.9 |
+| granite-3.3-instruct rerank top40   | **40.2**        | **64.1**|
+
 
 ## IBM internal benchmark 2
-![task2](images/task1.png)
+| Model      | MRR@1 | MRR@5 |
+| ------ | ------ | ------ |
+| granite-embedding-30M      | 29.6       | 37.1 |
+| granite-3.3-instruct rerank top40   | **34.8**  | **41.6**|
+
 
 ## BEIR benchmark
-We also provide the reranking result for popular BEIR benchmark as reference. By closely examing the reranking results, we found that a large amount of the LLM reranked top passages cross different tasks are at least as goog as the gold passage. We suspect this contributes to the performance drop in some tasks. 
+We also provide the reranking result for popular BEIR benchmark as reference. By closely examing the reranking results, we found that a large amount of the LLM reranked top passages cross different tasks are at least as goog as the gold passage but not counted as gold. We suspect this contributes to the performance drop in some tasks. 
 
-![task2](images/beir.png)
+| ndcg@10      | granite-embedding-30M | granite-3.3-instruct rerank top40 |
+| ------ | ------ | ------ |
+| trec-covid      | 0.631       | **0.724** |
+| nq   | 0.516  | **0.586**|
+| fiqa   | 0.369  | **0.371**|
+| scifact   | 0.713  | **0.742**|
+| msmarco   | 0.307  | **0.322**|
+| hotpotqa   | 0.629  | **0.652**|
+| nfcorpus   | 0.337  | **0.367**|
+| touche2020   | **0.240**  | 0.223|
+| scidoc   | **0.225**  | 0.210|
+| dbpedia   | 0.360  | **0.405**|
+| fever   | **0.855**  | 0.848 |
+| climate fever   | **0.303**  | 0.301|
+| CQADupstaceRetrieval   | 0.443  | **0.459**|
+| quora   | **0.867**  | 0.805 |
+| arguana   | **0.567**  | 0.347 |
+
 
 # Speed
 
