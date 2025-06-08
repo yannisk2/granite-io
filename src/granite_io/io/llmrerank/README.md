@@ -48,9 +48,9 @@ For similicity, it only compares even number of passages and drops the last pass
 ![task2](images/task1.png)
 
 ## BEIR benchmark
-![task2](images/beir.png)
+We also provide the reranking result for popular BEIR benchmark as reference. By closely examing the reranking results, we found that a large amount of the LLM reranked top passages cross different tasks are at least as goog as the gold passage. We suspect this contributes to the performance drop in some tasks. 
 
-For unknown reasons, Arguana and Quora retrieval have significant drop after reranking, we suspect that the prompt needs to be further optimized. 
+![task2](images/beir.png)
 
 # Speed
 
