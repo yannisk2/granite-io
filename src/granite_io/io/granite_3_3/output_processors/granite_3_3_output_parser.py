@@ -36,10 +36,10 @@ from granite_io.io.consts import (
     _GRANITE_3_3_CITE_START,
     _GRANITE_3_3_HALLUCINATIONS_START,
 )
-from granite_io.optional import nltk_check
 from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
     Granite3Point3Inputs,
 )
+from granite_io.optional import nltk_check
 
 # Setup logger
 logger = logging.getLogger("granite_io.io.granite_3_3.output_parser")
