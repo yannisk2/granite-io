@@ -91,13 +91,14 @@ class QueryExpansionIOProcessor(InputOutputProcessor):
         RevQ_v1_output = await self.backend.pipeline(generate_inputs)
         print(f"Reverse-Engineered Question: {RevQ_v1_output}")
         
-        
+        last_user_message = inputs.model_dump()['messages'][-1]
         query_str_list = [
-            sub_results[0].results[0].next_message.content,     #0
-            sub_results[1].results[0].completion_string,        #1
-            sub_results[2].results[0].completion_string,        #2
-            sub_results[3].results[0].next_message.content,     #3
-            RevQ_v1_output.results[0].completion_string,        #4
+            last_user_message['content'],                       #0
+            sub_results[0].results[0].next_message.content,     #1
+            sub_results[1].results[0].completion_string,        #2
+            sub_results[2].results[0].completion_string,        #3
+            sub_results[3].results[0].next_message.content,     #4
+            RevQ_v1_output.results[0].completion_string,        #5
         ]
         
         # print("\nList of Query Strings:", query_str_list)    
