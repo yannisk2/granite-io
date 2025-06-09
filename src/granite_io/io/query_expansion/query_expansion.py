@@ -59,7 +59,7 @@ class QueryExpansionIOProcessor(InputOutputProcessor):
         coroutines.append(self.rewrite_request_proc.acreate_chat_completion(inputs))        
         ####################Reformulate into Synonymous Query by prompting Granite####################
         input_conversation_string = self.format_chat_history(inputs.model_dump()['messages'])
-        print(f"Input Conversation: {input_conversation_string}")
+        # print(f"Input Conversation: {input_conversation_string}")
         
         generate_inputs = GenerateInputs(max_tokens=512, top_p=1, temperature=1, stop="[[Input]]")
         generate_inputs.prompt = f"""You are given a multi-turn conversation between a user and an assistant. Reformulate the last-turn user query into a synonymous standalone query by replacing key terms with appropriate synonyms or closely related phrases, while preserving the original intent and meaning. This rewritten query will be used to retrieve relevant passages from a corpus, so it must remain faithful to the user's information need. Only output the rewritten query.\n\n[[Input]]\n{input_conversation_string}\n\n[[Output]]\n"""
@@ -72,11 +72,10 @@ class QueryExpansionIOProcessor(InputOutputProcessor):
         chat_input_ans_v1 = ChatCompletionInputs(messages=inputs.messages, generate_inputs={"temperature": 1, "top_p": 1, "max_tokens": 512, })
         coroutines.append(self.io_proc.acreate_chat_completion(chat_input_ans_v1))
         ################################################################################
-        print("coroutines", coroutines)
         
         # Merge results from parallel invocations
         sub_results = await asyncio.gather(*coroutines)
-        print("sub_results", sub_results)
+        # print("sub_results", sub_results)
         print("QUERY REWRITE:", sub_results[0])
         print("SYNONMOUS QUERY:", sub_results[1])
         print("ENRICHED QUERIES:", sub_results[2])
@@ -90,8 +89,7 @@ class QueryExpansionIOProcessor(InputOutputProcessor):
         generate_inputs.prompt = f"Generate a single question for the given answer.\n[[Answer]]\nAlbert Einstein was born in Germany.\n[[Question]]\nWhere was Albert Einstein born?\n[[Answer]]{query_answer_v1}\n[[Question]]\n"
 
         RevQ_v1_output = await self.backend.pipeline(generate_inputs)
-        # RevQ_v1_output = RevQ_v1_output.results[0].completion_string
-        # print(f"Reverse-Engineered Question: {RevQ_v1_output}")
+        print(f"Reverse-Engineered Question: {RevQ_v1_output}")
         
         
         query_str_list = [
@@ -102,11 +100,11 @@ class QueryExpansionIOProcessor(InputOutputProcessor):
             RevQ_v1_output.results[0].completion_string,        #4
         ]
         
-        print("\nList of Query Strings:", query_str_list)    
+        # print("\nList of Query Strings:", query_str_list)    
         
         results = []
         for cur_query in query_str_list:
             results.append(ChatCompletionResult(next_message=UserMessage(content=cur_query)))
-        print("results", results)
+        # print("results", results)
         
         return ChatCompletionResults(results=results)
