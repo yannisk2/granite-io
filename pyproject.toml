@@ -52,7 +52,6 @@ litellm = [
 ]
 vllm = [
     "vllm",
-    "flashinfer-python",  # For top-k/top-p decoding
 ]
 voting = [
     "pandas",
