@@ -4,15 +4,20 @@
 """
 I/O processor for the Granite context relevancy intrinsic.
 """
+# Standard
+import json
+
+# Third Party
+import pydantic
 
 # Local
 from granite_io.io.base import (
     InputOutputProcessor,
     ModelDirectInputOutputProcessorWithGenerate,
 )
-from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
-    Granite3Point2InputProcessor,
-    Granite3Point2Inputs,
+from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
+    Granite3Point3InputProcessor,
+    Granite3Point3Inputs,
 )
 from granite_io.types import (
     AssistantMessage,
@@ -23,15 +28,24 @@ from granite_io.types import (
     GenerateResults,
 )
 
-IRRELEVANT = "0"
-RELEVANT = "1"
+IRRELEVANT = "irrelevant"
+RELEVANT = "relevant"
+PARTIAL = "partially relevant"
+CONTEXT_RELEVANCE_PROMPT = "<|start_of_role|>context relevance<|end_of_role|>"
+
+class ContextRelevanceRawOutput(pydantic.BaseModel):
+    context_relevance: str
+
+
+RAW_OUTPUT_JSON_SCHEMA = ContextRelevanceRawOutput.model_json_schema()
+
 
 class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for the context relevancy intrinsic, also known as the LoRA Adapter for
     Context Relevancy Classification
-    Takes as input a chat completion and returns a completion with a 1/0 context relevancy
-    flag as a string in the content field.
+    Takes as input a chat completion and returns a completion with a context relevancy
+    flag as a string in the "" field.
 
     Example raw input:
     ```
@@ -43,23 +57,31 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     So, taking on debt could either increase or decrease the EV depending on the cash balance of the company.  
     This will have no effect, directly, on the market cap. 
     It will, however effect the present value of its future cash flows as the WACC will increase due to the new cost of debt (interest payments, higher risk of bankruptcy, less flexibility by management).<|end_of_text|>
-    <|start_of_role|>context relevancy<|end_of_role|>
-        ```
+    <|start_of_role|>context_relevance<|end_of_role|>
+    ```
 
-    Raw output should be either 0 for a document that is irrelevant to the last user question in the conversation or 1 for relevant.
+
+    Raw output be in json format:
+    ```json
+    {
+        "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
+    }
+    ```
+    Where the value in `YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE` can be `irrelevant`, `partially relevant`, or `relevant`.
+    
     """
 
     def __init__(self, backend):
         super().__init__(backend=backend)
 
         # Input processor for the base model, which does most of the input formatting.
-        self.base_input_processor = Granite3Point2InputProcessor()
+        self.base_input_processor = Granite3Point3InputProcessor()
 
     def inputs_to_generate_inputs(
         self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
     ) -> GenerateInputs:
         # Validate the input and convert to Granite input
-        inputs = Granite3Point2Inputs.model_validate(inputs.model_dump())
+        inputs = Granite3Point3Inputs.model_validate(inputs.model_dump())
 
         # Check for the invariants that the model expects its input to satisfy
         if not inputs.documents:
@@ -77,7 +99,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
         # Only the generation prompt portion changes
         if add_generation_prompt:
-            prompt = prompt + "<|start_of_role|>context relevancy<|end_of_role|>"
+            prompt = prompt + CONTEXT_RELEVANCE_PROMPT
 
         generate_inputs_before = (
             updated_inputs.generate_inputs if updated_inputs.generate_inputs else GenerateInputs()
@@ -86,7 +108,10 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             update={
                 "prompt": prompt,
                 # Ensure enough tokens to produce the answer 
-                "max_tokens": 16,
+                "max_tokens": 100,
+                "extra_body": {
+                    "guided_json": RAW_OUTPUT_JSON_SCHEMA,
+                },
             }
         )
         return result
@@ -97,7 +122,15 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         results = []
         for raw_result in output.results:
             raw_str = raw_result.completion_string
-            if raw_str in (IRRELEVANT, RELEVANT):
+            json_result = raw_str
+            try:
+                json_result = json.loads(raw_str)["context_relevance"]
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                # Cannot parse the JSON. Pass through the unparsed raw output for now
+                # instead of raising an exception from the I/O processor.
+                print(f"\nException: {e}\n")
+                json_result = raw_str
+            if json_result in (IRRELEVANT, RELEVANT, PARTIAL):
                 results.append(
                     ChatCompletionResult(
                         next_message=AssistantMessage(
@@ -106,13 +139,21 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                     )
                 )
             # Model may forget to generate end of string
-            elif raw_str.startswith(IRRELEVANT):
+            elif PARTIAL in json_result:
+                results.append(
+                    ChatCompletionResult(
+                        next_message=AssistantMessage(
+                            content=PARTIAL, raw=raw_str
+                        )
+                    )
+                )
+            elif IRRELEVANT in json_result:
                 results.append(
                     ChatCompletionResult(
                         next_message=AssistantMessage(content=IRRELEVANT, raw=raw_str)
                     )
                 )
-            elif raw_str.startswith(RELEVANT):
+            elif RELEVANT in json_result:
                 results.append(
                     ChatCompletionResult(
                         next_message=AssistantMessage(
@@ -139,7 +180,8 @@ DEFAULT_CANNED_RESPONSE = (
 class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
     """
     Composite I/O processor that only keeps contexts (documents) 
-    that are relevant to the last user question of the RAG request.
+    that are relevant or partially relevant to the last user question 
+    of the RAG request.
     All other documents are filtered out.
     """
 
@@ -154,7 +196,7 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
         :param generator: I/O processor that generates the results that this I/O
          processor shoid validate.
         :param context relevancy_io_proc: IO processor for the context relevancy model.
-         Should return either "0" or "1".
+         Should return a string indicating the document's relevance
         :param fallback_type: "canned_response" 
         :param canned_response: Fallback response to use if ``fallback_type`` is
          "canned_response"
@@ -180,11 +222,11 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
             # Run a single context relevancy check
             context_relevancy_output = (
                 await self._context_relevancy.acreate_chat_completion(
-                    inputs.with_addl_generate_params({"temperature": 0.0, "n": 1})
+                    inputs.with_addl_generate_params({"temperature": 0.0})
                 )
             ).results[0]
 
-            if context_relevancy_output.next_message.content == RELEVANT:
+            if context_relevancy_output.next_message.content == RELEVANT or context_relevancy_output.next_message.content == PARTIAL:
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
             

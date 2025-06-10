@@ -14,13 +14,13 @@ import pytest
 # Local
 from granite_io.backend.vllm_server import LocalVLLMServer
 from granite_io.io.context_relevancy import ContextRelevancyIOProcessor
-from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
-    Granite3Point2Inputs,
+from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
+    Granite3Point3Inputs,
     override_date_for_testing,
 )
 from granite_io.types import GenerateResult, GenerateResults
 
-_EXAMPLE_CHAT_INPUT = Granite3Point2Inputs.model_validate(
+_EXAMPLE_CHAT_INPUT = Granite3Point3Inputs.model_validate(
     {
         "messages": [
             {"role": "assistant", "content": "Welcome to pet questions!"},
@@ -72,7 +72,7 @@ question cannot be answered based on the available data.<|end_of_text|>
     My cat does not have fleas.<|end_of_text|>
     <|start_of_role|>assistant<|end_of_role|>Welcome to pet questions!<|end_of_text|>
     <|start_of_role|>user<|end_of_role|>Which of my pets have fleas?<|end_of_text|>
-    <|start_of_role|>context relevancy<|end_of_role|>""")
+    <|start_of_role|>context relevance<|end_of_role|>""")
     assert output == expected_output
 
 
@@ -88,4 +88,4 @@ def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     override_date_for_testing(fake_date)  # For consistent VCR output
     chat_result = io_proc.create_chat_completion(_EXAMPLE_CHAT_INPUT)
 
-    assert chat_result.results[0].next_message.content in ("0", "1")
+    assert chat_result.results[0].next_message.content in ("relevant", "irrelevant", "partially relevant")
