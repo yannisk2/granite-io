@@ -231,5 +231,5 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
                 relevant_documents.append(document)
             
         inputs_with_updated_docs = inputs.model_copy(update={"documents": relevant_documents})
-        return await self._generator.acreate_chat_completion(inputs)
+        return await self._generator.acreate_chat_completion(inputs_with_updated_docs)
 
