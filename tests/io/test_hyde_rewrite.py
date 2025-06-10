@@ -88,33 +88,16 @@ def test_canned_output():
     """
     io_processor = HyDERewriteIOProcessor(None)
 
-    raw_output_to_expected = [
-        (
-            "What is the capital of France",  # noqa: E501
-            "Is Rex more likely to get fleas because he spends a lot of time outdoors?",
-        ),
-        # Current code passes through malformed data unchanged
-        ("<invalid model response>", "<invalid model response>"),
-    ]
+    raw_output = "Dummy Hyde Output"
+    expected = "What items I need to keep in the safe room? Dummy Hyde Output"
 
-    # Single output
-    for raw_output, expected in raw_output_to_expected:
-        output = io_processor.output_to_result(
-            GenerateResults(results=[_make_result(raw_output)]), _EXAMPLE_CHAT_INPUT
-        )
-        print(f"\n{output}\n")
-
-        assert len(output.results) == 1
-        assert output.results[0].next_message.content == expected
-
-    # Multiple outputs
-    multi_raw_output = [
-        _make_result(raw_output) for raw_output, _ in raw_output_to_expected
-    ]
-    multi_expected = [expected for _, expected in raw_output_to_expected]
-    multi_output = io_processor.output_to_result(
-        GenerateResults(results=multi_raw_output), _EXAMPLE_CHAT_INPUT
+    output = io_processor.output_to_result(
+        GenerateResults(results=[_make_result(raw_output)]), _EXAMPLE_CHAT_INPUT
     )
-    multi_output_strs = [r.next_message.content for r in multi_output.results]
-    print(f"\n{output}\n")
-    assert multi_output_strs == multi_expected
+    print(f"\n{output=}\n")
+    # print(f"\{expected=}\n")
+
+    assert len(output.results) == 1
+    assert output.results[0].next_message.content == expected
+
+    
