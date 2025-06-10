@@ -54,7 +54,7 @@ class _MODEL_OUTPUT_ENTRY(BaseModel):
     r: NonNegativeInt
     c: list[NonNegativeInt]
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra="forbid")
 
 class _MODEL_OUTPUT(RootModel):
     root: list[_MODEL_OUTPUT_ENTRY]
