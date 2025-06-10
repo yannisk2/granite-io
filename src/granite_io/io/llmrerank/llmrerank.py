@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-I/O processor for reranking retrieval output using Garnite model
+I/O processor for reranking retrieval output using Granite model
 """
 
 # Standard
 import asyncio
 import copy
+import logging
 
 # Local
 from granite_io.io.base import InputOutputProcessor, RequestProcessor
@@ -15,17 +16,17 @@ from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor impo
 )
 from granite_io.types import ChatCompletionInputs
 
-INSTRUCTION_TEXT = """You are a smart and helpful AI assistant with in-depth knowledge
-about how people search for information using search engines. In this task, you are 
-given two passages, and a query, your job is to judge which passage is relatively more
-suitable to answer that query. The first passage will start with "passage A" and the 
-second passage with start with "passage B". Output the preferred passage index, i.e. A 
-or B and followed by an explanation, if none of the passage answer the query directly, 
+INSTRUCTION_TEXT = """You are a smart and helpful AI assistant with in-depth knowledge \
+about how people search for information using search engines. In this task, you are \
+given two passages, and a query, your job is to judge which passage is relatively more \
+suitable to answer that query. The first passage will start with "passage A" and the \
+second passage with start with "passage B". Output the preferred passage index, i.e. A \
+or B and followed by an explanation, if none of the passage answer the query directly, \
 pick the one that has more relevant information.
 """
 
 
-def format_prompts(instruction, query, documents, generation_parameters):
+def _format_prompts(instruction, query, documents, generation_parameters):
     prompts = [
         f"{instruction}\n passage A: {pair[0]} \n passage B: {pair[1]} \n \
             query: {query}\n preferred passage: "
@@ -79,25 +80,28 @@ class RerankRequestProcessor(RequestProcessor):
         inputs_copy = copy.deepcopy(inputs)  # avoid changing original inputs
         query = inputs_copy.messages[-1].content
         documents = inputs_copy.documents
-        if len(documents) % 2 != 0:
-            print("for simplicity, drop the last document of number of document is odd")
         if self._rerank_top_k > len(documents):
-            print(
+            logging.warning(
                 f"Number of document ({len(documents)}) is less than "
-                f"{self._rerank_top_k} only reranking {len(documents)} documents"
+                f"{self._rerank_top_k}, only reranking {len(documents)} documents"
             )
         total_tournament_passages = min(
             self._rerank_top_k, len(documents) - len(documents) % 2
         )
 
         while total_tournament_passages > 10:
+            if total_tournament_passages % 2 != 0:
+                logging.warning(
+                    f"The number of document is odd: {total_tournament_passages}."
+                    f"For simplicity, this step automatically drops the last document"
+                )
             batch_content = []
             for indx in range(0, total_tournament_passages // 2):
                 passage1 = documents[indx].text
                 passage2 = documents[total_tournament_passages - 1 - indx].text
                 content = [passage1, passage2]
                 batch_content.append(content)
-            chat_input = format_prompts(
+            chat_input = _format_prompts(
                 self._prompt, query, batch_content, self._generation_parameters
             )
             generations = await asyncio.gather(
@@ -110,16 +114,16 @@ class RerankRequestProcessor(RequestProcessor):
                 )
                 if choice in ["B", "2"] or long_choice == "passage b":
                     if self._verbose:
-                        print("LLM prefers a lower ranked passage")
-                        print(f"query: {query}")
-                        print(f"passage A: {batch_content[indx][0]}")
-                        print(f"passage A position: {indx}")
-                        print(f"passage B: {batch_content[indx][1]}")
-                        print(
+                        logging.info("LLM prefers a lower ranked passage")
+                        logging.info(f"query: {query}")
+                        logging.info(f"passage A: {batch_content[indx][0]}")
+                        logging.info(f"passage A position: {indx}")
+                        logging.info(f"passage B: {batch_content[indx][1]}")
+                        logging.info(
                             f"passage B position: "
                             f"{total_tournament_passages - 1 - indx}"
                         )
-                        print(
+                        logging.info(
                             f"LLM output:"
                             f"{generations[indx].results[0].next_message.content}"
                         )
@@ -137,7 +141,7 @@ class RerankRequestProcessor(RequestProcessor):
                 batch_content.append([documents[indx_a].text, documents[indx_b].text])
                 pair_index.append({"A": indx_a, "B": indx_b})
 
-        chat_input = format_prompts(
+        chat_input = _format_prompts(
             self._prompt, query, batch_content, self._generation_parameters
         )
         generations = await asyncio.gather(
@@ -150,13 +154,15 @@ class RerankRequestProcessor(RequestProcessor):
             if choice in ["B", "2"] or long_choice == "passage b":
                 win_count[pair["B"]] += 1
                 if self._verbose:
-                    print("LLM prefers a lower ranked passage")
-                    print(f"query: {query}")
-                    print(f"passage A: {documents[pair['A']].text}")
-                    print(f"passage A position: {pair['A']}")
-                    print(f"passage B: {documents[pair['B']].text}")
-                    print(f"passage B position: {pair['B']}")
-                    print(f"LLM output:{generation.results[0].next_message.content}")
+                    logging.info("LLM prefers a lower ranked passage")
+                    logging.info(f"query: {query}")
+                    logging.info(f"passage A: {documents[pair['A']].text}")
+                    logging.info(f"passage A position: {pair['A']}")
+                    logging.info(f"passage B: {documents[pair['B']].text}")
+                    logging.info(f"passage B position: {pair['B']}")
+                    logging.info(
+                        f"LLM output:{generation.results[0].next_message.content}"
+                    )
             elif choice in ["A", "1"] or long_choice == "passage a":
                 win_count[pair["A"]] += 1
             else:

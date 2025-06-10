@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Test cases for the retrieval intrinsic.
+Test cases for the llm rerank intrinsic.
 """
 
 # Standard
@@ -45,7 +45,7 @@ _EMBEDDING_MODEL_NAME = "multi-qa-mpnet-base-dot-v1"
 
 def test_rerank_request_processor():  # pylint: disable=redefined-outer-name
     temp_data_dir = "data/test_retrieval"
-    corpus_name = "govt"
+    corpus_name = "govt10"
     embeddings_location = f"{temp_data_dir}/{corpus_name}_embeds.parquet"
     if not os.path.exists(embeddings_location):
         download_mtrag_embeddings(
@@ -57,10 +57,10 @@ def test_rerank_request_processor():  # pylint: disable=redefined-outer-name
     backend = server.make_backend()
     io_proc = make_io_processor(model_name, backend=backend)
     retriever = InMemoryRetriever(embeddings_location, _EMBEDDING_MODEL_NAME)
-    request_processor = RetrievalRequestProcessor(retriever, top_k=32)
+    request_processor = RetrievalRequestProcessor(retriever, top_k=128)
     rag_chat_input = request_processor.process(_EXAMPLE_CHAT_INPUT)[0]
     rerank_processor = RerankRequestProcessor(
-        io_proc, rerank_top_k=16, return_top_k=16, verbose=True
+        io_proc, rerank_top_k=128, return_top_k=128, verbose=True
     )
     rerank_chat_input = rerank_processor.process(rag_chat_input)
     rerank_doc_ids = []
@@ -72,5 +72,4 @@ def test_rerank_request_processor():  # pylint: disable=redefined-outer-name
     match = [
         id1 == id2 for id1, id2 in zip(rerank_doc_ids, retrieval_doc_ids, strict=False)
     ]
-    print(match)
     assert not all(match)

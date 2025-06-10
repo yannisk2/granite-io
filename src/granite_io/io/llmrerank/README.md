@@ -1,10 +1,10 @@
 # Overview
 
-This module supports using LLM as a reranker to rerank the retrieved passages. It takes the output of retrieval step as input and returns a reorder of passges which can be then used for generation. Evaluation on multiple domains and tasks shows that it can significanly improve the retrieval result with low latency and minimum code change. 
+This module supports using an LLM as a reranker to rerank the retrieved passages. It takes the output of the retrieval step as input and returns a reranked (subset of the) retrieved passages which can be then used for generation. Evaluation on multiple domains and tasks shows that it can significanly improve the retrieval result with low latency and minimum code change. 
 
 # Algorithm
 
-The reranking is done in a tournament style by asking the LLM to compare paired passages and return the label of preferred one. The users can provide their own prompt otherwise the default prompt is used.
+The reranking is done in a tournament style by asking the LLM to compare paired passages and return the label of the preferred one. Users can provide their own prompt; otherwise the default prompt is used.
 
 ## Default prompt
 `You are a smart and helpful AI assistant with in-depth knowledge
@@ -16,9 +16,8 @@ or B and followed by an explanation, if none of the passage answer the query dir
 pick the one that has more relevant information.`
 
 ## Tournament
-When number of reranking passage is less than 10, LLM compares the all possible paires and rank by each passage's win count. All or mulitple pairs are grouped into single batch for efficiency. 
-When the number of reranking passage is larger than 10, LLM forms pairs like the example below and only pick the winning passages for the next round. 
-For similicity, it only compares even number of passages and drops the last passage if there are odd number of passages
+When the number of reranking passages is less than 10, the LLM compares all possible paires and ranks by each passage's win count. All or mulitple pairs are grouped into single batch for efficiency. 
+When the number of reranking passages is larger than 10, the LLM forms pairs like the example below and only picks the winning passages for the next round. For simplicity, in this step it only compares even number of passages and drops the last passage if there are odd number of passages
 
 ![tournament](images/Picture1.png)
 
@@ -56,7 +55,7 @@ For similicity, it only compares even number of passages and drops the last pass
 
 
 ## BEIR benchmark
-We also provide the reranking result for popular BEIR benchmark as reference. By closely examing the reranking results, we found that a large amount of the LLM reranked top passages cross different tasks are at least as goog as the gold passage but not counted as gold. We suspect this contributes to the performance drop in some tasks. 
+We also provide the reranking result for popular BEIR benchmark as reference. By closely examing the reranking results, we found that a large amount of the LLM reranked top passages cross different tasks are at least as good as the gold passage but not counted as gold. We suspect this contributes to the performance drop in some tasks. 
 
 | ndcg@10      | granite-embedding-30M | granite-3.3-instruct rerank top40 |
 | ------ | ------ | ------ |

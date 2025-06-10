@@ -14,7 +14,7 @@ from granite_io.io.retrieval.util import download_mtrag_embeddings
 
 def main():
     # Constants go here
-    temp_data_dir = "../data/test_retrieval"
+    temp_data_dir = "data/test_retrieval"
     corpus_name = "govt"
     embedding_model_name = "multi-qa-mpnet-base-dot-v1"
     # embedding_model_name = "ibm-granite/granite-embedding-30m-english"
@@ -44,7 +44,7 @@ def main():
         # backend=make_backend("openai", {"model_name": model_name})
 
     # Download the indexed corpus if it hasn't already been downloaded.
-    # This notebook uses a subset of the government corpus from the MTRAG benchmark.
+    # This example uses a subset of the government corpus from the MTRAG benchmark.
     embeddings_location = f"{temp_data_dir}/{corpus_name}_embeds.parquet"
     if not os.path.exists(embeddings_location):
         download_mtrag_embeddings(
