@@ -7,6 +7,7 @@ I/O processor for the Granite context relevancy intrinsic.
 
 # Standard
 import json
+from enum import Enum
 
 # Third Party
 import pydantic
@@ -29,14 +30,17 @@ from granite_io.types import (
     GenerateResults,
 )
 
-IRRELEVANT = "irrelevant"
-RELEVANT = "relevant"
-PARTIAL = "partially relevant"
+
 CONTEXT_RELEVANCE_PROMPT = "<|start_of_role|>context_relevance<|end_of_role|>"
+
+class CRLabel(str, Enum):
+    IRRELEVANT = "irrelevant"
+    RELEVANT = "relevant"
+    PARTIAL = "partially relevant"
 
 
 class ContextRelevanceRawOutput(pydantic.BaseModel):
-    context_relevance: str
+    context_relevance: CRLabel
 
 
 RAW_OUTPUT_JSON_SCHEMA = ContextRelevanceRawOutput.model_json_schema()
@@ -141,7 +145,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                 # instead of raising an exception from the I/O processor.
                 print(f"\nException: {e}\n")
                 json_result = raw_str
-            if json_result in (IRRELEVANT, RELEVANT, PARTIAL):
+            if json_result in (CRLabel.IRRELEVANT, CRLabel.RELEVANT, CRLabel.PARTIAL):
                 results.append(
                     ChatCompletionResult(
                         next_message=AssistantMessage(
@@ -150,22 +154,31 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                     )
                 )
             # Model may forget to generate end of string
-            elif PARTIAL in json_result:
+            elif CRLabel.PARTIAL in json_result:
                 results.append(
                     ChatCompletionResult(
-                        next_message=AssistantMessage(content=PARTIAL, raw=raw_str)
+                        next_message=AssistantMessage(
+                            content=CRLabel.PARTIAL, 
+                            raw=raw_str
+                        )
                     )
                 )
-            elif IRRELEVANT in json_result:
+            elif CRLabel.IRRELEVANT in json_result:
                 results.append(
                     ChatCompletionResult(
-                        next_message=AssistantMessage(content=IRRELEVANT, raw=raw_str)
+                        next_message=AssistantMessage(
+                            content=CRLabel.IRRELEVANT, 
+                            raw=raw_str
+                        )
                     )
                 )
-            elif RELEVANT in json_result:
+            elif CRLabel.RELEVANT in json_result:
                 results.append(
                     ChatCompletionResult(
-                        next_message=AssistantMessage(content=RELEVANT, raw=raw_str)
+                        next_message=AssistantMessage(
+                            content=CRLabel.RELEVANT, 
+                            raw=raw_str
+                        )
                     )
                 )
             else:
@@ -234,8 +247,8 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
             ).results[0]
 
             if (
-                context_relevancy_output.next_message.content == RELEVANT
-                or context_relevancy_output.next_message.content == PARTIAL
+                context_relevancy_output.next_message.content == CRLabel.RELEVANT
+                or context_relevancy_output.next_message.content == CRLabel.PARTIAL
             ):
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
