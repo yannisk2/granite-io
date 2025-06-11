@@ -18,7 +18,7 @@ from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor impo
     Granite3Point3Inputs,
     override_date_for_testing,
 )
-from granite_io.types import GenerateResult, GenerateResults
+from granite_io.types import GenerateResult
 
 _EXAMPLE_CHAT_INPUT = Granite3Point3Inputs.model_validate(
     {
@@ -88,4 +88,8 @@ def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     override_date_for_testing(fake_date)  # For consistent VCR output
     chat_result = io_proc.create_chat_completion(_EXAMPLE_CHAT_INPUT)
 
-    assert chat_result.results[0].next_message.content in ("relevant", "irrelevant", "partially relevant")
+    assert chat_result.results[0].next_message.content in (
+        "relevant", 
+        "irrelevant", 
+        "partially relevant"
+    )

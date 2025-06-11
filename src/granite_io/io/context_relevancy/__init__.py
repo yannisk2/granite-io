@@ -2,7 +2,10 @@
 
 
 # Local
-from .context_relevancy import ContextRelevancyCompositeIOProcessor, ContextRelevancyIOProcessor
+from .context_relevancy import (
+    ContextRelevancyCompositeIOProcessor,
+    ContextRelevancyIOProcessor,
+)
 
-# Expose public symbols at `granite_io.io.certainty` to save users from typing
+# Expose public symbols at `granite_io.io.context_relevancy` to save users from typing
 __all__ = ["ContextRelevancyIOProcessor", "ContextRelevancyCompositeIOProcessor"]

@@ -4,6 +4,7 @@
 """
 I/O processor for the Granite context relevancy intrinsic.
 """
+
 # Standard
 import json
 
@@ -31,7 +32,8 @@ from granite_io.types import (
 IRRELEVANT = "irrelevant"
 RELEVANT = "relevant"
 PARTIAL = "partially relevant"
-CONTEXT_RELEVANCE_PROMPT = "<|start_of_role|>context relevance<|end_of_role|>"
+CONTEXT_RELEVANCE_PROMPT = "<|start_of_role|>context_relevance<|end_of_role|>"
+
 
 class ContextRelevanceRawOutput(pydantic.BaseModel):
     context_relevance: str
@@ -42,21 +44,26 @@ RAW_OUTPUT_JSON_SCHEMA = ContextRelevanceRawOutput.model_json_schema()
 
 class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
-    I/O processor for the context relevancy intrinsic, also known as the LoRA Adapter for
-    Context Relevancy Classification
+    I/O processor for the context relevancy intrinsic, also known as the LoRA Adapter 
+    for Context Relevancy Classification
     Takes as input a chat completion and returns a completion with a context relevancy
     flag as a string in the "" field.
 
     Example raw input:
     ```
-    <|start_of_role|>user<|end_of_role|>How is enterprise value calculated?<|end_of_text|>
+    <|start_of_role|>user<|end_of_role|>How is enterprise value calculated?
+    <|end_of_text|>
     <|start_of_role|>documents<|end_of_role|>Document 0
 
-    You wouldn't know it's value (Enterprise Value) without knowing its cash balance.  
-    The equation:   EV = Market Cap + Minority Interest + Preferred Stock + Debt - Cash  Enterprise Value is the value of the company to ALL shareholders (creditors, preferred stock holders, common stock holders).  
-    So, taking on debt could either increase or decrease the EV depending on the cash balance of the company.  
-    This will have no effect, directly, on the market cap. 
-    It will, however effect the present value of its future cash flows as the WACC will increase due to the new cost of debt (interest payments, higher risk of bankruptcy, less flexibility by management).<|end_of_text|>
+    You wouldn't know it's value (Enterprise Value) without knowing its cash balance.
+    The equation:   EV = Market Cap + Minority Interest + Preferred Stock + Debt - Cash
+    Enterprise Value is the value of the company to ALL shareholders (creditors, 
+    preferred stock holders, common stock holders). So, taking on debt could either 
+    increase or decrease the EV depending on the cash balance of the company.
+    This will have no effect, directly, on the market cap.
+    It will, however effect the present value of its future cash flows as the WACC will 
+    increase due to the new cost of debt (interest payments, higher risk of bankruptcy, 
+    less flexibility by management).<|end_of_text|>
     <|start_of_role|>context_relevance<|end_of_role|>
     ```
 
@@ -67,8 +74,9 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
     }
     ```
-    Where the value in `YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE` can be `irrelevant`, `partially relevant`, or `relevant`.
-    
+    Where the value in `YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE` can be `irrelevant`,
+    `partially relevant`, or `relevant`.
+
     """
 
     def __init__(self, backend):
@@ -88,10 +96,11 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             raise ValueError("Input does not contain any documents")
         if len(inputs.documents) > 1:
             raise ValueError("Input contains more than one document")
-        
+
         updated_inputs = inputs
-        # If the last message is from the assistant, remove it; we only want the last turn to be the user message
-        if not inputs.messages[-1].role == "assistant":
+        # If the last message is from the assistant, remove it; 
+        # We only want the last turn to be the user message
+        if inputs.messages[-1].role != "assistant":
             updated_inputs = inputs.with_messages(inputs.messages[:-1])
 
         # The beginning of the prompt doesn't change relative to base Granite 3.2
@@ -102,12 +111,14 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             prompt = prompt + CONTEXT_RELEVANCE_PROMPT
 
         generate_inputs_before = (
-            updated_inputs.generate_inputs if updated_inputs.generate_inputs else GenerateInputs()
+            updated_inputs.generate_inputs
+            if updated_inputs.generate_inputs
+            else GenerateInputs()
         )
         result = generate_inputs_before.model_copy(
             update={
                 "prompt": prompt,
-                # Ensure enough tokens to produce the answer 
+                # Ensure enough tokens to produce the answer
                 "max_tokens": 100,
                 "extra_body": {
                     "guided_json": RAW_OUTPUT_JSON_SCHEMA,
@@ -142,9 +153,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             elif PARTIAL in json_result:
                 results.append(
                     ChatCompletionResult(
-                        next_message=AssistantMessage(
-                            content=PARTIAL, raw=raw_str
-                        )
+                        next_message=AssistantMessage(content=PARTIAL, raw=raw_str)
                     )
                 )
             elif IRRELEVANT in json_result:
@@ -156,9 +165,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             elif RELEVANT in json_result:
                 results.append(
                     ChatCompletionResult(
-                        next_message=AssistantMessage(
-                            content=RELEVANT, raw=raw_str
-                        )
+                        next_message=AssistantMessage(content=RELEVANT, raw=raw_str)
                     )
                 )
             else:
@@ -172,15 +179,14 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         return ChatCompletionResults(results=results)
 
 
-DEFAULT_CANNED_RESPONSE = (
-    "Sorry, but I am unable to identify whether the document(s) is relevant or irrelevant to the last user question."
-)
+DEFAULT_CANNED_RESPONSE = ("Sorry, but I am unable to identify whether the document(s) "
+    "is relevant or irrelevant to the last user question.")
 
 
 class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
     """
-    Composite I/O processor that only keeps contexts (documents) 
-    that are relevant or partially relevant to the last user question 
+    Composite I/O processor that only keeps contexts (documents)
+    that are relevant or partially relevant to the last user question
     of the RAG request.
     All other documents are filtered out.
     """
@@ -197,7 +203,7 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
          processor shoid validate.
         :param context relevancy_io_proc: IO processor for the context relevancy model.
          Should return a string indicating the document's relevance
-        :param fallback_type: "canned_response" 
+        :param fallback_type: "canned_response"
         :param canned_response: Fallback response to use if ``fallback_type`` is
          "canned_response"
         """
@@ -214,7 +220,6 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
     async def acreate_chat_completion(
         self, inputs: ChatCompletionInputs
     ) -> ChatCompletionResults:
-        
         relevant_documents = []
         # Iterate through the documents
         for document in inputs.documents:
@@ -222,14 +227,20 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
             # Run a single context relevancy check
             context_relevancy_output = (
                 await self._context_relevancy.acreate_chat_completion(
-                    inputs.with_addl_generate_params({"temperature": 0.0})
+                    single_document_input.with_addl_generate_params(
+                        {"temperature": 0.0}
+                    )
                 )
             ).results[0]
 
-            if context_relevancy_output.next_message.content == RELEVANT or context_relevancy_output.next_message.content == PARTIAL:
+            if (
+                context_relevancy_output.next_message.content == RELEVANT
+                or context_relevancy_output.next_message.content == PARTIAL
+            ):
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
-            
-        inputs_with_updated_docs = inputs.model_copy(update={"documents": relevant_documents})
-        return await self._generator.acreate_chat_completion(inputs_with_updated_docs)
 
+        inputs_with_updated_docs = inputs.model_copy(
+            update={"documents": relevant_documents}
+        )
+        return await self._generator.acreate_chat_completion(inputs_with_updated_docs)
