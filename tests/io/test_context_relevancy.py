@@ -89,7 +89,7 @@ def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     chat_result = io_proc.create_chat_completion(_EXAMPLE_CHAT_INPUT)
 
     assert chat_result.results[0].next_message.content in (
-        "relevant", 
-        "irrelevant", 
-        "partially relevant"
+        "relevant",
+        "irrelevant",
+        "partially relevant",
     )
