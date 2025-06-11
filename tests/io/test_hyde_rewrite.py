@@ -99,5 +99,3 @@ def test_canned_output():
 
     assert len(output.results) == 1
     assert output.results[0].next_message.content == expected
-
-    

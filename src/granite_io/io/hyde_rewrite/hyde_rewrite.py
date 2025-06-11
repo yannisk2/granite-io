@@ -30,26 +30,23 @@ HYDE_MAX_TOKENS = 256
 class HyDERewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for Query rewrite using HyDE https://arxiv.org/abs/2212.10496
-    
+
     Takes as input a chat completion and returns a completion with a rewrite of the
     most recent user turn (last in the conversation).
 
     Example raw input:
     ```
-    <|start_of_role|>user<|end_of_role|>Tim Cook is the CEO of Apple Inc.<|end_of_text|>
-    <|start_of_role|>assistant<|end_of_role|>Yes, Tim Cook is the Chief Executive \
-Officer of Apple Inc.<|end_of_text|>
-    <|start_of_role|>user<|end_of_role|>and for Microsoft?<|end_of_text|>
+    <|start_of_role|>user<|end_of_role|>What items I need to keep in the safe room?<|end_of_text|>
     ```
-    
+
     Example of corresponding raw output:
     ```
-    { "rewritten_question": "Who is the CEO of Microsoft" }
+    <|start_of_role|>user<|end_of_role|>What items I need to keep in the safe room? A safe room should contain a supply of water, non-perishable food, first aid kit <|end_of_text|>
     ```
 
     Output string with the rewrite of the last user turn:
-        'Who is the CEO of Microsoft'
-    """
+        'What items I need to keep in the safe room? A safe room should contain a supply of water, non-perishable food, first aid kit'
+    """  # noqa: E501
 
     def __init__(self, backend):
         super().__init__(backend=backend)
@@ -77,7 +74,7 @@ Officer of Apple Inc.<|end_of_text|>
                 update={"messages": rewritten_messages}
             )
 
-            prompt = self.base_input_processor.transform(rewritten_inputs, True)
+            prompt = self.base_input_processor.transform(rewritten_inputs, False)
         else:
             prompt = self.base_input_processor.transform(inputs, False)
         result = inputs.generate_inputs.model_copy(
