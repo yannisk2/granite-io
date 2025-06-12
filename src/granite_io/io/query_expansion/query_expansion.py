@@ -108,10 +108,10 @@ class QueryExpansionIOProcessor(InputOutputProcessor):
         # Merge results from parallel invocations
         sub_results = await asyncio.gather(*coroutines)
 
-        print(
-            f"QUERY REWRITE: {sub_results[0]}\nSYNONMOUS QUERY: {sub_results[1]}",
-            f"Reverse-Engineered Question: {sub_results[2]}",
-        )
+        # print(
+        #     f"QUERY REWRITE: {sub_results[0]}\nSYNONYMOUS QUERY: {sub_results[1]}",
+        #     f"Reverse-Engineered Question: {sub_results[2]}",
+        # )
 
         last_user_message = inputs.model_dump()["messages"][-1]
         query_str_list = [
