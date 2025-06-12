@@ -7,6 +7,9 @@ I/O processor for the Granite citations intrinsic.
 # Standard
 import json
 
+# Third Party
+from pydantic import BaseModel, ConfigDict, NonNegativeInt, RootModel
+
 # Local
 from granite_io.backend.base import Backend
 from granite_io.io.base import (
@@ -28,7 +31,6 @@ from granite_io.types import (
     GenerateInputs,
     GenerateResults,
 )
-from pydantic import BaseModel, RootModel, ConfigDict, NonNegativeInt
 
 # The citations intrinsic model expects to see a special system prompt after the last
 # assistant message.
