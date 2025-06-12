@@ -28,12 +28,7 @@ from granite_io.types import (
     GenerateInputs,
     GenerateResults,
 )
-from pydantic import (
-    BaseModel,
-    RootModel,
-    ConfigDict,
-    NonNegativeInt
-)
+from pydantic import BaseModel, RootModel, ConfigDict, NonNegativeInt
 
 # The citations intrinsic model expects to see a special system prompt after the last
 # assistant message.
@@ -56,8 +51,10 @@ class _MODEL_OUTPUT_ENTRY(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+
 class _MODEL_OUTPUT(RootModel):
     root: list[_MODEL_OUTPUT_ENTRY]
+
 
 _MODEL_OUTPUT_SCHEMA = _MODEL_OUTPUT.model_json_schema()
 
@@ -389,9 +386,7 @@ projects are visible to anyone.",
                 for entry in parsed_json:
                     response_index = entry["r"]
                     if not isinstance(response_index, int):
-                        raise TypeError(
-                            f"{response_index} is not an integer"
-                        )
+                        raise TypeError(f"{response_index} is not an integer")
                     if response_index >= len(message_sentence_offsets):
                         # Hallucinated sentence offset
                         print(
