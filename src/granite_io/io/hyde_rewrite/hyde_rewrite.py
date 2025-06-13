@@ -56,7 +56,7 @@ class HyDERewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
     def inputs_to_generate_inputs(
         self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
-    ) -> GenerateInputs:        
+    ) -> GenerateInputs:
         # Validate the input and convert to Granite input
         inputs = Granite3Point3Inputs.model_validate(inputs.model_dump())
 
