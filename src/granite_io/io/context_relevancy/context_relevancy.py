@@ -1,6 +1,4 @@
 # SPDX-License-Identifier: Apache-2.0
-
-
 """
 I/O processor for the Granite context relevancy intrinsic.
 """
@@ -30,8 +28,21 @@ from granite_io.types import (
     GenerateResults,
 )
 
-CONTEXT_RELEVANCE_PROMPT = "<|start_of_role|>context_relevance<|end_of_role|>"
+# Regex for v3.3 constrained decoding
+_JSON_FENCE_REGEX = r"```json\n\{\s*\"context_relevance\"\s*:\s*\"(irrelevant|relevant|partially relevant)\"\s*\}\n```"
 
+INSTRUCTION_TEXT = "Analyze the provided document in relation to the final user query from the conversation. Determine if the document contains information that could help answer the final user query. Output 'relevant' if the document contains substantial information directly useful for answering the final user query. Output 'partially relevant' if the document contains some related information that could partially help answer the query, or if you are uncertain about the relevance - err on the side of 'partially relevant' when in doubt. Output 'irrelevant' only if the document clearly contains no information that could help answer the final user query. When uncertain, choose 'partially relevant' rather than 'irrelevant'."
+
+json_object = {
+    "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
+}
+json_str = json.dumps(json_object, indent=4)
+JSON = "Your output should be a JSON structure with the context relevance classification:\n" + "```json\n" + json_str + "\n```"
+
+FINAL_QUERY_ROLE = "<|start_of_role|>final_user_query<|end_of_role|>{final_user_query}<|end_of_text|>\n"
+
+# Set up invocation prompt (matching Tag_with_instruction_JSON from training)
+INVOCATION_PROMPT = "<|start_of_role|>context_relevance: " + INSTRUCTION_TEXT + " " + JSON + "<|end_of_role|>"
 
 class CRLabel(str, Enum):
     IRRELEVANT = "irrelevant"
@@ -101,91 +112,66 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         if len(inputs.documents) > 1:
             raise ValueError("Input contains more than one document")
 
-        updated_inputs = inputs
         # If the last message is from the assistant, remove it;
         # We only want the last turn to be the user message
-        if inputs.messages[-1].role != "assistant":
-            updated_inputs = inputs.with_messages(inputs.messages[:-1])
+        if inputs.messages[-1].role != "user":
+            raise ValueError("Last message is not a user message")
 
-        # The beginning of the prompt doesn't change relative to base Granite 3.2
-        prompt = self.base_input_processor.transform(updated_inputs, False)
+        # The beginning of the prompt doesn't change relative to base Granite 3.3
+        prompt_prefix = self.base_input_processor.transform(inputs, False)
+
+        # Add the final user message
+        prompt = prompt_prefix + FINAL_QUERY_ROLE.format(final_user_query=inputs.messages[-1].content)
 
         # Only the generation prompt portion changes
         if add_generation_prompt:
-            prompt = prompt + CONTEXT_RELEVANCE_PROMPT
-
-        generate_inputs_before = (
-            updated_inputs.generate_inputs
-            if updated_inputs.generate_inputs
-            else GenerateInputs()
-        )
-        result = generate_inputs_before.model_copy(
-            update={
-                "prompt": prompt,
-                # Ensure enough tokens to produce the answer
-                "max_tokens": 100,
-                "extra_body": {
-                    "guided_json": RAW_OUTPUT_JSON_SCHEMA,
-                },
-            }
-        )
-        return result
+            prompt = prompt + INVOCATION_PROMPT
+        
+        return inputs.generate_inputs.model_copy(update={
+            "prompt": prompt,
+            "max_tokens": 100,
+            "extra_body": {"guided_regex": _JSON_FENCE_REGEX},
+        })
 
     def output_to_result(
         self, output: GenerateResults, inputs: ChatCompletionInputs | None = None
     ) -> ChatCompletionResults:
         results = []
         for raw_result in output.results:
-            raw_str = raw_result.completion_string
-            json_result = raw_str
+            raw_str = raw_result.completion_string.strip()
+            relevance_label = None
+
+            # Try to parse JSON and extract context_relevance
             try:
-                json_result = json.loads(raw_str)["context_relevance"]
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                # Cannot parse the JSON. Pass through the unparsed raw output for now
-                # instead of raising an exception from the I/O processor.
-                print(f"\nException: {e}\n")
-                json_result = raw_str
-            if json_result in (CRLabel.IRRELEVANT, CRLabel.RELEVANT, CRLabel.PARTIAL):
-                results.append(
-                    ChatCompletionResult(
-                        next_message=AssistantMessage(
-                            content=raw_result.completion_string
-                        )
+                import re
+                # Look for JSON structure in the output
+                match = re.search(r'\{.*\}', raw_str, re.DOTALL)
+                if match:
+                    data = json.loads(match.group(0))
+                    relevance_label = data.get("context_relevance")
+            except Exception:
+                pass
+
+            # Fallback: check if any of the valid labels are in the raw string
+            if not relevance_label:
+                if CRLabel.PARTIAL in raw_str:
+                    relevance_label = CRLabel.PARTIAL
+                elif CRLabel.IRRELEVANT in raw_str:
+                    relevance_label = CRLabel.IRRELEVANT
+                elif CRLabel.RELEVANT in raw_str:
+                    relevance_label = CRLabel.RELEVANT
+
+            # If we found a valid label, use it; otherwise use raw string
+            content = relevance_label if relevance_label else "ERROR"
+            
+            results.append(
+                ChatCompletionResult(
+                    next_message=AssistantMessage(
+                        content=content,
+                        raw=raw_str
                     )
                 )
-            # Model may forget to generate end of string
-            elif CRLabel.PARTIAL in json_result:
-                results.append(
-                    ChatCompletionResult(
-                        next_message=AssistantMessage(
-                            content=CRLabel.PARTIAL, raw=raw_str
-                        )
-                    )
-                )
-            elif CRLabel.IRRELEVANT in json_result:
-                results.append(
-                    ChatCompletionResult(
-                        next_message=AssistantMessage(
-                            content=CRLabel.IRRELEVANT, raw=raw_str
-                        )
-                    )
-                )
-            elif CRLabel.RELEVANT in json_result:
-                results.append(
-                    ChatCompletionResult(
-                        next_message=AssistantMessage(
-                            content=CRLabel.RELEVANT, raw=raw_str
-                        )
-                    )
-                )
-            else:
-                # Improper output. Pass through as an error message for now instead of
-                # raising an exception from the I/O processor.
-                results.append(
-                    ChatCompletionResult(
-                        next_message=AssistantMessage(content="ERROR", raw=raw_str),
-                    )
-                )
+            )   
         return ChatCompletionResults(results=results)
 
 
