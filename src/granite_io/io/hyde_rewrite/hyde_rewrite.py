@@ -69,11 +69,10 @@ class HyDERewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         rewritten_messages[-1].content = (
             HYDE_INSTRUCTION + rewritten_messages[-1].content
         )
-        rewritten_inputs = inputs.model_copy(
-            update={"messages": rewritten_messages}
+        rewritten_inputs = inputs.model_copy(update={"messages": rewritten_messages})
+        prompt = self.base_input_processor.transform(
+            rewritten_inputs, add_generation_prompt
         )
-        prompt = self.base_input_processor.transform(rewritten_inputs,
-                                                     add_generation_prompt)
         result = inputs.generate_inputs.model_copy(
             update={"prompt": prompt, "max_tokens": HYDE_MAX_TOKENS}
         )
