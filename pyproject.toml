@@ -84,8 +84,13 @@ dev = [
     "granite-io[vllm]",
     "granite-io[retriever]",
 ]
+
+# Dependencies needed for running notebooks. Update as required.
 notebook = [
-    "notebook"
+    "notebook",
+    "aiohttp",  # For AIO in notebooks
+    "granite-io[openai]",
+    "granite-io[voting]"
 ]
 all = [
     "granite-io[dev]",
