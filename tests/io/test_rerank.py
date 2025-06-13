@@ -7,9 +7,15 @@ Test cases for the llm rerank intrinsic.
 # Standard
 import os
 
+# Third Party
+import pytest
+
 # Local
 from granite_io import make_io_processor
-from granite_io.backend.vllm_server import LocalVLLMServer
+from granite_io.backend import Backend
+from granite_io.io.consts import (
+    _GRANITE_3_3_MODEL_NAME,
+)
 from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
     Granite3Point3Inputs,
 )
@@ -43,7 +49,8 @@ _EXAMPLE_CHAT_INPUT = Granite3Point3Inputs.model_validate(
 _EMBEDDING_MODEL_NAME = "multi-qa-mpnet-base-dot-v1"
 
 
-def test_rerank_request_processor():  # pylint: disable=redefined-outer-name
+@pytest.mark.vcr(record_mode="new_episodes")
+def test_rerank_request_processor(backend_3_3: Backend):  # pylint: disable=redefined-outer-name
     temp_data_dir = "data/test_retrieval"
     corpus_name = "govt10"
     embeddings_location = f"{temp_data_dir}/{corpus_name}_embeds.parquet"
@@ -51,11 +58,7 @@ def test_rerank_request_processor():  # pylint: disable=redefined-outer-name
         download_mtrag_embeddings(
             _EMBEDDING_MODEL_NAME, corpus_name, embeddings_location
         )
-    model_name = "ibm-granite/granite-3.3-8b-instruct"
-    server = LocalVLLMServer(model_name)
-    server.wait_for_startup(200)
-    backend = server.make_backend()
-    io_proc = make_io_processor(model_name, backend=backend)
+    io_proc = make_io_processor(_GRANITE_3_3_MODEL_NAME, backend=backend_3_3)
     retriever = InMemoryRetriever(embeddings_location, _EMBEDDING_MODEL_NAME)
     request_processor = RetrievalRequestProcessor(retriever, top_k=128)
     rag_chat_input = request_processor.process(_EXAMPLE_CHAT_INPUT)[0]
