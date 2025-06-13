@@ -56,7 +56,7 @@ class HyDERewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
     def inputs_to_generate_inputs(
         self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
-    ) -> GenerateInputs:
+    ) -> GenerateInputs:        
         # Validate the input and convert to Granite input
         inputs = Granite3Point3Inputs.model_validate(inputs.model_dump())
 
@@ -65,18 +65,15 @@ class HyDERewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             raise ValueError("Last message is not a user message")
 
         # To invoke the model, we add the rewrite prompt to the prompt prefix:
-        if add_generation_prompt:
-            rewritten_messages = [m.model_copy() for m in inputs.messages[-1:]]
-            rewritten_messages[-1].content = (
-                HYDE_INSTRUCTION + rewritten_messages[-1].content
-            )
-            rewritten_inputs = inputs.model_copy(
-                update={"messages": rewritten_messages}
-            )
-
-            prompt = self.base_input_processor.transform(rewritten_inputs, False)
-        else:
-            prompt = self.base_input_processor.transform(inputs, False)
+        rewritten_messages = [m.model_copy() for m in inputs.messages[-1:]]
+        rewritten_messages[-1].content = (
+            HYDE_INSTRUCTION + rewritten_messages[-1].content
+        )
+        rewritten_inputs = inputs.model_copy(
+            update={"messages": rewritten_messages}
+        )
+        prompt = self.base_input_processor.transform(rewritten_inputs,
+                                                     add_generation_prompt)
         result = inputs.generate_inputs.model_copy(
             update={"prompt": prompt, "max_tokens": HYDE_MAX_TOKENS}
         )
