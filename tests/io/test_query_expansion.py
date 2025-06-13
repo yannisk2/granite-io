@@ -79,5 +79,5 @@ def test_run_model(server: LocalVLLMServer, fake_date: str):
 
     assert len(qe_result.results) == 5
 
-    qe_result_strs = [r.next_message.content for r in qe_result.results]
-    print(f"Query Expansion Results: {qe_result_strs}")
+    # qe_result_strs = [r.next_message.content for r in qe_result.results]
+    # print(f"Query Expansion Results: {qe_result_strs}")
