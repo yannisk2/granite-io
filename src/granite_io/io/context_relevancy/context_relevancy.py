@@ -117,11 +117,20 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         if inputs.messages[-1].role != "user":
             raise ValueError("Last message is not a user message")
 
+        # Create a copy of inputs without documents for the base processor
+        inputs_without_docs = inputs.model_copy(update={"documents": []})
+        
         # The beginning of the prompt doesn't change relative to base Granite 3.3
-        prompt_prefix = self.base_input_processor.transform(inputs, False)
+        # but we don't pass documents to the base processor
+        prompt_prefix = self.base_input_processor.transform(inputs_without_docs, False)
 
         # Add the final user message
         prompt = prompt_prefix + FINAL_QUERY_ROLE.format(final_user_query=inputs.messages[-1].content)
+
+        # Add the document after the final user query
+        document = inputs.documents[0]
+        document_role = f"<|start_of_role|>document {{\"document_id\": \"1\"}}<|end_of_role|>\n{document.text}<|end_of_text|>\n"
+        prompt = prompt + document_role
 
         # Only the generation prompt portion changes
         if add_generation_prompt:
