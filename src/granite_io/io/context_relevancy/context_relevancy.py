@@ -6,6 +6,8 @@ I/O processor for the Granite context relevancy intrinsic.
 # Standard
 from enum import Enum
 import json
+import re
+import warnings
 
 # Third Party
 import pydantic
@@ -29,20 +31,43 @@ from granite_io.types import (
 )
 
 # Regex for v3.3 constrained decoding
-_JSON_FENCE_REGEX = r"```json\n\{\s*\"context_relevance\"\s*:\s*\"(irrelevant|relevant|partially relevant)\"\s*\}\n```"
+_JSON_FENCE_REGEX = (
+    r"```json\n\{\s*\"context_relevance\"\s*:\s*\"(irrelevant|relevant|"
+    r"partially relevant)\"\s*\}\n```"
+)
 
-INSTRUCTION_TEXT = "Analyze the provided document in relation to the final user query from the conversation. Determine if the document contains information that could help answer the final user query. Output 'relevant' if the document contains substantial information directly useful for answering the final user query. Output 'partially relevant' if the document contains some related information that could partially help answer the query, or if you are uncertain about the relevance - err on the side of 'partially relevant' when in doubt. Output 'irrelevant' only if the document clearly contains no information that could help answer the final user query. When uncertain, choose 'partially relevant' rather than 'irrelevant'."
+INSTRUCTION_TEXT = (
+    "Analyze the provided document in relation to the final user query from the "
+    "conversation. Determine if the document contains information that could help "
+    "answer the final user query. Output 'relevant' if the document contains "
+    "substantial information directly useful for answering the final user query. "
+    "Output 'partially relevant' if the document contains some related information "
+    "that could partially help answer the query, or if you are uncertain about the "
+    "relevance - err on the side of 'partially relevant' when in doubt. "
+    "Output 'irrelevant' only if the document clearly contains no information that "
+    "could help answer the final user query. When uncertain, choose 'partially "
+    "relevant' rather than 'irrelevant'."
+)
 
 json_object = {
     "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
 }
 json_str = json.dumps(json_object, indent=4)
-JSON = "Your output should be a JSON structure with the context relevance classification:\n" + "```json\n" + json_str + "\n```"
+JSON = (
+    "Your output should be a JSON structure with the context relevance "
+    "classification:\n" + "```json\n" + json_str + "\n```"
+)
 
-FINAL_QUERY_ROLE = "<|start_of_role|>final_user_query<|end_of_role|>{final_user_query}<|end_of_text|>\n"
+FINAL_QUERY_ROLE = (
+    "<|start_of_role|>final_user_query<|end_of_role|>{final_user_query}"
+    "<|end_of_text|>\n"
+)
 
-# Set up invocation prompt (matching Tag_with_instruction_JSON from training)
-INVOCATION_PROMPT = "<|start_of_role|>context_relevance: " + INSTRUCTION_TEXT + " " + JSON + "<|end_of_role|>"
+# Set up invocation prompt for context relevancy LoRA
+INVOCATION_PROMPT = (
+    "<|start_of_role|>context_relevance: " + INSTRUCTION_TEXT + " " + JSON + 
+    "<|end_of_role|>"
+)
 
 class CRLabel(str, Enum):
     IRRELEVANT = "irrelevant"
@@ -61,14 +86,14 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for the context relevancy intrinsic, also known as the LoRA Adapter
     for Context Relevancy Classification
-    Takes as input a chat completion and returns a completion with a context relevancy
-    flag as a string in the "" field.
 
     Example raw input:
     ```
     <|start_of_role|>user<|end_of_role|>How is enterprise value calculated?
     <|end_of_text|>
-    <|start_of_role|>documents<|end_of_role|>Document 0
+    <|start_of_role|>final_user_query<|end_of_role|>How is enterprise value 
+    calculated?<|end_of_text|>
+    <|start_of_role|>document {"document_id": "1"}<|end_of_role|>
 
     You wouldn't know it's value (Enterprise Value) without knowing its cash balance.
     The equation:   EV = Market Cap + Minority Interest + Preferred Stock + Debt - Cash
@@ -79,19 +104,25 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     It will, however effect the present value of its future cash flows as the WACC will
     increase due to the new cost of debt (interest payments, higher risk of bankruptcy,
     less flexibility by management).<|end_of_text|>
-    <|start_of_role|>context_relevance<|end_of_role|>
-    ```
-
-
-    Raw output be in json format:
+    <|start_of_role|>context_relevance: Analyze the provided document in relation to 
+    the final user query from the conversation.
+    Determine if the document contains information that could help answer the final 
+    user query.
+    Output 'relevant' if the document contains substantial information directly useful 
+    for answering the final user query.
+    Output 'partially relevant' if the document contains some related information that 
+    could partially help answer the query, or if you are uncertain about the relevance 
+    - err on the side of 'partially relevant' when in doubt.
+    Output 'irrelevant' only if the document clearly contains no information that could 
+    help answer the final user query.
+    When uncertain, choose 'partially relevant' rather than 'irrelevant'.
+    Your output should be a JSON structure with the context relevance classification:
     ```json
     {
         "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
     }
     ```
-    Where the value in `YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE` can be `irrelevant`,
-    `partially relevant`, or `relevant`.
-
+    <|end_of_role|>
     """
 
     def __init__(self, backend):
@@ -112,7 +143,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         if len(inputs.documents) > 1:
             raise ValueError("Input contains more than one document")
 
-        # If the last message is from the assistant, remove it;
+        # If the last message is from the assistant, we raise an error.
         # We only want the last turn to be the user message
         if inputs.messages[-1].role != "user":
             raise ValueError("Last message is not a user message")
@@ -121,18 +152,26 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         inputs_without_docs = inputs.model_copy(update={"documents": []})
         
         # The beginning of the prompt doesn't change relative to base Granite 3.3
-        # but we don't pass documents to the base processor
+        # but we don't pass documents to the base processor as we change the 
+        # document order in the prompt
         prompt_prefix = self.base_input_processor.transform(inputs_without_docs, False)
 
-        # Add the final user message
-        prompt = prompt_prefix + FINAL_QUERY_ROLE.format(final_user_query=inputs.messages[-1].content)
+        # Add the final user message to the prompt to remove any confusion about 
+        # the final user query to the model
+        prompt = prompt_prefix + FINAL_QUERY_ROLE.format(
+            final_user_query=inputs.messages[-1].content
+        )
 
-        # Add the document after the final user query
+        # Add the document after the final user query so that the model can see 
+        # the final user query and the document together to determine relevance
         document = inputs.documents[0]
-        document_role = f"<|start_of_role|>document {{\"document_id\": \"1\"}}<|end_of_role|>\n{document.text}<|end_of_text|>\n"
+        document_role = (
+            f'<|start_of_role|>document {{"document_id": "1"}}<|end_of_role|>\n'
+            f'{document.text}<|end_of_text|>\n'
+        )
         prompt = prompt + document_role
 
-        # Only the generation prompt portion changes
+        # We add the generation prompt to the end of the prompt
         if add_generation_prompt:
             prompt = prompt + INVOCATION_PROMPT
         
@@ -152,9 +191,8 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
             # Try to parse JSON and extract context_relevance
             try:
-                import re
                 # Look for JSON structure in the output
-                match = re.search(r'\{.*\}', raw_str, re.DOTALL)
+                match = re.search(r"\{.*\}", raw_str, re.DOTALL)
                 if match:
                     data = json.loads(match.group(0))
                     relevance_label = data.get("context_relevance")
@@ -184,12 +222,6 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         return ChatCompletionResults(results=results)
 
 
-DEFAULT_CANNED_RESPONSE = (
-    "Sorry, but I am unable to identify whether the document(s) "
-    "is relevant or irrelevant to the last user question."
-)
-
-
 class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
     """
     Composite I/O processor that only keeps contexts (documents)
@@ -202,27 +234,15 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
         self,
         generator: InputOutputProcessor,
         context_relevancy: InputOutputProcessor,
-        fallback_type: str = "canned_response",
-        canned_response: str = DEFAULT_CANNED_RESPONSE,
     ):
         """
         :param generator: I/O processor that generates the results that this I/O
-         processor shoid validate.
-        :param context relevancy_io_proc: IO processor for the context relevancy model.
+         processor should validate.
+        :param context_relevancy: IO processor for the context relevancy model.
          Should return a string indicating the document's relevance
-        :param fallback_type: "canned_response"
-        :param canned_response: Fallback response to use if ``fallback_type`` is
-         "canned_response"
         """
-        if fallback_type not in ("canned_response"):
-            raise ValueError(
-                f"Unknown fallback type '{fallback_type}'. Should be one "
-                f"of 'canned_response'"
-            )
         self._generator = generator
         self._context_relevancy = context_relevancy
-        self._fallback_type = fallback_type
-        self._canned_response = canned_response
 
     async def acreate_chat_completion(
         self, inputs: ChatCompletionInputs
@@ -234,7 +254,8 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
             futures.append(
                 self._context_relevancy.acreate_chat_completion(
                     single_document_input.with_addl_generate_params(
-                        {"temperature": 0.0}
+                        {"temperature": 0.0,
+                         "n": 1}
                     )
                 )
             )
@@ -251,7 +272,19 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
 
+        # Warn if all documents were filtered out
+        if not relevant_documents and inputs.documents:
+            warnings.warn(
+                f"All {len(inputs.documents)} documents were classified as irrelevant "
+                "and removed by the context relevancy filter. The generator will "
+                "receive no context documents.",
+                UserWarning,
+                stacklevel=2
+            )
+
+        # Update the inputs with the relevant documents (can be empty)
         inputs_with_updated_docs = inputs.model_copy(
-            update={"documents": relevant_documents}
-        )
+                update={"documents": relevant_documents}
+            )
+        
         return await self._generator.acreate_chat_completion(inputs_with_updated_docs)
