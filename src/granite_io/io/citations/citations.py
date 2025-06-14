@@ -90,7 +90,7 @@ class CitationsIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for the Granite citations intrinsic, also known as the [LoRA Adapter
     for Citation Generation](https://huggingface.co/ibm-granite/
-    granite-3.2-8b-lora-rag-citation-generation). 
+    granite-3.3-8b-rag-agent-lib/blob/main/citation_generation_lora/README.md). 
     
     Takes as input a chat completion and returns a version of the completion with 
     citations to documents.

@@ -38,6 +38,11 @@ class RagAgentLibModelInfo(RagAgentModelInfoMixin, enum.Enum):
         "LoRA Adapter for Hallucination Detection in RAG outputs",
         True,
     )
+    CITATION_GENERATION = (
+        "citation_generation",
+        "LoRA Adapter for Citation Generation",
+        True,
+    )
 
     @staticmethod
     def from_str(short_name: str):
