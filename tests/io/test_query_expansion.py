@@ -57,13 +57,13 @@ _TODAYS_DATE = datetime.datetime.now().strftime("%B %d, %Y")
 
 
 @pytest.mark.vcr
-def test_run_model(server: LocalVLLMServer, fake_date: str):
+def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     """
     Run a chat completion using the I/O processor.
     """
 
-    backend = server.make_backend()
-    query_rewrite_lora_backend = server.make_lora_backend("query_rewrite")
+    backend = lora_server.make_backend()
+    query_rewrite_lora_backend = lora_server.make_lora_backend("query_rewrite")
 
     io_processor = make_io_processor("Granite 3.2", backend=backend)
     rewrite_io_proc = QueryRewriteIOProcessor(query_rewrite_lora_backend)
