@@ -27,6 +27,7 @@ class Hallucination(pydantic.BaseModel):
 
     hallucination_id: str
     risk: str
+    reasoning: str
     response_text: str
     response_begin: int
     response_end: int
