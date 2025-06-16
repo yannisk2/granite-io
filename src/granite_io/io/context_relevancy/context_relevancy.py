@@ -150,19 +150,19 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
         # Create a copy of inputs without documents for the base processor
         inputs_without_docs = inputs.model_copy(update={"documents": []})
-        
+
         # The beginning of the prompt doesn't change relative to base Granite 3.3
-        # but we don't pass documents to the base processor as we change the 
+        # but we don't pass documents to the base processor as we change the
         # document order in the prompt
         prompt_prefix = self.base_input_processor.transform(inputs_without_docs, False)
 
-        # Add the final user message to the prompt to remove any confusion about 
+        # Add the final user message to the prompt to remove any confusion about
         # the final user query to the model
         prompt = prompt_prefix + FINAL_QUERY_ROLE.format(
             final_user_query=inputs.messages[-1].content
         )
 
-        # Add the document after the final user query so that the model can see 
+        # Add the document after the final user query so that the model can see
         # the final user query and the document together to determine relevance
         document = inputs.documents[0]
         document_role = (
@@ -174,7 +174,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         # We add the generation prompt to the end of the prompt
         if add_generation_prompt:
             prompt = prompt + INVOCATION_PROMPT
-        
+
         return inputs.generate_inputs.model_copy(update={
             "prompt": prompt,
             "max_tokens": 100,
@@ -196,7 +196,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                 if match:
                     data = json.loads(match.group(0))
                     relevance_label = data.get("context_relevance")
-            except Exception:
+            except (json.JSONDecodeError, AttributeError):
                 pass
 
             # Fallback: check if any of the valid labels are in the raw string
@@ -210,7 +210,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
             # If we found a valid label, use it; otherwise use raw string
             content = relevance_label if relevance_label else "ERROR"
-            
+
             results.append(
                 ChatCompletionResult(
                     next_message=AssistantMessage(
@@ -218,7 +218,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                         raw=raw_str
                     )
                 )
-            )   
+            )
         return ChatCompletionResults(results=results)
 
 
@@ -265,10 +265,7 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
         for document, future in zip(inputs.documents, futures, strict=True):
             relevancy_output_obj = await future
             context_relevancy_output = relevancy_output_obj.results[0]
-            if (
-                context_relevancy_output.next_message.content == CRLabel.RELEVANT
-                or context_relevancy_output.next_message.content == CRLabel.PARTIAL
-            ):
+            if context_relevancy_output.next_message.content in (CRLabel.RELEVANT, CRLabel.PARTIAL):
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
 
@@ -286,5 +283,5 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
         inputs_with_updated_docs = inputs.model_copy(
                 update={"documents": relevant_documents}
             )
-        
+
         return await self._generator.acreate_chat_completion(inputs_with_updated_docs)

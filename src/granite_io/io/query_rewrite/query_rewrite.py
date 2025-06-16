@@ -56,28 +56,28 @@ REWRITE_PROMPT_3_3 = (
 class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for Granite 3.3 query-rewrite LoRAs.
-    
+
     This processor takes a conversation history and rewrites the final user query
     into a standalone question that doesn't require context from the conversation
     history to understand the user's intent.
-    
-    Note: Previously supported Granite 3.2, but support has been removed to 
+
+    Note: Previously supported Granite 3.2, but support has been removed to
     simplify the codebase and focus on the newer 3.3 architecture.
     """
 
     def __init__(self, backend):
         """
         Initialize the QueryRewriteIOProcessor for Granite 3.3.
-        
+
         Args:
             backend: The model backend to use for generation
         """
         super().__init__(backend=backend)
-        
+
         # Import and configure Granite 3.3 specific components
         Granite3Point3InputProcessor = g33_input_processor.Granite3Point3InputProcessor
         Granite3Point3Inputs = g33_input_processor.Granite3Point3Inputs
-        
+
         self.InputsModel = Granite3Point3Inputs
         self.base_input_processor = Granite3Point3InputProcessor()
         # Use guided regex for constrained JSON output
@@ -90,11 +90,11 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     ) -> GenerateInputs:
         """
         Convert chat completion inputs to generation inputs for query rewriting.
-        
+
         Args:
             inputs: Chat completion inputs containing conversation history
             add_generation_prompt: Whether to add the generation prompt
-            
+
         Returns:
             GenerateInputs configured for query rewriting task
         """
@@ -111,7 +111,7 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             inputs.messages[-1].content,
             add_generation_prompt
         )
-        
+
         return inputs.generate_inputs.model_copy(update={
             "prompt": prompt,
             "max_tokens": 256,  # Sufficient for query rewriting tasks
@@ -121,12 +121,12 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     def _make_prompt_3_3(self, prefix: str, final_msg: str, add_prompt: bool) -> str:
         """
         Build the complete prompt for Granite 3.3 query rewriting.
-        
+
         Args:
             prefix: Conversation history formatted by input processor
             final_msg: The final user message to be rewritten
             add_prompt: Whether to add the rewrite instruction prompt
-            
+
         Returns:
             Complete prompt string for the model
         """
@@ -142,11 +142,11 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     ) -> ChatCompletionResults:
         """
         Process the model output and extract the rewritten query.
-        
+
         Args:
             output: Raw generation results from the model
             inputs: Original chat completion inputs (for context)
-            
+
         Returns:
             ChatCompletionResults with rewritten query as the next message
         """
@@ -161,7 +161,7 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
                 if m:
                     data = json.loads(m.group(0))
                     rewrite = data.get("rewritten_question")
-            except Exception:
+            except (json.JSONDecodeError, AttributeError):
                 # JSON parsing failed, will fallback to raw string
                 pass
 
