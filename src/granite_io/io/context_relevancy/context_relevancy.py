@@ -265,7 +265,9 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
         for document, future in zip(inputs.documents, futures, strict=True):
             relevancy_output_obj = await future
             context_relevancy_output = relevancy_output_obj.results[0]
-            if context_relevancy_output.next_message.content in (CRLabel.RELEVANT, CRLabel.PARTIAL):
+            if context_relevancy_output.next_message.content in (
+                CRLabel.RELEVANT, CRLabel.PARTIAL
+            ):
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
 
