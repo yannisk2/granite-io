@@ -7,6 +7,9 @@ I/O processor for the Granite hallucinations intrinsic.
 # Standard
 import json
 
+# Third Party
+from pydantic import BaseModel, ConfigDict, NonNegativeInt, RootModel, StrictStr
+
 # Local
 from granite_io.backend.base import Backend
 from granite_io.io.base import (
@@ -28,14 +31,6 @@ from granite_io.types import (
     Hallucination,
 )
 
-from pydantic import (
-    BaseModel,
-    RootModel,
-    ConfigDict,
-    NonNegativeInt,
-    StrictStr
-)
-
 # The hallucinations intrinsic model expects to see a special system prompt after the
 # last assistant message.
 _HALLUCINATION_SYSTEM_PROMPT = (
@@ -44,10 +39,11 @@ _HALLUCINATION_SYSTEM_PROMPT = (
     "by comparing with the provided documents and generate the faithfulness reasoning "
     "and faithfulness decision. "
     "Ensure that your output includes all response sentence IDs, "
-    "and for each response sentence ID, provide the corresponding faithfulness reasoning "
-    "and faithfulness decision. "
+    "and for each response sentence ID, provide the corresponding faithfulness "
+    "reasoning and faithfulness decision. "
     "The output must be a json structure."
 )
+
 
 # Specify the schema of the raw output of the model to use in contrained decoding
 # This is done by first creating a Pydantic model representing the raw model output
@@ -59,8 +55,10 @@ class _MODEL_OUTPUT_ENTRY(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+
 class _MODEL_OUTPUT(RootModel):
     root: list[_MODEL_OUTPUT_ENTRY]
+
 
 _MODEL_OUTPUT_SCHEMA = _MODEL_OUTPUT.model_json_schema()
 
@@ -176,17 +174,21 @@ faithfulness decision. The output must be a json structure.<|end_of_text|>
     Example of raw output of the model for the above request:
 
     ```
-    "[{\"i\": 0, \"r\": \"This sentence makes a factual claim about the visibility levels of Git Repos\
-        and Issue Tracking projects. The document states 'Git Repos and Issue Tracking projects can \
-            have one of the following visibility levels: private, internal, or public.' This matches \
-                exactly with the claim in the sentence.\", \"f\": \"faithful\"}, ...]"
+    "[{\"i\": 0, \"r\": \"This sentence makes a factual claim about the visibility \
+levels of Git Repos and Issue Tracking projects. The document states 'Git Repos and \
+Issue Tracking projects can have one of the following visibility levels: private, \
+internal, or public.' This matches exactly with the claim in the sentence.\", \"f\": \
+\"faithful\"}, ...]"
     ```
     Note that the raw model output is JSON data encoded as a JSON string.
 
     Example of processed output from this IO processor for the above raw model output:
     ```
     {
-        "content": "Git Repos and Issue Tracking projects can have one of three visibility levels: private, internal, or public. Private projects are visible only to project members, internal projects are visible to all logged-in IBM Cloud users, and public projects are visible to anyone.",
+        "content": "Git Repos and Issue Tracking projects can have one of three \
+visibility levels: private, internal, or public. Private projects are visible only to \
+project members, internal projects are visible to all logged-in IBM Cloud users, and \
+public projects are visible to anyone.",
         "role": "assistant",
         "tool_calls": [],
         "reasoning_content": null,
@@ -196,16 +198,26 @@ faithfulness decision. The output must be a json structure.<|end_of_text|>
             {
             "hallucination_id": "0",
             "risk": "faithful",
-            "reasoning": "This sentence makes a factual claim about the visibility levels of Git Repos and Issue Tracking projects. The document states 'Git Repos and Issue Tracking projects can have one of the following visibility levels: private, internal, or public.' This matches exactly with the claim in the sentence.",
-            "response_text": "Git Repos and Issue Tracking projects can have one of three visibility levels: private, internal, or public.",
+            "reasoning": "This sentence makes a factual claim about the visibility \
+levels of Git Repos and Issue Tracking projects. The document states 'Git Repos and \
+Issue Tracking projects can have one of the following visibility levels: private, \
+internal, or public.' This matches exactly with the claim in the sentence.",
+            "response_text": "Git Repos and Issue Tracking projects can have one of \
+three visibility levels: private, internal, or public.",
             "response_begin": 0,
             "response_end": 108
             },
             {
             "hallucination_id": "1",
             "risk": "faithful",
-            "reasoning": "This sentence makes factual claims about the visibility of each type of project. The document states 'Private projects are visible only to project members,' 'Internal projects are visible to all users that are logged in to IBM Cloud,' and 'Public projects are visible to anyone.' These statements match exactly with the claims in the sentence.",
-            "response_text": "Private projects are visible only to project members, internal projects are visible to all logged-in IBM Cloud users, and public projects are visible to anyone.",
+            "reasoning": "This sentence makes factual claims about the visibility of \
+each type of project. The document states 'Private projects are visible only to \
+project members,' 'Internal projects are visible to all users that are logged in to \
+IBM Cloud,' and 'Public projects are visible to anyone.' These statements match \
+exactly with the claims in the sentence.",
+            "response_text": "Private projects are visible only to project members, \
+internal projects are visible to all logged-in IBM Cloud users, and public projects \
+are visible to anyone.",
             "response_begin": 109,
             "response_end": 269
             }
@@ -311,7 +323,8 @@ faithfulness decision. The output must be a json structure.<|end_of_text|>
         for raw_result in output.results:
             try:
                 # Example output:
-                # [{"i": 0, "r": "....", "f": "..."}, {"i": 1, "r": "....", "f": "..."},...]
+                # [{"i": 0, "r": "....", "f": "..."}, {"i": 1, "r": "....", "f":
+                # "..."},...]
                 parsed_json = json.loads(raw_result.completion_string)
                 hallucinations = []
                 next_hallucination_id = 0
@@ -410,7 +423,7 @@ class HallucinationsCompositeIOProcessor(InputOutputProcessor):
 
         :param request_hallucinations_from_generator: New value to be applied to
          subsequent calls to the I/O processor."""
-        self.request_hallucinations_from_generator = (
+        self._request_hallucinations_from_generator = (
             request_hallucinations_from_generator
         )
 

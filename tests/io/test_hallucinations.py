@@ -32,13 +32,17 @@ _EXAMPLE_CHAT_INPUT = Granite3Point3Inputs.model_validate(
         "messages": [
             {
                 "role": "user",
-                "content": "What is the visibility level of Git Repos and Issue Tracking projects?",
+                "content": "What is the visibility level of Git Repos and Issue "
+                "Tracking projects?",
             },
             {
                 "role": "assistant",
-                "content": "Git Repos and Issue Tracking projects can have one of three visibility levels: "
-                "private, internal, or public. Private projects are visible only to project members, internal "
-                "projects are visible to all logged-in IBM Cloud users, and public projects are visible to anyone.",
+                "content": "Git Repos and Issue Tracking projects can have one of "
+                "three visibility levels: "
+                "private, internal, or public. Private projects are visible only to "
+                "project members, internal "
+                "projects are visible to all logged-in IBM Cloud users, and public "
+                "projects are visible to anyone.",
             },
         ],
         "documents": [
@@ -167,23 +171,45 @@ def test_canned_output():
     io_processor = HallucinationsIOProcessor(None)
     raw_output_to_expected = [
         (
-            "[{\"i\": 0, \"r\": \"This sentence makes a factual claim about the visibility levels of Git Repos and Issue Tracking projects. The document states 'Git Repos and Issue Tracking projects can have one of the following visibility levels: private, internal, or public.' This matches exactly with the claim in the sentence.\", \"f\": \"faithful\"}, {\"i\": 1, \"r\": \"This sentence makes factual claims about the visibility of each type of project. The document states 'Private projects are visible only to project members,' 'Internal projects are visible to all users that are logged in to IBM Cloud,' and 'Public projects are visible to anyone.' These statements match exactly with the claims in the sentence.\", \"f\": \"faithful\"}]",
+            '[{"i": 0, "r": "This sentence makes a factual claim about the visibility '
+            "levels of Git Repos and Issue Tracking projects. The document states "
+            "'Git Repos and Issue Tracking projects can have one of the following "
+            "visibility levels: private, internal, or public.' This matches exactly "
+            'with the claim in the sentence.", "f": "faithful"}, {"i": 1, "r": "This '
+            "sentence makes factual claims about the visibility of each type of "
+            "project. The document states 'Private projects are visible only to "
+            "project members,' 'Internal projects are visible to all users that "
+            "are logged in to IBM Cloud,' and 'Public projects are visible to "
+            "anyone.' These statements match exactly with the claims in the "
+            'sentence.", "f": "faithful"}]',
             [
                 {
                     "hallucination_id": "0",
                     "risk": "faithful",
-                    "reasoning": "This sentence makes a factual claim about the visibility levels of Git Repos and Issue Tracking projects. The document states 'Git Repos and Issue Tracking projects can have one of the following visibility levels: private, internal, or public.' This matches exactly with the claim in the sentence.",
-                    "response_text": "Git Repos and Issue Tracking projects can have one of three visibility levels: private, internal, or public.",
+                    "reasoning": "This sentence makes a factual claim about the "
+                    "visibility levels of Git Repos and Issue Tracking projects. "
+                    "The document states 'Git Repos and Issue Tracking projects can "
+                    "have one of the following visibility levels: private, internal, "
+                    "or public.' This matches exactly with the claim in the sentence.",
+                    "response_text": "Git Repos and Issue Tracking projects can have "
+                    "one of three visibility levels: private, internal, or public.",
                     "response_begin": 0,
-                    "response_end": 108
+                    "response_end": 108,
                 },
                 {
                     "hallucination_id": "1",
                     "risk": "faithful",
-                    "reasoning": "This sentence makes factual claims about the visibility of each type of project. The document states 'Private projects are visible only to project members,' 'Internal projects are visible to all users that are logged in to IBM Cloud,' and 'Public projects are visible to anyone.' These statements match exactly with the claims in the sentence.",
-                    "response_text": "Private projects are visible only to project members, internal projects are visible to all logged-in IBM Cloud users, and public projects are visible to anyone.",
+                    "reasoning": "This sentence makes factual claims about the "
+                    "visibility of each type of project. The document states 'Private "
+                    "projects are visible only to project members,' 'Internal projects "
+                    "are visible to all users that are logged in to IBM Cloud,' and '"
+                    "Public projects are visible to anyone.' These statements match "
+                    "exactly with the claims in the sentence.",
+                    "response_text": "Private projects are visible only to project "
+                    "members, internal projects are visible to all logged-in IBM Cloud "
+                    "users, and public projects are visible to anyone.",
                     "response_begin": 109,
-                    "response_end": 269
+                    "response_end": 269,
                 },
             ],
         ),
