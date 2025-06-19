@@ -90,8 +90,8 @@ def mark_sentence_boundaries(
 
 class HallucinationsIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
-    I/O processor for the Granite citations intrinsic, also known as the [LoRA Adapter
-    for Hallucination Detection](https://huggingface.co/ibm-granite/granite-3.3-8b-rag-agent-lib/blob/main/hallucination_detection_lora/README.md). 
+    I/O processor for the Granite hallucinations intrinsic, also known as the [LoRA 
+    Adapter for Hallucination Detection](https://huggingface.co/ibm-granite/granite-3.3-8b-rag-agent-lib/blob/main/hallucination_detection_lora/README.md). 
     
     Takes as input a chat completion and returns a version of the completion with 
     hallucinations detected on the last assistant turn.
