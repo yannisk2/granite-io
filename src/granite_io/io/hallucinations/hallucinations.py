@@ -177,7 +177,7 @@ faithfulness decision. The output must be a json structure.<|end_of_text|>
     "[{\"i\": 0, \"r\": \"This sentence makes a factual claim about the visibility \
 levels of Git Repos and Issue Tracking projects. The document states 'Git Repos and \
 Issue Tracking projects can have one of the following visibility levels: private, \
-internal, or public.' This matches exactly with the claim in the sentence.\", \"f\": \
+internal, or public.' This matches exactly with the claim in the sentence. \", \"f\": \
 \"faithful\"}, ...]"
     ```
     Note that the raw model output is JSON data encoded as a JSON string.
