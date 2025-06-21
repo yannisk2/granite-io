@@ -132,17 +132,18 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
 
     # Updated to use Granite 3.3 8B with latest LoRA adapters
     base_model = "ibm-granite/granite-3.3-8b-instruct"
-    
-    # LoRA adapter short names - these will be resolved to local paths using obtain_lora()
+
+    # LoRA adapter short names - these will be resolved to local paths using
+    # obtain_lora()
     lora_adapter_names = [
         "answerability_prediction",  # Maps to answerability_prediction_lora
-        "certainty",                 # Maps to certainty_lora  
+        "certainty",                 # Maps to certainty_lora
         "citation_generation",       # Maps to citation_generation_lora
         "hallucination_detection",   # Maps to hallucination_detection_lora
         "query_rewrite",            # Maps to query_rewrite_lora
         "context_relevancy",        # Maps to context_relevancy_lora
     ]
-    
+
     # Download and get local paths for all LoRA adapters
     lora_adapters = []
     for lora_name in lora_adapter_names:
@@ -150,7 +151,7 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
             lora_path = obtain_lora(lora_name)
             lora_adapters.append((lora_name, str(lora_path)))
             print(f"✅ Downloaded LoRA adapter: {lora_name} -> {lora_path}")
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             print(f"❌ Failed to download LoRA adapter {lora_name}: {e}")
             # Continue with other adapters
 
