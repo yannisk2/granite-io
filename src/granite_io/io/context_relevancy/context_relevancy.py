@@ -49,9 +49,7 @@ INSTRUCTION_TEXT = (
     "relevant' rather than 'irrelevant'."
 )
 
-json_object = {
-    "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
-}
+json_object = {"context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"}
 json_str = json.dumps(json_object, indent=4)
 JSON = (
     "Your output should be a JSON structure with the context relevance "
@@ -65,9 +63,13 @@ FINAL_QUERY_ROLE = (
 
 # Set up invocation prompt for context relevancy LoRA
 INVOCATION_PROMPT = (
-    "<|start_of_role|>context_relevance: " + INSTRUCTION_TEXT + " " + JSON + 
-    "<|end_of_role|>"
+    "<|start_of_role|>context_relevance: "
+    + INSTRUCTION_TEXT
+    + " "
+    + JSON
+    + "<|end_of_role|>"
 )
+
 
 class CRLabel(str, Enum):
     IRRELEVANT = "irrelevant"
@@ -91,7 +93,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     ```
     <|start_of_role|>user<|end_of_role|>How is enterprise value calculated?
     <|end_of_text|>
-    <|start_of_role|>final_user_query<|end_of_role|>How is enterprise value 
+    <|start_of_role|>final_user_query<|end_of_role|>How is enterprise value
     calculated?<|end_of_text|>
     <|start_of_role|>document {"document_id": "1"}<|end_of_role|>
 
@@ -104,16 +106,16 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     It will, however effect the present value of its future cash flows as the WACC will
     increase due to the new cost of debt (interest payments, higher risk of bankruptcy,
     less flexibility by management).<|end_of_text|>
-    <|start_of_role|>context_relevance: Analyze the provided document in relation to 
+    <|start_of_role|>context_relevance: Analyze the provided document in relation to
     the final user query from the conversation.
-    Determine if the document contains information that could help answer the final 
+    Determine if the document contains information that could help answer the final
     user query.
-    Output 'relevant' if the document contains substantial information directly useful 
+    Output 'relevant' if the document contains substantial information directly useful
     for answering the final user query.
-    Output 'partially relevant' if the document contains some related information that 
-    could partially help answer the query, or if you are uncertain about the relevance 
+    Output 'partially relevant' if the document contains some related information that
+    could partially help answer the query, or if you are uncertain about the relevance
     - err on the side of 'partially relevant' when in doubt.
-    Output 'irrelevant' only if the document clearly contains no information that could 
+    Output 'irrelevant' only if the document clearly contains no information that could
     help answer the final user query.
     When uncertain, choose 'partially relevant' rather than 'irrelevant'.
     Your output should be a JSON structure with the context relevance classification:
@@ -167,7 +169,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         document = inputs.documents[0]
         document_role = (
             f'<|start_of_role|>document {{"document_id": "1"}}<|end_of_role|>\n'
-            f'{document.text}<|end_of_text|>\n'
+            f"{document.text}<|end_of_text|>\n"
         )
         prompt = prompt + document_role
 
@@ -175,11 +177,13 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         if add_generation_prompt:
             prompt = prompt + INVOCATION_PROMPT
 
-        return inputs.generate_inputs.model_copy(update={
-            "prompt": prompt,
-            "max_tokens": 100,
-            "extra_body": {"guided_regex": _JSON_FENCE_REGEX},
-        })
+        return inputs.generate_inputs.model_copy(
+            update={
+                "prompt": prompt,
+                "max_tokens": 100,
+                "extra_body": {"guided_regex": _JSON_FENCE_REGEX},
+            }
+        )
 
     def output_to_result(
         self, output: GenerateResults, inputs: ChatCompletionInputs | None = None
@@ -214,10 +218,7 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
 
             results.append(
                 ChatCompletionResult(
-                    next_message=AssistantMessage(
-                        content=content,
-                        raw=raw_str
-                    )
+                    next_message=AssistantMessage(content=content, raw=raw_str)
                 )
             )
         return ChatCompletionResults(results=results)
@@ -255,8 +256,7 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
             futures.append(
                 self._context_relevancy.acreate_chat_completion(
                     single_document_input.with_addl_generate_params(
-                        {"temperature": 0.0,
-                         "n": 1}
+                        {"temperature": 0.0, "n": 1}
                     )
                 )
             )
@@ -267,7 +267,8 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
             relevancy_output_obj = await future
             context_relevancy_output = relevancy_output_obj.results[0]
             if context_relevancy_output.next_message.content in (
-                CRLabel.RELEVANT, CRLabel.PARTIAL
+                CRLabel.RELEVANT,
+                CRLabel.PARTIAL,
             ):
                 # Document is relevant to the last user question; keep it
                 relevant_documents.append(document)
@@ -279,12 +280,12 @@ class ContextRelevancyCompositeIOProcessor(InputOutputProcessor):
                 "and removed by the context relevancy filter. The generator will "
                 "receive no context documents.",
                 UserWarning,
-                stacklevel=2
+                stacklevel=2,
             )
 
         # Update the inputs with the relevant documents (can be empty)
         inputs_with_updated_docs = inputs.model_copy(
-                update={"documents": relevant_documents}
-            )
+            update={"documents": relevant_documents}
+        )
 
         return await self._generator.acreate_chat_completion(inputs_with_updated_docs)

@@ -137,11 +137,11 @@ def lora_server() -> collections.abc.Generator[LocalVLLMServer, object, None]:
     # obtain_lora()
     lora_adapter_names = [
         "answerability_prediction",  # Maps to answerability_prediction_lora
-        "certainty",                 # Maps to certainty_lora
-        "citation_generation",       # Maps to citation_generation_lora
-        "hallucination_detection",   # Maps to hallucination_detection_lora
-        "query_rewrite",            # Maps to query_rewrite_lora
-        "context_relevancy",        # Maps to context_relevancy_lora
+        "certainty",  # Maps to certainty_lora
+        "citation_generation",  # Maps to citation_generation_lora
+        "hallucination_detection",  # Maps to hallucination_detection_lora
+        "query_rewrite",  # Maps to query_rewrite_lora
+        "context_relevancy",  # Maps to context_relevancy_lora
     ]
 
     # Download and get local paths for all LoRA adapters

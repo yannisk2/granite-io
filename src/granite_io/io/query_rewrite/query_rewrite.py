@@ -3,7 +3,8 @@
 import json
 import re
 from granite_io.io.granite_3_3.input_processors import (
-    granite_3_3_input_processor as g33_input_processor)
+    granite_3_3_input_processor as g33_input_processor,
+)
 from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
 from granite_io.types import (
     ChatCompletionInputs,
@@ -21,9 +22,7 @@ import pydantic
 _JSON_FENCE_REGEX = r"```json\n\{\s*\"rewritten_question\"\s*:\s*\"[^\"]*\"\s*\}\n```"
 
 # JSON object template for Granite 3.3 output format
-_JSON_OBJECT_3_3 = {
-    "rewritten_question": "YOUR_REWRITTEN_QUESTION_HERE"
-}
+_JSON_OBJECT_3_3 = {"rewritten_question": "YOUR_REWRITTEN_QUESTION_HERE"}
 
 JSON_OBJECT_3_3_STR = json.dumps(_JSON_OBJECT_3_3, indent=4)
 
@@ -55,8 +54,10 @@ REWRITE_PROMPT_3_3 = (
     + "<|end_of_role|>"
 )
 
+
 class QueryRewriteRawOutput(pydantic.BaseModel):
     rewritten_question: str
+
 
 class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
@@ -89,9 +90,7 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         self._extra_body = {"guided_regex": _JSON_FENCE_REGEX}
 
     def inputs_to_generate_inputs(
-        self,
-        inputs: ChatCompletionInputs,
-        add_generation_prompt: bool = True
+        self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
     ) -> GenerateInputs:
         """
         Convert chat completion inputs to generation inputs for query rewriting.
@@ -112,16 +111,16 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         # Build the prompt using conversation history and the query to rewrite
         prompt_prefix = self.base_input_processor.transform(inputs, False)
         prompt = self._make_prompt_3_3(
-            prompt_prefix,
-            inputs.messages[-1].content,
-            add_generation_prompt
+            prompt_prefix, inputs.messages[-1].content, add_generation_prompt
         )
 
-        return inputs.generate_inputs.model_copy(update={
-            "prompt": prompt,
-            "max_tokens": 256,  # Sufficient for query rewriting tasks
-            "extra_body": self._extra_body,
-        })
+        return inputs.generate_inputs.model_copy(
+            update={
+                "prompt": prompt,
+                "max_tokens": 256,  # Sufficient for query rewriting tasks
+                "extra_body": self._extra_body,
+            }
+        )
 
     def _make_prompt_3_3(self, prefix: str, final_msg: str, add_prompt: bool) -> str:
         """
@@ -163,9 +162,7 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             # Attempt to parse JSON output to extract rewritten question
             try:
                 m = re.search(r"\{.*\}", s, re.DOTALL)
-                parsed_output = QueryRewriteRawOutput.model_validate_json(
-                    m.group(0)
-                )
+                parsed_output = QueryRewriteRawOutput.model_validate_json(m.group(0))
                 rewrite = parsed_output.rewritten_question
             except (json.JSONDecodeError, AttributeError):
                 # JSON parsing failed, will fallback to raw string
