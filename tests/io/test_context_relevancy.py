@@ -61,22 +61,22 @@ def test_canned_input():
     expected_output = textwrap.dedent(f"""\
     <|start_of_role|>system<|end_of_role|>Knowledge Cutoff Date: April 2024.
     Today's Date: {_TODAYS_DATE}.
-    You are Granite, developed by IBM.Write the response to the user's input by \
-strictly aligning with the facts in the provided documents. If the information needed \
-to answer the question is not available in the documents, inform the user that the \
-question cannot be answered based on the available data.<|end_of_text|>
-    <|start_of_role|>documents<|end_of_role|>Document 0
-    My dog has fleas.
-    
-    Document 1
-    My cat does not have fleas.<|end_of_text|>
+    You are Granite, developed by IBM. You are a helpful AI assistant.<|end_of_text|>
     <|start_of_role|>assistant<|end_of_role|>Welcome to pet questions!<|end_of_text|>
     <|start_of_role|>user<|end_of_role|>Which of my pets have fleas?<|end_of_text|>
-    <|start_of_role|>context relevance<|end_of_role|>""")
+    <|start_of_role|>final_user_query<|end_of_role|>Which of my pets have fleas?<|end_of_text|>
+    <|start_of_role|>document {{"document_id": "1"}}<|end_of_role|>
+    My dog has fleas.<|end_of_text|>
+    <|start_of_role|>context_relevance: Analyze the provided document in relation to the final user query from the conversation. Determine if the document contains information that could help answer the final user query. Output 'relevant' if the document contains substantial information directly useful for answering the final user query. Output 'partially relevant' if the document contains some related information that could partially help answer the query, or if you are uncertain about the relevance - err on the side of 'partially relevant' when in doubt. Output 'irrelevant' only if the document clearly contains no information that could help answer the final user query. When uncertain, choose 'partially relevant' rather than 'irrelevant'. Your output should be a JSON structure with the context relevance classification:
+    ```json
+    {{
+        "context_relevance": "YOUR_CONTEXT_RELEVANCE_CLASSIFICATION_HERE"
+    }}
+    ```<|end_of_role|>""")
     assert output == expected_output
 
 
-@pytest.mark.vcr
+@pytest.mark.vcr(record_mode="new_episodes")
 def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     """
     Run a chat completion through the LoRA adapter using the I/O processor.

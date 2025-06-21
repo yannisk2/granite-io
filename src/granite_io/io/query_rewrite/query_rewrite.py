@@ -13,6 +13,9 @@ from granite_io.types import (
     GenerateResults,
 )
 
+# Third Party
+import pydantic
+
 # Granite 3.3 specific configurations
 # Regex pattern for constrained decoding with JSON fence format
 _JSON_FENCE_REGEX = r"```json\n\{\s*\"rewritten_question\"\s*:\s*\"[^\"]*\"\s*\}\n```"
@@ -52,6 +55,8 @@ REWRITE_PROMPT_3_3 = (
     + "<|end_of_role|>"
 )
 
+class QueryRewriteRawOutput(pydantic.BaseModel):
+    rewritten_question: str
 
 class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
@@ -158,9 +163,10 @@ class QueryRewriteIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             # Attempt to parse JSON output to extract rewritten question
             try:
                 m = re.search(r"\{.*\}", s, re.DOTALL)
-                if m:
-                    data = json.loads(m.group(0))
-                    rewrite = data.get("rewritten_question")
+                parsed_output = QueryRewriteRawOutput.model_validate_json(
+                    m.group(0)
+                )
+                rewrite = parsed_output.rewritten_question
             except (json.JSONDecodeError, AttributeError):
                 # JSON parsing failed, will fallback to raw string
                 pass

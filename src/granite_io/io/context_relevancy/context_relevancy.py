@@ -193,9 +193,10 @@ class ContextRelevancyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             try:
                 # Look for JSON structure in the output
                 match = re.search(r"\{.*\}", raw_str, re.DOTALL)
-                if match:
-                    data = json.loads(match.group(0))
-                    relevance_label = data.get("context_relevance")
+                parsed_output = ContextRelevanceRawOutput.model_validate_json(
+                    match.group(0)
+                )
+                relevance_label = parsed_output.context_relevance
             except (json.JSONDecodeError, AttributeError):
                 pass
 
