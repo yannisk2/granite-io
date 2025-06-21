@@ -5,7 +5,6 @@ Test cases for query_rewrite.py
 """
 
 # Standard
-import datetime
 import textwrap
 
 # Third Party
@@ -18,7 +17,11 @@ from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor impo
     Granite3Point3Inputs,
     override_date_for_testing,
 )
-from granite_io.io.query_rewrite import QueryRewriteIOProcessor
+from granite_io.io.query_rewrite.query_rewrite import (
+    QUERY_TO_REWRITE_TEMPLATE,
+    REWRITE_PROMPT_3_3,
+    QueryRewriteIOProcessor,
+)
 from granite_io.types import (
     GenerateResult,
     GenerateResults,
@@ -66,30 +69,22 @@ def _make_result(content: str):
     )
 
 
-_TODAYS_DATE = datetime.datetime.now().strftime("%B %d, %Y")
-
-INSTRUCTION_TEXT = (
-    "Reword the final utterance from the USER into a single utterance that doesn't "
-    "need the prior conversation history to understand the user's intent. If the final "
-    "utterance is a clear and standalone question, please DO NOT attempt to rewrite "
-    "it, rather output the last user utterance as is. "
-)
-JSON = 'Your output format should be in JSON: { "rewritten_question": <REWRITE> }'
-REWRITE_PROMPT = (
-    "<|start_of_role|>rewrite: " + INSTRUCTION_TEXT + JSON + "<|end_of_role|>"
-)
-
-
-def test_canned_input():
+def test_canned_input(fake_date: str):
     """
     Validate that the I/O processor handles a single instance of canned input in the
     expected way.
     """
     io_processor = QueryRewriteIOProcessor(None)
+    override_date_for_testing(fake_date)  # Use the fake date for consistent testing
     output = io_processor.inputs_to_generate_inputs(_EXAMPLE_CHAT_INPUT)
 
+    # Build the expected output using the actual Granite 3.3 format
+    query_to_rewrite = QUERY_TO_REWRITE_TEMPLATE.format(
+        msg="But is he more likely to get fleas because of that?"
+    )
+
     expected_output = textwrap.dedent(f"""<|start_of_role|>system<|end_of_role|>Knowledge Cutoff Date: April 2024.
-Today's Date: {_TODAYS_DATE}.
+Today's Date: {fake_date}.
 You are Granite, developed by IBM. You are a helpful AI assistant.<|end_of_text|>
 <|start_of_role|>assistant<|end_of_role|>Welcome to pet questions!<|end_of_text|>
 <|start_of_role|>user<|end_of_role|>I have two pets, a dog named Rex and a cat named Lucy.<|end_of_text|>
@@ -97,7 +92,7 @@ You are Granite, developed by IBM. You are a helpful AI assistant.<|end_of_text|
 <|start_of_role|>user<|end_of_role|>Rex spends a lot of time in the backyard and outdoors, and Luna is always inside.<|end_of_text|>
 <|start_of_role|>assistant<|end_of_role|>Sounds good! Rex must love exploring outside, while Lucy probably enjoys her cozy indoor life.<|end_of_text|>
 <|start_of_role|>user<|end_of_role|>But is he more likely to get fleas because of that?<|end_of_text|>
-{REWRITE_PROMPT}""")  # noqa: E501
+{query_to_rewrite}{REWRITE_PROMPT_3_3}""")  # noqa: E501
 
     print(f"---\n|{output.prompt}|\n---\n")
     print(f"|{expected_output}|\n---")

@@ -1,11 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
+# Standard
 import json
 import re
+
+# Third Party
+import pydantic
+
+# Local
+from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
 from granite_io.io.granite_3_3.input_processors import (
     granite_3_3_input_processor as g33_input_processor,
 )
-from granite_io.io.base import ModelDirectInputOutputProcessorWithGenerate
 from granite_io.types import (
     ChatCompletionInputs,
     ChatCompletionResult,
@@ -13,9 +19,6 @@ from granite_io.types import (
     GenerateInputs,
     GenerateResults,
 )
-
-# Third Party
-import pydantic
 
 # Granite 3.3 specific configurations
 # Regex pattern for constrained decoding with JSON fence format
