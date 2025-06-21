@@ -14,8 +14,8 @@ import pytest
 # Local
 from granite_io.backend.vllm_server import LocalVLLMServer
 from granite_io.io.base import RewriteRequestProcessor
-from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
-    Granite3Point2Inputs,
+from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
+    Granite3Point3Inputs,
     override_date_for_testing,
 )
 from granite_io.io.query_rewrite import QueryRewriteIOProcessor
@@ -24,7 +24,7 @@ from granite_io.types import (
     GenerateResults,
 )
 
-_EXAMPLE_CHAT_INPUT = Granite3Point2Inputs.model_validate(
+_EXAMPLE_CHAT_INPUT = Granite3Point3Inputs.model_validate(
     {
         "messages": [
             {"role": "assistant", "content": "Welcome to pet questions!"},
@@ -52,7 +52,8 @@ _EXAMPLE_CHAT_INPUT = Granite3Point2Inputs.model_validate(
             },
         ],
         "generate_inputs": {
-            "temperature": 0.0  # Ensure consistency across runs
+            "temperature": 0.0,  # Ensure consistency across runs
+            "seed": 42,  # Fixed seed for deterministic output
         },
     }
 )
@@ -113,8 +114,10 @@ def test_canned_output():
 
     raw_output_to_expected = [
         (
-            '{ "rewritten_question": "Is Rex more likely to get fleas because he spends a lot of time outdoors?" }',  # noqa: E501
-            "Is Rex more likely to get fleas because he spends a lot of time outdoors?",
+            '{ "rewritten_question": "Is Rex more likely to get fleas because he '
+            'spends a lot of time in the backyard and outdoors?" }',
+            "Is Rex more likely to get fleas because he spends "
+            "a lot of time in the backyard and outdoors?",
         ),
         # Current code passes through malformed data unchanged
         ("<invalid model response>", "<invalid model response>"),
@@ -158,11 +161,12 @@ def test_run_model(lora_server: LocalVLLMServer, fake_date: str):
     print(f"\n{chat_result.results[0].next_message.content}\n")
     assert (
         chat_result.results[0].next_message.content
-        == "Is Rex more likely to get fleas because he spends a lot of time outdoors?"
+        == "Is Rex more likely to get fleas because he spends "
+        "a lot of time in the backyard and outdoors?"
     )
 
 
-@pytest.mark.vcr(record_mode="new_episodes")
+@pytest.mark.vcr
 def test_request_processor(lora_server: LocalVLLMServer, fake_date: str):
     """
     Run a chat completion through the LoRA adapter using a RequestProcessor
@@ -180,5 +184,6 @@ def test_request_processor(lora_server: LocalVLLMServer, fake_date: str):
     assert len(rewritten_input.messages) == len(_EXAMPLE_CHAT_INPUT.messages)
     assert (
         rewritten_input.messages[-1].content
-        == "Is Rex more likely to get fleas because he spends a lot of time outdoors?"
+        == "Is Rex more likely to get fleas because he spends "
+        "a lot of time in the backyard and outdoors?"
     )
