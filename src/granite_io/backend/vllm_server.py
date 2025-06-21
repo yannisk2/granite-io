@@ -112,7 +112,7 @@ class LocalVLLMServer:
             "--max-model-len",
             str(max_model_len),
             "--guided_decoding_backend",
-            "outlines",
+            "auto",
             "--device",
             device_name,
         ]
