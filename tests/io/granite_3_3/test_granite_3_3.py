@@ -508,8 +508,7 @@ def test_citation_hallucination_parsing(
     assert result.hallucinations == exp_hallucination
 
 
-@pytest.mark.vcr(record_mode="new_episodes")
-@pytest.mark.block_network
+@pytest.mark.vcr
 def test_multiple_return(backend_3_3: Backend, input_json_str: str):
     inputs = ChatCompletionInputs.model_validate_json(input_json_str)
     inputs = inputs.model_copy(

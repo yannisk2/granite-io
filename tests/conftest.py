@@ -19,6 +19,9 @@ from granite_io.io.consts import (
 from granite_io.io.granite_3_2.input_processors.granite_3_2_input_processor import (
     override_date_for_testing as g32_override_date_for_testing,
 )
+from granite_io.io.granite_3_3.input_processors.granite_3_3_input_processor import (
+    override_date_for_testing as g33_override_date_for_testing,
+)
 
 
 @pytest.fixture(scope="session")
@@ -100,6 +103,7 @@ def fake_date():
     # Cleanup code. Augment as needed as we add new IO processors with date-dependent
     # prompts.
     g32_override_date_for_testing(None)
+    g33_override_date_for_testing(None)
 
 
 @pytest.fixture(
