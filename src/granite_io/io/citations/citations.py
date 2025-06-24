@@ -428,7 +428,8 @@ projects are visible to anyone.",
                     for citation_index in citation_indexes:
                         if not isinstance(citation_index, int) or citation_index < 0:
                             raise TypeError(
-                                f"Value in list for {response_index} is not a non-negative integer"
+                                f"Value in list for {response_index} is not "
+                                f"a non-negative integer"
                             )
                         if (
                             citation_index != last_citation_index + 1
@@ -445,7 +446,7 @@ projects are visible to anyone.",
                     if len(cur_group) == 1:
                         cur_group.append(citation_indexes[-1])
                         citation_index_groups.append(cur_group)
-                    
+
                     # Iterate over citation groups and generate output
                     for citation_index_group in citation_index_groups:
                         doc_num = sentence_to_doc[citation_index_group[0]]
