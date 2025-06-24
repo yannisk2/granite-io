@@ -86,6 +86,60 @@ def mark_sentence_boundaries(
     return result
 
 
+def group_consecutive_context_sentence_indexes(
+    index_list: list[int], sentence_to_doc: dict[int, int]
+) -> list[list[int]]:
+    """
+    Transform flat list of context sentence indexes into list of
+    context sentence index groups, where each group represents a set of
+    consecutive indexes from the same document in the original list.
+
+    A group is represented in the ouput as [x, y], where x and y are
+    the first and last context sentence indexes in the group, resp.
+
+    Example input:
+    [ 1, 3, 2, 5, 6, 8 ]
+
+    Example output:
+    (Assuming all indexes in the input correspond to sentences in the same doc)
+    [ [1, 3], [5, 6], [8, 8] ]
+
+    :param: List of context sentence indexes
+    :param: Dictionary mapping sentence index to document index
+
+    :returns: List of sentence index groups, where each sentence index group
+    represents a set of consecutive indexes from the same document
+    in the input list
+    """
+    citation_indexes = sorted(index_list)
+    citation_index_groups = []
+
+    cur_group = []
+    last_citation_index = -2
+    last_citation_index_doc = -2
+    for citation_index in citation_indexes:
+        if not isinstance(citation_index, int) or citation_index < 0:
+            raise TypeError(
+                "Value in citation index list is not a non-negative integer"
+            )
+        if (
+            citation_index != last_citation_index + 1
+            or sentence_to_doc[citation_index] != last_citation_index_doc
+        ):
+            if len(cur_group) == 1:
+                cur_group.append(last_citation_index)
+                citation_index_groups.append(cur_group)
+            cur_group = [citation_index]
+        last_citation_index = citation_index
+        last_citation_index_doc = sentence_to_doc[citation_index]
+
+    if len(cur_group) == 1:
+        cur_group.append(citation_indexes[-1])
+        citation_index_groups.append(cur_group)
+
+    return citation_index_groups
+
+
 class CitationsIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
     """
     I/O processor for the Granite citations intrinsic, also known as the [LoRA Adapter
@@ -404,48 +458,9 @@ projects are visible to anyone.",
                     if not isinstance(value, list):
                         raise TypeError(f"Entry for {response_index} is not a list")
 
-                    # Transform flat list of citation indexes into list of
-                    # citation index groups, where each group represents a
-                    # set of consecutive indexes from the same document
-                    # in the original list.
-                    #
-                    # A group is represented in the ouput as [x, y], where x and y are
-                    # the first and last citation indexes in the group, resp.
-                    #
-                    # Example input:
-                    # [ 1, 3, 2, 5, 6, 8 ]
-                    #
-                    # Example output:
-                    # (Assuming all indexes in the input correspond to
-                    # sentences in the same document)
-                    # [ [1, 3], [5, 6], [8, 8] ]
-                    citation_indexes = sorted(value)
-                    citation_index_groups = []
-
-                    cur_group = []
-                    last_citation_index = -2
-                    last_citation_index_doc = -2
-                    for citation_index in citation_indexes:
-                        if not isinstance(citation_index, int) or citation_index < 0:
-                            raise TypeError(
-                                f"Value in list for {response_index} is not "
-                                f"a non-negative integer"
-                            )
-                        if (
-                            citation_index != last_citation_index + 1
-                            or sentence_to_doc[citation_index]
-                            != last_citation_index_doc
-                        ):
-                            if len(cur_group) == 1:
-                                cur_group.append(last_citation_index)
-                                citation_index_groups.append(cur_group)
-                            cur_group = [citation_index]
-                        last_citation_index = citation_index
-                        last_citation_index_doc = sentence_to_doc[citation_index]
-
-                    if len(cur_group) == 1:
-                        cur_group.append(citation_indexes[-1])
-                        citation_index_groups.append(cur_group)
+                    citation_index_groups = group_consecutive_context_sentence_indexes(
+                        value, sentence_to_doc
+                    )
 
                     # Iterate over citation groups and generate output
                     for citation_index_group in citation_index_groups:
