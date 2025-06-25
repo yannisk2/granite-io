@@ -460,9 +460,7 @@ projects are visible to anyone.",
                     valid_indexes = [
                         idx
                         for idx in unique_indexes
-                        if isinstance(idx, int)
-                        and idx >= 0
-                        and idx < len(sentence_to_doc)
+                        if isinstance(idx, int) and 0 <= idx < len(sentence_to_doc)
                     ]
 
                     citation_index_groups = group_consecutive_context_sentence_indexes(
