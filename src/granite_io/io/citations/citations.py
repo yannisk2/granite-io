@@ -104,7 +104,8 @@ def group_consecutive_context_sentence_indexes(
     (Assuming all indexes in the input correspond to sentences in the same doc)
     [ [1, 3], [5, 6], [8, 8] ]
 
-    :param: List of context sentence indexes
+    :param: List of context sentence indexes. The list should consist only
+            of unique indexes that also exist in the input documents
     :param: Dictionary mapping sentence index to document index
 
     :returns: List of sentence index groups, where each sentence index group
@@ -118,10 +119,6 @@ def group_consecutive_context_sentence_indexes(
     last_citation_index = -2
     last_citation_index_doc = -2
     for citation_index in citation_indexes:
-        if not isinstance(citation_index, int) or citation_index < 0:
-            raise TypeError(
-                "Value in citation index list is not a non-negative integer"
-            )
         if (
             citation_index != last_citation_index + 1
             or sentence_to_doc[citation_index] != last_citation_index_doc
@@ -458,8 +455,18 @@ projects are visible to anyone.",
                     if not isinstance(value, list):
                         raise TypeError(f"Entry for {response_index} is not a list")
 
+                    # De-deduplicate list and remove invalid context indexes
+                    unique_indexes = list(set(value))
+                    valid_indexes = [
+                        idx
+                        for idx in unique_indexes
+                        if isinstance(idx, int)
+                        and idx >= 0
+                        and idx < len(sentence_to_doc)
+                    ]
+
                     citation_index_groups = group_consecutive_context_sentence_indexes(
-                        value, sentence_to_doc
+                        valid_indexes, sentence_to_doc
                     )
 
                     # Iterate over citation groups and generate output
